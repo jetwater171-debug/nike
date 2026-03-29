@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 const EMAIL_DOMAINS = [
@@ -194,6 +195,13 @@ export default function DadosLeadForm() {
             campanha para concluir o resgate.
           </p>
         </div>
+
+        <Link
+          href="/nike"
+          className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+        >
+          Resgatar
+        </Link>
       </div>
     </div>
   );
