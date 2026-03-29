@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { JerseyFrameSequence } from "@/components/JerseyFrameSequence";
 
 const productUrl =
   "https://www.nike.com.br/camisa-brasil-jordan-ii-2026-27-jogador-masculina-097619.html";
@@ -122,124 +123,111 @@ export default function Home() {
       </header>
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 pb-16 pt-24 sm:px-8 lg:px-12">
-        <div className="grid w-full gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-16">
-          <div className="relative order-1 -mx-1 lg:order-2 lg:mx-0">
-            <div className="mb-4 flex items-center justify-between px-2 md:hidden">
-              <div className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.62rem] uppercase tracking-[0.28em] text-white/[0.62]">
-                Edicao jogador
-              </div>
-              <div className="text-right">
-                <p className="text-[0.62rem] uppercase tracking-[0.24em] text-white/[0.46]">
-                  Preco
-                </p>
-                <p className="mt-1 text-lg font-semibold text-white">
-                  R$ 749,99
-                </p>
-              </div>
-            </div>
-
-            <div className="liquid-stage relative overflow-hidden rounded-[2rem] p-4 sm:p-8">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_46%),linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.14))]" />
-              <div className="absolute left-1/2 top-5 h-14 w-[76%] -translate-x-1/2 rounded-full bg-white/[0.16] blur-3xl sm:w-[70%]" />
-              <div className="absolute inset-x-6 top-8 h-[1px] bg-white/[0.12] sm:inset-x-10 sm:top-10" />
-              <div className="absolute bottom-7 left-4 right-4 h-[34%] rounded-[1.6rem] border border-white/[0.08] sm:bottom-10 sm:left-8 sm:right-8 sm:h-[38%] sm:rounded-[2rem]" />
-
-              <div className="absolute left-4 top-4 hidden rounded-full border border-white/10 bg-black/[0.18] px-4 py-2 text-[0.68rem] uppercase tracking-[0.3em] text-white/[0.68] backdrop-blur-xl sm:left-6 sm:top-6 md:block">
-                Edicao jogador
-              </div>
-
-              <div className="absolute bottom-5 left-5 hidden max-w-[13rem] rounded-[1.4rem] border border-white/[0.12] bg-black/[0.22] p-4 text-sm leading-6 text-white/[0.68] backdrop-blur-2xl xl:block">
-                A Nike destaca a recomendacao de subir um tamanho para deixar o
-                caimento mais confortavel.
-              </div>
-
-              <div className="absolute right-5 top-20 hidden max-w-[13rem] rounded-[1.4rem] border border-white/[0.12] bg-black/[0.22] p-4 text-sm leading-6 text-white/[0.68] backdrop-blur-2xl xl:block">
-                Azul royal, preto, verde-agua e amarelo para um visual mais
-                afiado e raro.
-              </div>
-
-              <Image
-                src="/assets/nike-brazil-jordan-ii-a3.jpg"
-                alt="Camisa Brasil Jordan II 2026/27 Jogador Masculina"
-                width={1400}
-                height={1400}
-                priority
-                className="relative z-10 mx-auto w-full max-w-[23rem] object-contain drop-shadow-[0_28px_80px_rgba(0,0,0,0.78)] sm:max-w-[34rem]"
-              />
-            </div>
-
-            <div className="mt-3 grid grid-cols-3 gap-2 px-1 md:hidden">
-              {mobileSignals.map((signal) => (
-                <div
-                  key={signal}
-                  className="rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3 text-center text-[0.62rem] uppercase tracking-[0.24em] text-white/[0.62]"
-                >
-                  {signal}
+        <div className="w-full space-y-4 sm:space-y-6">
+          <div className="liquid-stage relative overflow-hidden rounded-[2rem] p-4 sm:p-8">
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(0,0,0,0.14))]" />
+            <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-center gap-3 sm:gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] sm:gap-3 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.32em]">
+                  <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
+                  Brasil Jordan II
                 </div>
-              ))}
+
+                <p className="mt-4 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.68rem] sm:tracking-[0.3em]">
+                  Edicao jogador
+                </p>
+
+                <h1 className="mt-3 font-display text-[2.2rem] leading-[0.86] text-white sm:text-[4.3rem] lg:text-[5.6rem]">
+                  Brasil.
+                  <span className="block text-white/[0.62]">Em 360.</span>
+                </h1>
+
+                <p className="mt-3 max-w-[15rem] text-[0.84rem] leading-5 text-white/[0.68] sm:mt-5 sm:max-w-md sm:text-base sm:leading-7">
+                  A camisa Match com Aero-FIT agora abre a home em giro
+                  completo, mostrando frente e costas com presença de campanha.
+                </p>
+
+                <div className="mt-4 sm:mt-6">
+                  <p className="text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.68rem] sm:tracking-[0.3em]">
+                    Preco
+                  </p>
+                  <p className="mt-1 text-[1.35rem] font-semibold text-white sm:text-[2rem]">
+                    R$ 749,99
+                  </p>
+                  <p className="text-[0.72rem] text-white/[0.58] sm:text-sm">
+                    7x de R$ 107,14 sem juros
+                  </p>
+                </div>
+
+                <div className="mt-5 grid gap-2 sm:mt-7 sm:flex sm:flex-wrap sm:gap-3">
+                  <Link
+                    href={productUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-4 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-black sm:min-h-12 sm:w-auto sm:px-7 sm:text-sm sm:tracking-[0.18em]"
+                  >
+                    Abrir na Nike
+                  </Link>
+                  <Link
+                    href="#story"
+                    className="hidden min-h-12 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-7 text-sm font-semibold uppercase tracking-[0.18em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:inline-flex"
+                  >
+                    Explorar a camisa
+                  </Link>
+                </div>
+              </div>
+
+              <div className="relative flex min-h-[23rem] items-center justify-end sm:min-h-[30rem] lg:min-h-[34rem]">
+                <div className="absolute inset-0 rounded-[1.7rem] border border-white/[0.08]" />
+                <div className="absolute right-[10%] top-[10%] h-[70%] w-[68%] rounded-full bg-white/[0.08] blur-3xl sm:right-[14%] sm:w-[56%]" />
+                <div className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/[0.2] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] backdrop-blur-xl sm:right-5 sm:top-5 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.3em]">
+                  360
+                </div>
+                <div className="absolute bottom-4 right-3 rounded-full border border-white/10 bg-black/[0.2] px-3 py-2 text-[0.58rem] uppercase tracking-[0.2em] text-white/[0.54] backdrop-blur-xl sm:right-5 sm:bottom-5 sm:px-4 sm:text-[0.68rem]">
+                  Frente / Costas
+                </div>
+
+                <JerseyFrameSequence className="relative z-10 h-[22rem] w-full max-w-[11rem] object-contain drop-shadow-[0_28px_80px_rgba(0,0,0,0.82)] sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]" />
+              </div>
             </div>
           </div>
 
-          <div className="order-2 max-w-2xl lg:order-1">
-            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-[0.68rem] uppercase tracking-[0.32em] text-white/[0.55]">
-              <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
-              Brasil Jordan II 2026/27
-            </div>
-
-            <h1 className="mt-6 font-display text-[3.35rem] leading-[0.92] text-white sm:mt-8 sm:text-6xl md:text-7xl lg:text-[5.8rem]">
-              Brasil, em
-              <span className="block text-white/[0.64]">modo noturno.</span>
-            </h1>
-
-            <p className="mt-5 max-w-xl text-[0.98rem] leading-7 text-white/[0.72] sm:mt-7 sm:text-lg sm:leading-8">
-              A camisa Brasil Jordan II 2026/27 Jogador chega com a base Match
-              da Nike, tecnologia Aero-FIT e um visual azul-preto criado para
-              parecer elegante, raro e intimidador no primeiro olhar.
-            </p>
-
-            <div className="mt-8 grid gap-3 sm:mt-10 sm:flex sm:flex-wrap sm:gap-4">
-              <Link
-                href={productUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-full items-center justify-center rounded-full border border-white/[0.15] bg-white px-7 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-black transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto sm:py-3"
+          <div className="grid grid-cols-3 gap-2 px-1 md:hidden">
+            {mobileSignals.map((signal) => (
+              <div
+                key={signal}
+                className="rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3 text-center text-[0.62rem] uppercase tracking-[0.24em] text-white/[0.62]"
               >
-                Ver produto na Nike
-              </Link>
-              <Link
-                href="#story"
-                className="inline-flex w-full items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-7 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:w-auto sm:py-3"
-              >
-                Explorar a camisa
-              </Link>
-            </div>
+                {signal}
+              </div>
+            ))}
+          </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-12 sm:grid-cols-3 sm:gap-4">
-              {heroStats.map((item, index) => (
-                <article
-                  key={item.label}
-                  className={`liquid-panel p-4 sm:p-5 ${
-                    index === 0 ? "col-span-2 sm:col-span-1" : ""
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            {heroStats.map((item, index) => (
+              <article
+                key={item.label}
+                className={`liquid-panel p-4 sm:p-5 ${
+                  index === 0 ? "col-span-2 sm:col-span-1" : ""
+                }`}
+              >
+                <p className="text-[0.68rem] uppercase tracking-[0.28em] text-white/[0.42]">
+                  {item.label}
+                </p>
+                <p
+                  className={`mt-3 font-semibold text-white ${
+                    index === 0
+                      ? "text-[1.9rem] sm:mt-4 sm:text-2xl"
+                      : "text-[1.15rem] sm:mt-4 sm:text-2xl"
                   }`}
                 >
-                  <p className="text-[0.68rem] uppercase tracking-[0.28em] text-white/[0.42]">
-                    {item.label}
-                  </p>
-                  <p
-                    className={`mt-3 font-semibold text-white ${
-                      index === 0
-                        ? "text-[1.9rem] sm:mt-4 sm:text-2xl"
-                        : "text-[1.15rem] sm:mt-4 sm:text-2xl"
-                    }`}
-                  >
-                    {item.value}
-                  </p>
-                  <p className="mt-2 text-[0.82rem] leading-5 text-white/60 sm:text-sm sm:leading-6">
-                    {item.detail}
-                  </p>
-                </article>
-              ))}
-            </div>
+                  {item.value}
+                </p>
+                <p className="mt-2 text-[0.82rem] leading-5 text-white/60 sm:text-sm sm:leading-6">
+                  {item.detail}
+                </p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

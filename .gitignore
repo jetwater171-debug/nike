@@ -35,6 +35,7 @@ yarn-error.log*
 dev_err.txt
 build_output.txt
 ts_output.txt
+public/assets/Brazil_football_jersey_202603291715.mp4
 
 # env files (can opt-in for committing if needed)
 .env*
