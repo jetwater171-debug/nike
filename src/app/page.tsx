@@ -9,7 +9,7 @@ const PromoGame = dynamic(() => import("./components/PromoGame"), {
 const productUrl =
   "https://www.nike.com.br/camisa-brasil-jordan-ii-2026-27-jogador-masculina-097619.html";
 
-const mobileSignals = ["Aero-FIT", "Player issue", "P ao GGG"];
+const mobileSignals = ["Aero-FIT", "Design autentico", "P ao GGG"];
 
 function NikeSwoosh({ className }: { className?: string }) {
   return (
@@ -69,22 +69,22 @@ export default function Home() {
         <div className="w-full space-y-4 sm:space-y-6">
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-4">
             <div className="liquid-panel p-5 sm:p-8 sm:pr-5 lg:pr-6">
-              <div className="relative z-10">
+              <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
                 <h1 className="max-w-3xl font-display text-[2.35rem] leading-[0.9] text-white sm:text-[4.1rem] lg:text-[5.4rem]">
                   Promocao Mines.
                   <span className="block text-white/[0.62]">Cupons da Nike.</span>
                 </h1>
 
-                <p className="mt-3 max-w-2xl text-[0.9rem] leading-6 text-white/[0.68] sm:mt-5 sm:text-base sm:leading-7">
-                  Role a pagina, toque em iniciar e acerte apenas 2 cupons para
-                  liberar os dois beneficios da campanha para voce. A proposta
-                  e simples: entrar na dinamica, ganhar frete gratis e ainda
-                  buscar o cupom de desconto na mesma experiencia.
+                <p className="mt-4 max-w-[30rem] text-[0.94rem] leading-7 text-white/[0.72] sm:mt-5 sm:text-base sm:leading-8">
+                  Desca ate o tabuleiro, entre na rodada e encontre 2 cupons
+                  validos para liberar a sua vantagem dentro da campanha. Uma
+                  experiencia direta, visual e pensada para transformar a
+                  jogada em recompensa.
                 </p>
 
                 <Link
                   href="#promo"
-                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:mt-7 sm:min-h-12 sm:px-7 sm:text-sm sm:tracking-[0.18em]"
+                  className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:mt-7 sm:min-h-12 sm:px-7 sm:text-sm sm:tracking-[0.18em]"
                 >
                   Rolar para iniciar
                 </Link>
