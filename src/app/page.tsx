@@ -153,27 +153,28 @@ export default function Home() {
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 pb-16 pt-24 sm:px-8 lg:px-12">
         <div className="w-full space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-[minmax(0,0.98fr)_minmax(0,1.02fr)] items-center gap-0.5 sm:gap-2 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-4">
-            <div className="liquid-panel p-4 pr-3 sm:p-8 sm:pr-5 lg:pr-6">
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-4">
+            <div className="liquid-panel p-5 sm:p-8 sm:pr-5 lg:pr-6">
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] sm:gap-3 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.32em]">
                   <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
-                  Promocao Nike Brasil
+                  Promocao Mines Nike
                 </div>
 
                 <p className="mt-4 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.68rem] sm:tracking-[0.3em]">
-                  Camisa + cupons da campanha
+                  Cupons da campanha oficial
                 </p>
 
-                <h1 className="mt-3 font-display text-[2.2rem] leading-[0.86] text-white sm:text-[4.3rem] lg:text-[5.6rem]">
-                  Brasil.
-                  <span className="block text-white/[0.62]">Promocao premium.</span>
+                <h1 className="mt-3 max-w-3xl font-display text-[2.35rem] leading-[0.9] text-white sm:text-[4.1rem] lg:text-[5.4rem]">
+                  Promocao Mines.
+                  <span className="block text-white/[0.62]">Cupons da Nike.</span>
                 </h1>
 
-                <p className="mt-3 max-w-[15rem] text-[0.84rem] leading-5 text-white/[0.68] sm:mt-5 sm:max-w-md sm:text-base sm:leading-7">
-                  A campanha da Nike apresenta a camisa do Brasil em movimento
-                  e conduz o usuario para uma dinamica promocional com cupons,
-                  frete gratis e oferta ativa na mesma jornada.
+                <p className="mt-3 max-w-2xl text-[0.9rem] leading-6 text-white/[0.68] sm:mt-5 sm:text-base sm:leading-7">
+                  Role a pagina, toque em iniciar e acerte apenas 2 cupons para
+                  liberar os dois beneficios da campanha para voce. A proposta
+                  e simples: entrar na dinamica, ganhar frete gratis e ainda
+                  buscar o cupom de desconto na mesma experiencia.
                 </p>
 
                 <div className="mt-4 sm:mt-6">
@@ -201,13 +202,13 @@ export default function Home() {
                     href="#promo"
                     className="hidden min-h-12 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-7 text-sm font-semibold uppercase tracking-[0.18em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:inline-flex"
                   >
-                    Ver a promocao
+                    Rolar para iniciar
                   </Link>
                 </div>
               </div>
             </div>
 
-            <div className="relative -ml-1 flex min-h-[23rem] items-center justify-end sm:-ml-3 sm:min-h-[30rem] lg:-ml-4 lg:min-h-[34rem]">
+            <div className="relative flex min-h-[20rem] items-center justify-center sm:min-h-[28rem] lg:-ml-4 lg:min-h-[34rem] lg:justify-end">
               <video
                 aria-hidden="true"
                 autoPlay
@@ -218,7 +219,7 @@ export default function Home() {
                 poster="/assets/hero-jersey-poster.webp"
                 preload="metadata"
                 tabIndex={-1}
-                className="hero-media pointer-events-none relative z-10 h-[22rem] w-full max-w-[11rem] select-none object-contain sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]"
+                className="hero-media pointer-events-none relative z-10 h-[19rem] w-full max-w-[11.5rem] select-none object-contain sm:h-[28rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]"
               >
                 <source src="/assets/hero-jersey-loop.webm" type="video/webm" />
                 <source src="/assets/hero-jersey-loop.mp4" type="video/mp4" />
