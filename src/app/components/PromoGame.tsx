@@ -331,8 +331,8 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
-              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.97)] backdrop-blur-xl" />
-              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,rgba(3,3,3,0.16)_36%,rgba(3,3,3,0.84)_100%)]" />
+              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.9)] backdrop-blur-lg" />
+              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.045)_0%,rgba(3,3,3,0.08)_28%,rgba(3,3,3,0.58)_72%,rgba(3,3,3,0.78)_100%)]" />
               <div className="promo-pop relative z-10 flex max-w-md flex-col items-center text-center">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
@@ -359,7 +359,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
           <div
             className={`relative z-10 mx-auto grid w-full max-w-[344px] grid-cols-4 gap-3.5 transition-[opacity,filter] duration-300 sm:max-w-[420px] sm:gap-[1.125rem] ${
-              gameStarted ? "opacity-100 blur-0" : "opacity-[0.18] blur-[1.6px]"
+              gameStarted ? "opacity-100 blur-0" : "opacity-[0.24] blur-[0.9px]"
             }`}
           >
             {grid.map((cell, index) => (
