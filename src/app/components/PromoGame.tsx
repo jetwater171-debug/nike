@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
@@ -417,50 +418,79 @@ export default function PromoGame() {
       )}
 
       {activeModal === "success" && (
-        <div className="promo-pop fixed inset-x-4 bottom-32 z-50 mx-auto w-full max-w-sm overflow-hidden rounded-3xl border border-white/10 bg-[#111] p-6 shadow-2xl sm:inset-x-auto sm:left-1/2 sm:bottom-12 sm:-translate-x-1/2">
-          <div className="absolute inset-0 rounded-3xl bg-emerald-500/5 blur-3xl" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="promo-fade absolute inset-0 bg-black/72 backdrop-blur-md" />
 
-          <div className="relative z-10 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-emerald-500/20 bg-emerald-500/10">
-              <Ticket className="h-6 w-6 text-emerald-400" />
-            </div>
-            <h3 className="mb-2 text-xl font-display text-white">
-              Dois cupons encontrados
-            </h3>
-            <p className="mb-6 text-sm text-white/60">
-              Voce acertou 2 cupons e liberou o desconto da campanha para
-              finalizar a nova camisa da Selecao com mais vantagem.
-            </p>
+          <div className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 sm:p-7">
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(16,185,129,0.18),transparent_70%)] blur-3xl"
+            />
 
-            <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1.5">
-              <span className="flex-1 font-mono text-lg font-bold tracking-wider text-emerald-400">
-                {COUPON_CODE}
-              </span>
+            <div className="relative z-10 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
+                <Ticket className="h-7 w-7 text-emerald-300" />
+              </div>
+
+              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
+                Desconto liberado
+              </p>
+              <h3 className="mt-3 font-display text-[2rem] leading-none text-white sm:text-[2.2rem]">
+                Cupom confirmado
+              </h3>
+              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
+                Voce acertou 2 premios e liberou o desconto da campanha para
+                finalizar a nova camisa da Selecao com mais vantagem.
+              </p>
+
+              <div className="relative mx-auto mt-6 max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-2">
+                <div className="relative aspect-[1.5] overflow-hidden rounded-[1.2rem] bg-white">
+                  <Image
+                    src="/assets/desconto.png"
+                    alt="Arte do desconto liberado"
+                    fill
+                    sizes="(max-width: 640px) 70vw, 304px"
+                    className="object-cover object-center"
+                    priority
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_48%,rgba(9,9,9,0.56)_100%)]" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#111] via-[#111]/55 to-transparent" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#111] via-[#111]/65 to-transparent" />
+                  <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#111] via-[#111]/60 to-transparent" />
+                  <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#111] via-[#111]/60 to-transparent" />
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center rounded-full border border-white/10 bg-white/5 p-1.5">
+                <span className="flex-1 font-mono text-lg font-bold tracking-wider text-emerald-400">
+                  {COUPON_CODE}
+                </span>
+                <button
+                  type="button"
+                  onClick={copyCoupon}
+                  className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black transition-colors hover:bg-white/90"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-3.5 w-3.5" /> Copiado
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3.5 w-3.5" /> Copiar
+                    </>
+                  )}
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={copyCoupon}
-                className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black transition-colors hover:bg-white/90"
+                onClick={startGame}
+                className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.05] px-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/[0.88]"
               >
-                {copied ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" /> Copiado
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" /> Copiar
-                  </>
-                )}
+                <RotateCcw className="h-4 w-4" />
+                Nova rodada
               </button>
             </div>
-
-            <button
-              type="button"
-              onClick={startGame}
-              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.05] px-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/[0.88]"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Nova rodada
-            </button>
           </div>
         </div>
       )}

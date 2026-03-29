@@ -70,7 +70,7 @@ export default function Home() {
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-4">
             <div className="liquid-panel p-5 sm:p-8 sm:pr-5 lg:pr-6">
               <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
-                <h1 className="font-hero max-w-[10ch] text-[2.45rem] text-white sm:max-w-[11ch] sm:text-[4.25rem] lg:max-w-[11ch] lg:text-[5.7rem]">
+                <h1 className="font-hero w-full max-w-none text-[2.1rem] text-white sm:text-[4.25rem] lg:max-w-[11ch] lg:text-[5.7rem]">
                   Promocao Mines
                   <span className="mt-1 block text-white/[0.62] sm:mt-2">
                     de cupons Nike
