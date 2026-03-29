@@ -1,31 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
-const frameCount = 96;
+const frameCount = 240;
 const frames = Array.from(
   { length: frameCount },
   (_, index) => `/assets/jersey-frames/frame-${String(index + 1).padStart(3, "0")}.webp`,
 );
 
-const frameDuration = 1000 / 12;
+const frameDuration = 1000 / 30;
 
 export function JerseyFrameSequence({
   className = "",
 }: {
   className?: string;
 }) {
-  const [frameIndex, setFrameIndex] = useState(0);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
-    frames.forEach((src) => {
+    const cache = frames.map((src) => {
       const img = new window.Image();
       img.decoding = "async";
       img.src = src;
+      return img;
     });
 
     let animationFrame = 0;
     let lastFrameTime = performance.now();
+    let currentFrame = 0;
 
     const tick = (now: number) => {
       if (document.visibilityState === "visible") {
@@ -33,8 +35,14 @@ export function JerseyFrameSequence({
 
         if (elapsed >= frameDuration) {
           const steps = Math.max(1, Math.floor(elapsed / frameDuration));
-          lastFrameTime = now;
-          setFrameIndex((current) => (current + steps) % frames.length);
+          currentFrame = (currentFrame + steps) % frames.length;
+          lastFrameTime += steps * frameDuration;
+
+          const nextFrame = cache[currentFrame];
+
+          if (imgRef.current && nextFrame?.complete) {
+            imgRef.current.src = nextFrame.src;
+          }
         }
       } else {
         lastFrameTime = now;
@@ -52,11 +60,13 @@ export function JerseyFrameSequence({
 
   return (
     <img
-      src={frames[frameIndex]}
-      alt="Camisa Brasil Jordan II 2026/27 girando em 360 graus"
+      ref={imgRef}
+      src={frames[0]}
+      alt="Camisa Brasil Jordan II 2026/27 em movimento"
       className={className}
       draggable={false}
       loading="eager"
+      fetchPriority="high"
     />
   );
 }

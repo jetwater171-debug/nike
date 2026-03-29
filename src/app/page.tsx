@@ -124,9 +124,8 @@ export default function Home() {
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 pb-16 pt-24 sm:px-8 lg:px-12">
         <div className="w-full space-y-4 sm:space-y-6">
-          <div className="liquid-stage relative overflow-hidden rounded-[2rem] p-4 sm:p-8">
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(0,0,0,0.14))]" />
-            <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-center gap-3 sm:gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+          <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-center gap-2 sm:gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+            <div className="liquid-panel p-4 sm:p-8">
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] sm:gap-3 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.32em]">
                   <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
@@ -139,12 +138,13 @@ export default function Home() {
 
                 <h1 className="mt-3 font-display text-[2.2rem] leading-[0.86] text-white sm:text-[4.3rem] lg:text-[5.6rem]">
                   Brasil.
-                  <span className="block text-white/[0.62]">Em 360.</span>
+                  <span className="block text-white/[0.62]">Edicao jogador.</span>
                 </h1>
 
                 <p className="mt-3 max-w-[15rem] text-[0.84rem] leading-5 text-white/[0.68] sm:mt-5 sm:max-w-md sm:text-base sm:leading-7">
-                  A camisa Match com Aero-FIT agora abre a home em giro
-                  completo, mostrando frente e costas com presença de campanha.
+                  A camisa Match com Aero-FIT abre a home mostrando a peca em
+                  movimento, com leitura limpa de frente e costas em fundo
+                  preto.
                 </p>
 
                 <div className="mt-4 sm:mt-6">
@@ -176,19 +176,10 @@ export default function Home() {
                   </Link>
                 </div>
               </div>
+            </div>
 
-              <div className="relative flex min-h-[23rem] items-center justify-end sm:min-h-[30rem] lg:min-h-[34rem]">
-                <div className="absolute inset-0 rounded-[1.7rem] border border-white/[0.08]" />
-                <div className="absolute right-[10%] top-[10%] h-[70%] w-[68%] rounded-full bg-white/[0.08] blur-3xl sm:right-[14%] sm:w-[56%]" />
-                <div className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/[0.2] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] backdrop-blur-xl sm:right-5 sm:top-5 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.3em]">
-                  360
-                </div>
-                <div className="absolute bottom-4 right-3 rounded-full border border-white/10 bg-black/[0.2] px-3 py-2 text-[0.58rem] uppercase tracking-[0.2em] text-white/[0.54] backdrop-blur-xl sm:right-5 sm:bottom-5 sm:px-4 sm:text-[0.68rem]">
-                  Frente / Costas
-                </div>
-
-                <JerseyFrameSequence className="relative z-10 h-[22rem] w-full max-w-[11rem] object-contain drop-shadow-[0_28px_80px_rgba(0,0,0,0.82)] sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]" />
-              </div>
+            <div className="relative flex min-h-[23rem] items-center justify-end sm:min-h-[30rem] lg:min-h-[34rem]">
+              <JerseyFrameSequence className="relative z-10 h-[22rem] w-full max-w-[11rem] object-contain sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]" />
             </div>
           </div>
 
