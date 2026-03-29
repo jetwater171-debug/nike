@@ -131,7 +131,7 @@ export default function PromoGame() {
       id="promo"
       className="section-shell relative mx-auto w-full max-w-4xl scroll-mt-24 px-4 py-16 sm:px-8 lg:px-12"
     >
-      <div className="relative z-10 mx-auto max-w-lg">
+      <div className="relative z-10 mx-auto max-w-xl">
         <div className="mb-10 text-center">
           <h2 className="font-hero mb-4 text-[2rem] text-white sm:text-[3.6rem]">
             Promocao Mines Nike
@@ -150,8 +150,9 @@ export default function PromoGame() {
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
-              <div className="absolute inset-0 rounded-[inherit] bg-black/92 backdrop-blur-lg" />
-              <div className="promo-pop relative z-10 flex max-w-sm flex-col items-center text-center">
+              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.97)] backdrop-blur-xl" />
+              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,rgba(3,3,3,0.16)_36%,rgba(3,3,3,0.84)_100%)]" />
+              <div className="promo-pop relative z-10 flex max-w-md flex-col items-center text-center">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
                 </p>
@@ -175,7 +176,11 @@ export default function PromoGame() {
             </div>
           )}
 
-          <div className="relative z-10 mx-auto grid w-full max-w-[280px] grid-cols-4 gap-3 sm:max-w-[340px] sm:gap-4">
+          <div
+            className={`relative z-10 mx-auto grid w-full max-w-[344px] grid-cols-4 gap-3.5 transition-[opacity,filter] duration-300 sm:max-w-[420px] sm:gap-[1.125rem] ${
+              gameStarted ? "opacity-100 blur-0" : "opacity-[0.18] blur-[1.6px]"
+            }`}
+          >
             {grid.map((cell, index) => (
               <button
                 key={index}
