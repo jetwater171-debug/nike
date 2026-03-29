@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { JerseyFrameSequence } from "@/components/JerseyFrameSequence";
 
 const productUrl =
   "https://www.nike.com.br/camisa-brasil-jordan-ii-2026-27-jogador-masculina-097619.html";
@@ -179,7 +178,20 @@ export default function Home() {
             </div>
 
             <div className="relative -ml-1 flex min-h-[23rem] items-center justify-end sm:-ml-3 sm:min-h-[30rem] lg:-ml-4 lg:min-h-[34rem]">
-              <JerseyFrameSequence className="relative z-10 h-[22rem] w-full max-w-[11rem] object-contain sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]" />
+              <video
+                aria-hidden="true"
+                autoPlay
+                disablePictureInPicture
+                loop
+                muted
+                playsInline
+                poster="/assets/hero-jersey-poster.webp"
+                preload="auto"
+                tabIndex={-1}
+                className="pointer-events-none relative z-10 h-[22rem] w-full max-w-[11rem] select-none object-contain sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]"
+              >
+                <source src="/assets/hero-jersey-loop.mp4" type="video/mp4" />
+              </video>
             </div>
           </div>
 
