@@ -1,13 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
-import { Truck, Ticket, Copy, Check, RotateCcw } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Truck, Ticket, RotateCcw } from "lucide-react";
 
 type CellState = "hidden" | "empty" | "shipping" | "coupon";
 type ModalState = "progress" | "success" | null;
-
-const COUPON_CODE = "JORDAN15";
+type PromoGameProps = {
+  claimHref: string;
+};
 
 function NikeSwoosh({ className }: { className?: string }) {
   return (
@@ -29,12 +32,19 @@ function createHiddenGrid() {
   return Array(16).fill("hidden") as CellState[];
 }
 
-export default function PromoGame() {
+function PromoModalPortal({ children }: { children: React.ReactNode }) {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(children, document.body);
+}
+
+export default function PromoGame({ claimHref }: PromoGameProps) {
   const [grid, setGrid] = useState<CellState[]>(createHiddenGrid);
   const [clicks, setClicks] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalState>(null);
   const [isResolvingTurn, setIsResolvingTurn] = useState(false);
   const progressModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -52,6 +62,34 @@ export default function PromoGame() {
     return () => clearProgressModalTimeout();
   }, []);
 
+  useEffect(() => {
+    if (activeModal === null) {
+      return;
+    }
+
+    const scrollY = window.scrollY;
+    const previousBodyPosition = document.body.style.position;
+    const previousBodyTop = document.body.style.top;
+    const previousBodyWidth = document.body.style.width;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.position = previousBodyPosition;
+      document.body.style.top = previousBodyTop;
+      document.body.style.width = previousBodyWidth;
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, [activeModal]);
+
   const closeActiveModal = () => {
     setActiveModal(null);
   };
@@ -62,7 +100,6 @@ export default function PromoGame() {
     setClicks(0);
     setGameStarted(true);
     setGameOver(false);
-    setCopied(false);
     setActiveModal(null);
     setIsResolvingTurn(false);
   };
@@ -113,18 +150,162 @@ export default function PromoGame() {
     }
   };
 
-  const copyCoupon = () => {
-    navigator.clipboard.writeText(COUPON_CODE);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const canInteract = (cell: CellState) =>
     gameStarted &&
     cell === "hidden" &&
     !gameOver &&
     activeModal === null &&
     !isResolvingTurn;
+
+  const progressModal =
+    activeModal === "progress" ? (
+      <PromoModalPortal>
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="promo-fade absolute inset-0 bg-black/78 backdrop-blur-md"
+            onClick={closeActiveModal}
+            onTouchEnd={closeActiveModal}
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.68)] sm:p-7"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(96,165,250,0.28),transparent_70%)] blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-0 left-[-35%] w-1/2 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/[0.14] to-transparent"
+            />
+
+            <div className="relative z-10 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10 shadow-[0_0_30px_rgba(96,165,250,0.16)]">
+                <Truck className="h-7 w-7 text-blue-300" />
+              </div>
+
+              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-blue-200/70">
+                Cupom liberado
+              </p>
+              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
+                Frete gratis
+              </h3>
+              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
+                Voce ganhou o cupom de frete gratis. Falta acertar mais um
+                premio para seguir com esse beneficio ja reservado no seu
+                carrinho.
+              </p>
+
+              <div className="mt-6 flex items-center justify-center gap-2 text-[0.68rem] uppercase tracking-[0.2em] text-white/[0.42]">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
+                1 de 2 premios
+              </div>
+
+              <button
+                type="button"
+                onClick={closeActiveModal}
+                onTouchEnd={closeActiveModal}
+                className="mt-6 inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      </PromoModalPortal>
+    ) : null;
+
+  const successModal =
+    activeModal === "success" ? (
+      <PromoModalPortal>
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
+          <div className="promo-fade absolute inset-0 bg-black/82 backdrop-blur-md" />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="promo-pop liquid-panel relative z-10 w-full max-w-md overflow-hidden rounded-[2rem] border border-white/[0.12] bg-[rgba(9,9,9,0.92)] p-6 shadow-[0_34px_120px_rgba(0,0,0,0.74)] sm:p-7"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-8 top-0 h-24 bg-[radial-gradient(circle,rgba(255,255,255,0.22),transparent_72%)] blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-10 bottom-8 h-24 bg-[radial-gradient(circle,rgba(16,185,129,0.14),transparent_72%)] blur-3xl"
+            />
+
+            <div className="relative z-10 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
+                <Ticket className="h-7 w-7 text-emerald-300" />
+              </div>
+
+              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
+                Desconto liberado
+              </p>
+              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
+                Pronto para resgatar
+              </h3>
+              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
+                Voce bateu os 2 premios da rodada e agora ja pode seguir para a
+                nova camisa com a oferta desta campanha destravada.
+              </p>
+
+              <div className="relative mx-auto mt-6 w-full max-w-[20.5rem] overflow-hidden rounded-[1.85rem] border border-white/10 bg-[#050505] p-3 shadow-[0_22px_60px_rgba(0,0,0,0.56)]">
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.14),transparent_52%)]"
+                />
+                <div className="relative aspect-[1.34] overflow-hidden rounded-[1.4rem] bg-black">
+                  <div className="absolute inset-0 scale-110 opacity-40 blur-3xl">
+                    <Image
+                      src="/assets/desconto.png"
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 80vw, 320px"
+                      className="object-cover object-center"
+                    />
+                  </div>
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(4,4,4,0.96)_0%,rgba(4,4,4,0.28)_22%,rgba(4,4,4,0.16)_78%,rgba(4,4,4,0.96)_100%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(4,4,4,0.96)_0%,rgba(4,4,4,0.22)_16%,rgba(4,4,4,0.14)_84%,rgba(4,4,4,0.96)_100%)]" />
+                  <div className="pointer-events-none absolute inset-x-[14%] top-[7%] h-12 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.42),transparent_72%)] blur-2xl" />
+                  <Image
+                    src="/assets/desconto.png"
+                    alt="Arte do desconto liberado"
+                    fill
+                    sizes="(max-width: 640px) 80vw, 320px"
+                    className="relative z-10 object-contain p-2 sm:p-3"
+                  />
+                  <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_70px_rgba(0,0,0,0.72)]" />
+                </div>
+              </div>
+
+              <p className="mt-5 text-[0.68rem] uppercase tracking-[0.2em] text-white/[0.42]">
+                Sua oferta reservada segue na proxima etapa
+              </p>
+
+              <Link
+                href={claimHref}
+                className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+              >
+                Resgatar camisa agora
+              </Link>
+
+              <button
+                type="button"
+                onClick={startGame}
+                className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.05] px-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/[0.88]"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Nova rodada
+              </button>
+            </div>
+          </div>
+        </div>
+      </PromoModalPortal>
+    ) : null;
 
   return (
     <section
@@ -321,137 +502,8 @@ export default function PromoGame() {
         </div>
       </div>
 
-      {activeModal === "progress" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="promo-fade absolute inset-0 bg-black/72 backdrop-blur-md"
-            onClick={closeActiveModal}
-            onTouchEnd={closeActiveModal}
-          />
-
-          <div className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 sm:p-7">
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(96,165,250,0.28),transparent_70%)] blur-3xl"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-y-0 left-[-35%] w-1/2 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/[0.14] to-transparent"
-            />
-
-            <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10 shadow-[0_0_30px_rgba(96,165,250,0.16)]">
-                <Truck className="h-7 w-7 text-blue-300" />
-              </div>
-
-              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-blue-200/70">
-                Cupom liberado
-              </p>
-              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
-                Frete gratis
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
-                Voce ganhou o cupom de frete gratis. Falta acertar mais um
-                premio para seguir com esse beneficio ja reservado no seu
-                carrinho.
-              </p>
-
-              <div className="mt-6 flex items-center justify-center gap-2 text-[0.68rem] uppercase tracking-[0.2em] text-white/[0.42]">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
-                1 de 2 premios
-              </div>
-
-              <button
-                type="button"
-                onClick={closeActiveModal}
-                onTouchEnd={closeActiveModal}
-                className="mt-6 inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
-              >
-                Continuar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeModal === "success" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="promo-fade absolute inset-0 bg-black/72 backdrop-blur-md" />
-
-          <div className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 sm:p-7">
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(16,185,129,0.18),transparent_70%)] blur-3xl"
-            />
-
-            <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
-                <Ticket className="h-7 w-7 text-emerald-300" />
-              </div>
-
-              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
-                Desconto liberado
-              </p>
-              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
-                Cupom confirmado
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
-                Voce chegou ao segundo premio da rodada e liberou o desconto da
-                campanha para finalizar a nova camisa da Selecao com mais
-                vantagem.
-              </p>
-
-              <div className="relative mx-auto mt-6 max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-2">
-                <div className="relative aspect-[1.5] overflow-hidden rounded-[1.2rem] bg-white">
-                  <Image
-                    src="/assets/desconto.png"
-                    alt="Arte do desconto liberado"
-                    fill
-                    sizes="(max-width: 640px) 70vw, 304px"
-                    className="object-cover object-center"
-                    priority
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_48%,rgba(9,9,9,0.56)_100%)]" />
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#111] via-[#111]/55 to-transparent" />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#111] via-[#111]/65 to-transparent" />
-                  <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#111] via-[#111]/60 to-transparent" />
-                  <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#111] via-[#111]/60 to-transparent" />
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center rounded-full border border-white/10 bg-white/5 p-1.5">
-                <span className="flex-1 font-mono text-lg font-bold tracking-wider text-emerald-400">
-                  {COUPON_CODE}
-                </span>
-                <button
-                  type="button"
-                  onClick={copyCoupon}
-                  className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black transition-colors hover:bg-white/90"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-3.5 w-3.5" /> Copiado
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-3.5 w-3.5" /> Copiar
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={startGame}
-                className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.05] px-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/[0.88]"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Nova rodada
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {progressModal}
+      {successModal}
     </section>
   );
 }

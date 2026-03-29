@@ -110,7 +110,7 @@ export default function Home() {
         </div>
       </section>
 
-      <PromoGame />
+      <PromoGame claimHref="/dados" />
 
       <footer className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 text-sm text-white/40 sm:px-8 lg:px-12">
         <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
