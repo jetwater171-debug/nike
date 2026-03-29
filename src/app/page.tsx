@@ -111,10 +111,9 @@ export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden pb-28 text-white selection:bg-white selection:text-black md:pb-0">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-[-14rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(19,74,255,0.26),transparent_62%)] blur-3xl" />
-        <div className="absolute left-[12%] top-[22rem] h-[22rem] w-[22rem] rounded-full bg-[radial-gradient(circle,rgba(124,220,203,0.14),transparent_66%)] blur-3xl" />
-        <div className="absolute bottom-[-10rem] right-[8%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(24,73,255,0.18),transparent_62%)] blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,7,15,0.08)_0%,rgba(4,4,4,0)_18%,rgba(4,4,4,0.22)_100%)]" />
+        <div className="absolute left-1/2 top-[-17rem] h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(18,58,196,0.28),transparent_62%)] blur-3xl" />
+        <div className="absolute left-1/2 top-[-6rem] h-[18rem] w-[88%] max-w-[64rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(11,26,78,0.72),transparent_70%)] blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0)_46%,rgba(0,0,0,0.2)_100%)]" />
       </div>
 
       <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 py-4">
