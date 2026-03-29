@@ -159,7 +159,7 @@ export default function PromoGame() {
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
-              <div className="absolute inset-0 rounded-[inherit] bg-black/72 backdrop-blur-md" />
+              <div className="absolute inset-0 rounded-[inherit] bg-black/82 backdrop-blur-md" />
               <div className="promo-pop relative z-10 flex max-w-sm flex-col items-center text-center">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
