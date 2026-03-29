@@ -160,17 +160,17 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
   const progressModal =
     activeModal === "progress" ? (
       <PromoModalPortal>
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
+        <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
           <div
-            className="promo-fade absolute inset-0 bg-black/78 backdrop-blur-md"
+            className="promo-fade pointer-events-auto absolute inset-0 bg-black/78 backdrop-blur-md"
             onClick={closeActiveModal}
-            onTouchEnd={closeActiveModal}
           />
 
           <div
             role="dialog"
             aria-modal="true"
-            className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.68)] sm:p-7"
+            className="promo-pop liquid-panel pointer-events-auto relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.68)] sm:p-7"
+            onClick={(event) => event.stopPropagation()}
           >
             <div
               aria-hidden="true"
@@ -206,8 +206,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
               <button
                 type="button"
                 onClick={closeActiveModal}
-                onTouchEnd={closeActiveModal}
-                className="mt-6 inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+                className="mt-6 inline-flex min-h-12 w-full touch-manipulation select-none items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Continuar
               </button>
@@ -220,13 +219,14 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
   const successModal =
     activeModal === "success" ? (
       <PromoModalPortal>
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
-          <div className="promo-fade absolute inset-0 bg-black/82 backdrop-blur-md" />
+        <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
+          <div className="promo-fade pointer-events-auto absolute inset-0 bg-black/82 backdrop-blur-md" />
 
           <div
             role="dialog"
             aria-modal="true"
-            className="promo-pop liquid-panel relative z-10 w-full max-w-md overflow-hidden rounded-[2rem] border border-white/[0.12] bg-[rgba(9,9,9,0.92)] p-6 shadow-[0_34px_120px_rgba(0,0,0,0.74)] sm:p-7"
+            className="promo-pop liquid-panel pointer-events-auto relative z-10 w-full max-w-md overflow-hidden rounded-[2rem] border border-white/[0.12] bg-[rgba(9,9,9,0.92)] p-6 shadow-[0_34px_120px_rgba(0,0,0,0.74)] sm:p-7"
+            onClick={(event) => event.stopPropagation()}
           >
             <div
               aria-hidden="true"
