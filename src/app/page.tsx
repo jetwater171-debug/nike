@@ -22,6 +22,8 @@ const heroStats = [
   },
 ];
 
+const mobileSignals = ["Aero-FIT", "Player issue", "P ao GGG"];
+
 const storyCards = [
   {
     eyebrow: "Nike Aero-FIT",
@@ -91,19 +93,23 @@ function StoryCard({
   text: string;
 }) {
   return (
-    <article className="liquid-panel h-full p-6">
+    <article className="liquid-panel h-full p-5 sm:p-6">
       <p className="text-[0.68rem] uppercase tracking-[0.3em] text-white/[0.45]">
         {eyebrow}
       </p>
-      <h3 className="mt-4 font-display text-2xl text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-7 text-white/[0.68]">{text}</p>
+      <h3 className="mt-3 font-display text-[1.65rem] text-white sm:mt-4 sm:text-2xl">
+        {title}
+      </h3>
+      <p className="mt-3 text-sm leading-6 text-white/[0.68] sm:leading-7">
+        {text}
+      </p>
     </article>
   );
 }
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden text-white selection:bg-white selection:text-black">
+    <main className="relative min-h-screen overflow-hidden pb-28 text-white selection:bg-white selection:text-black md:pb-0">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-[-14rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(19,74,255,0.26),transparent_62%)] blur-3xl" />
         <div className="absolute left-[12%] top-[22rem] h-[22rem] w-[22rem] rounded-full bg-[radial-gradient(circle,rgba(124,220,203,0.14),transparent_66%)] blur-3xl" />
@@ -118,67 +124,30 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 pb-20 pt-28 sm:px-8 lg:px-12">
-        <div className="grid w-full gap-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-[0.68rem] uppercase tracking-[0.32em] text-white/[0.55]">
-              <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
-              Brasil Jordan II 2026/27
+      <section className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 pb-16 pt-24 sm:px-8 lg:px-12">
+        <div className="grid w-full gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-16">
+          <div className="relative order-1 -mx-1 lg:order-2 lg:mx-0">
+            <div className="mb-4 flex items-center justify-between px-2 md:hidden">
+              <div className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.62rem] uppercase tracking-[0.28em] text-white/[0.62]">
+                Edicao jogador
+              </div>
+              <div className="text-right">
+                <p className="text-[0.62rem] uppercase tracking-[0.24em] text-white/[0.46]">
+                  Preco
+                </p>
+                <p className="mt-1 text-lg font-semibold text-white">
+                  R$ 749,99
+                </p>
+              </div>
             </div>
 
-            <h1 className="mt-8 font-display text-5xl leading-[0.9] text-white sm:text-6xl md:text-7xl lg:text-[5.8rem]">
-              Brasil, em
-              <span className="block text-white/[0.64]">modo noturno.</span>
-            </h1>
-
-            <p className="mt-7 max-w-xl text-base leading-8 text-white/[0.72] sm:text-lg">
-              A camisa Brasil Jordan II 2026/27 Jogador chega com a base Match
-              da Nike, tecnologia Aero-FIT e um visual azul-preto criado para
-              parecer elegante, raro e intimidador no primeiro olhar.
-            </p>
-
-            <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                href={productUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center rounded-full border border-white/[0.15] bg-white px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-black transition-transform duration-300 hover:-translate-y-0.5"
-              >
-                Ver produto na Nike
-              </Link>
-              <Link
-                href="#story"
-                className="inline-flex items-center rounded-full border border-white/[0.15] bg-white/[0.06] px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10"
-              >
-                Explorar a camisa
-              </Link>
-            </div>
-
-            <div className="mt-12 grid gap-4 sm:grid-cols-3">
-              {heroStats.map((item) => (
-                <article key={item.label} className="liquid-panel p-5">
-                  <p className="text-[0.68rem] uppercase tracking-[0.28em] text-white/[0.42]">
-                    {item.label}
-                  </p>
-                  <p className="mt-4 text-2xl font-semibold text-white">
-                    {item.value}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-white/60">
-                    {item.detail}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="liquid-stage relative overflow-hidden rounded-[2rem] p-6 sm:p-8">
+            <div className="liquid-stage relative overflow-hidden rounded-[2rem] p-4 sm:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_46%),linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.14))]" />
-              <div className="absolute left-1/2 top-5 h-14 w-[70%] -translate-x-1/2 rounded-full bg-white/[0.16] blur-3xl" />
-              <div className="absolute inset-x-10 top-10 h-[1px] bg-white/[0.12]" />
-              <div className="absolute bottom-10 left-8 right-8 h-[38%] rounded-[2rem] border border-white/[0.08]" />
+              <div className="absolute left-1/2 top-5 h-14 w-[76%] -translate-x-1/2 rounded-full bg-white/[0.16] blur-3xl sm:w-[70%]" />
+              <div className="absolute inset-x-6 top-8 h-[1px] bg-white/[0.12] sm:inset-x-10 sm:top-10" />
+              <div className="absolute bottom-7 left-4 right-4 h-[34%] rounded-[1.6rem] border border-white/[0.08] sm:bottom-10 sm:left-8 sm:right-8 sm:h-[38%] sm:rounded-[2rem]" />
 
-              <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/[0.18] px-4 py-2 text-[0.68rem] uppercase tracking-[0.3em] text-white/[0.68] backdrop-blur-xl sm:left-6 sm:top-6">
+              <div className="absolute left-4 top-4 hidden rounded-full border border-white/10 bg-black/[0.18] px-4 py-2 text-[0.68rem] uppercase tracking-[0.3em] text-white/[0.68] backdrop-blur-xl sm:left-6 sm:top-6 md:block">
                 Edicao jogador
               </div>
 
@@ -198,8 +167,81 @@ export default function Home() {
                 width={1400}
                 height={1400}
                 priority
-                className="relative z-10 mx-auto w-full max-w-[34rem] object-contain drop-shadow-[0_28px_80px_rgba(0,0,0,0.78)]"
+                className="relative z-10 mx-auto w-full max-w-[23rem] object-contain drop-shadow-[0_28px_80px_rgba(0,0,0,0.78)] sm:max-w-[34rem]"
               />
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-2 px-1 md:hidden">
+              {mobileSignals.map((signal) => (
+                <div
+                  key={signal}
+                  className="rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3 text-center text-[0.62rem] uppercase tracking-[0.24em] text-white/[0.62]"
+                >
+                  {signal}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="order-2 max-w-2xl lg:order-1">
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-[0.68rem] uppercase tracking-[0.32em] text-white/[0.55]">
+              <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
+              Brasil Jordan II 2026/27
+            </div>
+
+            <h1 className="mt-6 font-display text-[3.35rem] leading-[0.92] text-white sm:mt-8 sm:text-6xl md:text-7xl lg:text-[5.8rem]">
+              Brasil, em
+              <span className="block text-white/[0.64]">modo noturno.</span>
+            </h1>
+
+            <p className="mt-5 max-w-xl text-[0.98rem] leading-7 text-white/[0.72] sm:mt-7 sm:text-lg sm:leading-8">
+              A camisa Brasil Jordan II 2026/27 Jogador chega com a base Match
+              da Nike, tecnologia Aero-FIT e um visual azul-preto criado para
+              parecer elegante, raro e intimidador no primeiro olhar.
+            </p>
+
+            <div className="mt-8 grid gap-3 sm:mt-10 sm:flex sm:flex-wrap sm:gap-4">
+              <Link
+                href={productUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full items-center justify-center rounded-full border border-white/[0.15] bg-white px-7 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-black transition-transform duration-300 hover:-translate-y-0.5 sm:w-auto sm:py-3"
+              >
+                Ver produto na Nike
+              </Link>
+              <Link
+                href="#story"
+                className="inline-flex w-full items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-7 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:w-auto sm:py-3"
+              >
+                Explorar a camisa
+              </Link>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-12 sm:grid-cols-3 sm:gap-4">
+              {heroStats.map((item, index) => (
+                <article
+                  key={item.label}
+                  className={`liquid-panel p-4 sm:p-5 ${
+                    index === 0 ? "col-span-2 sm:col-span-1" : ""
+                  }`}
+                >
+                  <p className="text-[0.68rem] uppercase tracking-[0.28em] text-white/[0.42]">
+                    {item.label}
+                  </p>
+                  <p
+                    className={`mt-3 font-semibold text-white ${
+                      index === 0
+                        ? "text-[1.9rem] sm:mt-4 sm:text-2xl"
+                        : "text-[1.15rem] sm:mt-4 sm:text-2xl"
+                    }`}
+                  >
+                    {item.value}
+                  </p>
+                  <p className="mt-2 text-[0.82rem] leading-5 text-white/60 sm:text-sm sm:leading-6">
+                    {item.detail}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </div>
@@ -207,17 +249,17 @@ export default function Home() {
 
       <section
         id="story"
-        className="relative mx-auto w-full max-w-7xl px-6 py-8 sm:px-8 lg:px-12 lg:py-12"
+        className="relative mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-8 lg:px-12 lg:py-12"
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)]">
-          <article className="liquid-panel p-8 sm:p-10">
+          <article className="liquid-panel p-6 sm:p-10">
             <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.42]">
               Manifesto
             </p>
-            <h2 className="mt-5 max-w-3xl font-display text-4xl leading-tight text-white sm:text-5xl">
+            <h2 className="mt-4 max-w-3xl font-display text-[2.25rem] leading-tight text-white sm:mt-5 sm:text-5xl">
               Um uniforme desenhado para parecer frio, tecnico e ameacador.
             </h2>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-white/70">
+            <p className="mt-5 max-w-2xl text-[0.98rem] leading-7 text-white/70 sm:mt-6 sm:text-base sm:leading-8">
               A narrativa oficial da Nike coloca a camisa nessa linha entre
               beleza e perigo. O resultado e uma peca com energia mais sombria,
               pensada para carregar a presenca da Selecao e o corte autentico de
@@ -231,14 +273,14 @@ export default function Home() {
             </div>
           </article>
 
-          <aside className="liquid-panel p-8 sm:p-10">
+          <aside className="liquid-panel p-6 sm:p-10">
             <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.42]">
               Ficha tecnica
             </p>
-            <h2 className="mt-5 font-display text-3xl text-white sm:text-4xl">
+            <h2 className="mt-4 font-display text-[2rem] text-white sm:mt-5 sm:text-4xl">
               O essencial da peca.
             </h2>
-            <ul className="mt-8 space-y-4 text-sm uppercase tracking-[0.2em] text-white/70">
+            <ul className="mt-6 space-y-3 text-[0.76rem] uppercase tracking-[0.18em] text-white/70 sm:mt-8 sm:space-y-4 sm:text-sm sm:tracking-[0.2em]">
               {productSpecs.map((item) => (
                 <li
                   key={item}
@@ -250,7 +292,7 @@ export default function Home() {
               ))}
             </ul>
 
-            <div className="mt-8 rounded-[1.6rem] border border-white/10 bg-white/5 p-6">
+            <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-white/5 p-5 sm:mt-8 sm:p-6">
               <p className="text-[0.68rem] uppercase tracking-[0.3em] text-white/[0.42]">
                 Grade
               </p>
@@ -266,9 +308,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative mx-auto w-full max-w-7xl px-6 py-14 sm:px-8 lg:px-12 lg:py-16">
+      <section className="relative mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 lg:px-12 lg:py-16">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <article className="liquid-panel relative min-h-[30rem] overflow-hidden p-8 sm:p-10">
+          <article className="liquid-panel relative min-h-[24rem] overflow-hidden p-6 sm:min-h-[30rem] sm:p-10">
             <div className="absolute inset-0">
               <Image
                 src="/assets/nike-brazil-jordan-ii-a3.jpg"
@@ -284,10 +326,10 @@ export default function Home() {
               <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.48]">
                 Lado sombrio do futebol
               </p>
-              <h2 className="mt-5 max-w-lg font-display text-4xl leading-tight text-white sm:text-5xl">
+              <h2 className="mt-4 max-w-lg font-display text-[2.25rem] leading-tight text-white sm:mt-5 sm:text-5xl">
                 Presenca de colecao, leitura de jogo.
               </h2>
-              <p className="mt-5 max-w-lg text-base leading-8 text-white/[0.72]">
+              <p className="mt-4 max-w-lg text-[0.98rem] leading-7 text-white/[0.72] sm:mt-5 sm:text-base sm:leading-8">
                 A direcao criativa da camisa trabalha uma sensacao de ataque,
                 com contraste escuro e detalhes vivos que reforcam o impacto da
                 peca mesmo fora do campo.
@@ -297,14 +339,14 @@ export default function Home() {
 
           <div className="grid gap-6">
             {buildNotes.map((item) => (
-              <article key={item.title} className="liquid-panel p-8 sm:p-10">
+              <article key={item.title} className="liquid-panel p-6 sm:p-10">
                 <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.42]">
                   Insight
                 </p>
-                <h3 className="mt-5 font-display text-3xl text-white">
+                <h3 className="mt-4 font-display text-[2rem] text-white sm:mt-5 sm:text-3xl">
                   {item.title}
                 </h3>
-                <p className="mt-4 max-w-2xl text-base leading-8 text-white/70">
+                <p className="mt-4 max-w-2xl text-[0.98rem] leading-7 text-white/70 sm:text-base sm:leading-8">
                   {item.text}
                 </p>
               </article>
@@ -313,7 +355,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="mx-auto w-full max-w-7xl px-6 pb-12 pt-6 text-sm text-white/40 sm:px-8 lg:px-12">
+      <footer className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 text-sm text-white/40 sm:px-8 lg:px-12">
         <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p>Camisa Brasil Jordan II 2026/27 Jogador Masculina.</p>
           <Link
@@ -326,6 +368,26 @@ export default function Home() {
           </Link>
         </div>
       </footer>
+
+      <div className="mobile-buy-bar md:hidden">
+        <div>
+          <p className="text-[0.6rem] uppercase tracking-[0.24em] text-white/[0.46]">
+            Camisa Brasil Jordan II 26/27
+          </p>
+          <p className="mt-1 text-lg font-semibold text-white">R$ 749,99</p>
+          <p className="text-[0.72rem] text-white/[0.58]">
+            7x de R$ 107,14 sem juros
+          </p>
+        </div>
+        <Link
+          href={productUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-white px-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-black"
+        >
+          Ver na Nike
+        </Link>
+      </div>
     </main>
   );
 }
