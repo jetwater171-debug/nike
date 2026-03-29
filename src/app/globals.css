@@ -50,6 +50,14 @@ img {
   letter-spacing: -0.035em;
 }
 
+.font-hero {
+  font-family: var(--font-hero), "Arial Narrow", "Helvetica Neue", sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
 .liquid-pill {
   border: 1px solid rgba(255, 255, 255, 0.18);
   background:

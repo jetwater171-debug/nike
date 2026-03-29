@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond } from "next/font/google";
+import { Anton, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["500", "600", "700"],
+});
+
+const anton = Anton({
+  subsets: ["latin"],
+  variable: "--font-hero",
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -21,7 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={cormorantGaramond.variable}>{children}</body>
+      <body className={`${cormorantGaramond.variable} ${anton.variable}`}>
+        {children}
+      </body>
     </html>
   );
 }
