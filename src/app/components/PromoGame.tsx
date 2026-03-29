@@ -27,6 +27,7 @@ export default function PromoGame() {
   const [clicks, setClicks] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shippingModalOpen, setShippingModalOpen] = useState(false);
 
   const handleCellClick = (index: number) => {
     if (grid[index] !== "hidden" || gameOver) return;
@@ -38,6 +39,7 @@ export default function PromoGame() {
       prize = "empty"; // 1st click: nothing
     } else if (newClicks === 2) {
       prize = "shipping"; // 2nd click: free shipping
+      setShippingModalOpen(true);
     } else if (newClicks === 3) {
       prize = "empty"; // 3rd click: nothing
     } else if (newClicks === 4) {
@@ -133,9 +135,9 @@ export default function PromoGame() {
                           animate={{ y: [0, -2, 0] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         >
-                          <NikeSwoosh className="h-4 w-auto text-white/80 drop-shadow-[0_0_18px_rgba(255,255,255,0.18)] sm:h-5" />
+                          <NikeSwoosh className="h-3 w-auto text-white/80 drop-shadow-[0_0_16px_rgba(255,255,255,0.16)] sm:h-4" />
                           <motion.span
-                            className="mt-2 text-[0.5rem] uppercase tracking-[0.22em] text-white/60 sm:text-[0.58rem]"
+                            className="mt-1.5 text-[0.42rem] uppercase tracking-[0.2em] text-white/[0.58] sm:text-[0.5rem]"
                             animate={{ opacity: [0.52, 0.92, 0.52] }}
                             transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
                           >
@@ -163,8 +165,80 @@ export default function PromoGame() {
         </div>
       </div>
 
-      {/* Success Modal */}
       <AnimatePresence>
+        {shippingModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/72 backdrop-blur-md"
+              onClick={() => setShippingModalOpen(false)}
+            />
+
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.96 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 sm:p-7"
+            >
+              <motion.div
+                aria-hidden="true"
+                className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(96,165,250,0.28),transparent_70%)] blur-3xl"
+                animate={{ opacity: [0.55, 0.9, 0.55], scale: [0.92, 1.06, 0.92] }}
+                transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                aria-hidden="true"
+                className="absolute inset-y-0 left-[-35%] w-1/2 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/[0.14] to-transparent"
+                animate={{ x: ["0%", "235%"] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+              />
+
+              <div className="relative z-10 text-center">
+                <motion.div
+                  className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10"
+                  animate={{ scale: [1, 1.06, 1], boxShadow: ["0 0 0 rgba(96,165,250,0.16)", "0 0 30px rgba(96,165,250,0.24)", "0 0 0 rgba(96,165,250,0.16)"] }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Truck className="h-7 w-7 text-blue-300" />
+                </motion.div>
+
+                <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-blue-200/70">
+                  Cupom liberado
+                </p>
+                <h3 className="mt-3 font-display text-[2rem] leading-none text-white sm:text-[2.2rem]">
+                  Frete gratis
+                </h3>
+                <p className="mt-4 text-sm leading-7 text-white/[0.68]">
+                  Voce ganhou o cupom de frete gratis. Falta acertar mais um
+                  premio para seguir com esse beneficio ja reservado no seu
+                  carrinho.
+                </p>
+
+                <div className="mt-6 flex items-center justify-center gap-2 text-[0.68rem] uppercase tracking-[0.2em] text-white/42">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
+                  2 de 4 jogadas
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShippingModalOpen(false)}
+                  className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+                >
+                  Continuar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
         {gameOver && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
