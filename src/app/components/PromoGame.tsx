@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Truck, Ticket, RotateCcw } from "lucide-react";
+import { Truck, Ticket } from "lucide-react";
 
 type CellState = "hidden" | "empty" | "shipping" | "coupon";
 type ModalState = "progress" | "success" | null;
@@ -157,6 +157,13 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     activeModal === null &&
     !isResolvingTurn;
 
+  const rewardImageMask = {
+    WebkitMaskImage:
+      "radial-gradient(ellipse 82% 84% at 50% 50%, #000 58%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,0.5) 82%, transparent 100%)",
+    maskImage:
+      "radial-gradient(ellipse 82% 84% at 50% 50%, #000 58%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,0.5) 82%, transparent 100%)",
+  } satisfies React.CSSProperties;
+
   const progressModal =
     activeModal === "progress" ? (
       <PromoModalPortal>
@@ -258,8 +265,11 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                   aria-hidden="true"
                   className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.14),transparent_52%)]"
                 />
-                <div className="relative aspect-[1.34] overflow-hidden rounded-[1.4rem] bg-black">
-                  <div className="absolute inset-0 scale-110 opacity-40 blur-3xl">
+                <div className="relative aspect-[1.34] overflow-hidden rounded-[1.4rem]">
+                  <div
+                    className="absolute inset-0 scale-[1.08] opacity-30 blur-3xl"
+                    style={rewardImageMask}
+                  >
                     <Image
                       src="/assets/desconto.png"
                       alt=""
@@ -268,17 +278,19 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                       className="object-cover object-center"
                     />
                   </div>
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(4,4,4,0.96)_0%,rgba(4,4,4,0.28)_22%,rgba(4,4,4,0.16)_78%,rgba(4,4,4,0.96)_100%)]" />
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(4,4,4,0.96)_0%,rgba(4,4,4,0.22)_16%,rgba(4,4,4,0.14)_84%,rgba(4,4,4,0.96)_100%)]" />
-                  <div className="pointer-events-none absolute inset-x-[14%] top-[7%] h-12 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.42),transparent_72%)] blur-2xl" />
-                  <Image
-                    src="/assets/desconto.png"
-                    alt="Arte do desconto liberado"
-                    fill
-                    sizes="(max-width: 640px) 80vw, 320px"
-                    className="relative z-10 object-contain p-2 sm:p-3"
-                  />
-                  <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_70px_rgba(0,0,0,0.72)]" />
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    style={rewardImageMask}
+                  >
+                    <Image
+                      src="/assets/desconto.png"
+                      alt="Arte do desconto liberado"
+                      fill
+                      sizes="(max-width: 640px) 80vw, 320px"
+                      className="object-contain p-2 sm:p-3"
+                    />
+                  </div>
+                  <div className="pointer-events-none absolute inset-x-[14%] top-[7%] h-12 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.22),transparent_72%)] blur-2xl" />
                 </div>
               </div>
 
@@ -292,15 +304,6 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
               >
                 Resgatar camisa agora
               </Link>
-
-              <button
-                type="button"
-                onClick={startGame}
-                className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.05] px-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/[0.88]"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Nova rodada
-              </button>
             </div>
           </div>
         </div>
