@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -157,13 +156,6 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     activeModal === null &&
     !isResolvingTurn;
 
-  const rewardImageMask = {
-    WebkitMaskImage:
-      "radial-gradient(ellipse 82% 84% at 50% 50%, #000 58%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,0.5) 82%, transparent 100%)",
-    maskImage:
-      "radial-gradient(ellipse 82% 84% at 50% 50%, #000 58%, rgba(0,0,0,0.92) 68%, rgba(0,0,0,0.5) 82%, transparent 100%)",
-  } satisfies React.CSSProperties;
-
   const progressModal =
     activeModal === "progress" ? (
       <PromoModalPortal>
@@ -227,80 +219,98 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     activeModal === "success" ? (
       <PromoModalPortal>
         <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
-          <div className="promo-fade pointer-events-auto absolute inset-0 bg-black/82 backdrop-blur-md" />
+          <div className="promo-fade pointer-events-auto absolute inset-0 bg-black/62 backdrop-blur-[10px]" />
 
           <div
             role="dialog"
             aria-modal="true"
-            className="promo-pop liquid-panel pointer-events-auto relative z-10 w-full max-w-md overflow-hidden rounded-[2rem] border border-white/[0.12] bg-[rgba(9,9,9,0.92)] p-6 shadow-[0_34px_120px_rgba(0,0,0,0.74)] sm:p-7"
+            className="promo-pop pointer-events-auto relative z-10 w-full max-w-md overflow-hidden rounded-[2rem] border border-[#d8d0c2] bg-[linear-gradient(180deg,#fbfaf5_0%,#f1ebde_100%)] p-6 text-[#121212] shadow-[0_34px_120px_rgba(0,0,0,0.42)] sm:p-7"
             onClick={(event) => event.stopPropagation()}
           >
             <div
               aria-hidden="true"
-              className="absolute inset-x-8 top-0 h-24 bg-[radial-gradient(circle,rgba(255,255,255,0.22),transparent_72%)] blur-3xl"
+              className="absolute inset-x-8 top-0 h-28 bg-[radial-gradient(circle,rgba(255,255,255,0.88),transparent_72%)] blur-3xl"
             />
             <div
               aria-hidden="true"
-              className="absolute inset-x-10 bottom-8 h-24 bg-[radial-gradient(circle,rgba(16,185,129,0.14),transparent_72%)] blur-3xl"
+              className="absolute inset-x-10 bottom-8 h-28 bg-[radial-gradient(circle,rgba(22,163,74,0.18),transparent_72%)] blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-0 right-[-16%] w-[42%] rotate-[10deg] bg-[linear-gradient(180deg,rgba(255,255,255,0.24),rgba(255,255,255,0))]"
             />
 
             <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
-                <Ticket className="h-7 w-7 text-emerald-300" />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-700/12 bg-white/70 shadow-[0_10px_30px_rgba(18,18,18,0.08)]">
+                <Ticket className="h-7 w-7 text-emerald-700" />
               </div>
 
-              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
+              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-800/68">
                 Desconto liberado
               </p>
-              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
+              <h3 className="mt-3 font-hero text-[1.7rem] text-[#121212] sm:text-[2.2rem]">
                 Pronto para resgatar
               </h3>
-              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
+              <p className="mt-4 text-sm leading-7 text-[#252525]/72">
                 Voce bateu os 2 premios da rodada e agora ja pode seguir para a
                 nova camisa com a oferta desta campanha destravada.
               </p>
 
-              <div className="relative mx-auto mt-6 w-full max-w-[20.5rem] overflow-hidden rounded-[1.85rem] border border-white/10 bg-[#050505] p-3 shadow-[0_22px_60px_rgba(0,0,0,0.56)]">
+              <div className="relative mx-auto mt-6 w-full max-w-[21rem] overflow-hidden rounded-[2rem] border border-[#dbd4c9] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.44))] p-[0.7rem] shadow-[0_20px_50px_rgba(18,18,18,0.14)]">
                 <div
                   aria-hidden="true"
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.14),transparent_52%)]"
+                  className="absolute inset-x-6 top-0 h-16 bg-[radial-gradient(circle,rgba(255,255,255,0.9),transparent_72%)] blur-2xl"
                 />
-                <div className="relative aspect-[1.34] overflow-hidden rounded-[1.4rem]">
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-x-10 bottom-0 h-20 bg-[radial-gradient(circle,rgba(22,163,74,0.18),transparent_72%)] blur-2xl"
+                />
+                <div className="relative overflow-hidden rounded-[1.45rem] border border-[#d7d0c3] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(249,246,239,0.96)_42%,rgba(236,230,217,0.96)_100%)] px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] sm:px-6 sm:py-7">
                   <div
-                    className="absolute inset-0 scale-[1.08] opacity-30 blur-3xl"
-                    style={rewardImageMask}
-                  >
-                    <Image
-                      src="/assets/desconto.png"
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 80vw, 320px"
-                      className="object-cover object-center"
-                    />
-                  </div>
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-[-14%] top-[16%] h-24 w-24 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.75),transparent_70%)] blur-2xl"
+                  />
                   <div
-                    className="pointer-events-none absolute inset-0"
-                    style={rewardImageMask}
-                  >
-                    <Image
-                      src="/assets/desconto.png"
-                      alt="Arte do desconto liberado"
-                      fill
-                      sizes="(max-width: 640px) 80vw, 320px"
-                      className="object-contain p-2 sm:p-3"
-                    />
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-[-8%] bottom-[8%] h-24 w-24 rounded-full bg-[radial-gradient(circle,rgba(22,163,74,0.14),transparent_70%)] blur-2xl"
+                  />
+                  <div className="relative text-center">
+                    <NikeSwoosh className="mx-auto h-5 w-auto text-[#181818]" />
+                    <p className="mx-auto mt-5 max-w-[12ch] font-hero text-[2rem] leading-[0.9] text-[#121212] sm:text-[2.3rem]">
+                      Descontasso na camiseta do Brasil
+                    </p>
+
+                    <div className="mt-5 flex flex-col items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[#5a554c]">
+                          de
+                        </span>
+                        <span className="relative text-[1.15rem] font-medium text-[#918675]">
+                          749,99
+                          <span className="absolute left-[-4%] right-[-4%] top-1/2 h-[2px] -translate-y-1/2 rotate-[-6deg] bg-[#ca4d43]" />
+                        </span>
+                      </div>
+
+                      <div className="mt-1.5 flex items-end gap-2">
+                        <span className="text-[1.95rem] leading-none text-[#121212] sm:text-[2.2rem]">
+                          por
+                        </span>
+                        <span className="font-hero text-[3.7rem] leading-none text-[#159447] sm:text-[4.3rem]">
+                          139,19
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="pointer-events-none absolute inset-x-[14%] top-[7%] h-12 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.22),transparent_72%)] blur-2xl" />
                 </div>
               </div>
 
-              <p className="mt-5 text-[0.68rem] uppercase tracking-[0.2em] text-white/[0.42]">
+              <p className="mt-5 text-[0.68rem] uppercase tracking-[0.2em] text-[#4a4740]/66">
                 Sua oferta reservada segue na proxima etapa
               </p>
 
               <Link
                 href={claimHref}
-                className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+                className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#121212] px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-white transition-transform duration-300 hover:scale-[1.01]"
               >
                 Resgatar camisa agora
               </Link>
