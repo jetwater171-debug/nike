@@ -1,6 +1,11 @@
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import PromoGame from "./components/PromoGame";
+
+const PromoGame = dynamic(() => import("./components/PromoGame"), {
+  ssr: false,
+  loading: () => <PromoGameSkeleton />,
+});
 
 const productUrl =
   "https://www.nike.com.br/camisa-brasil-jordan-ii-2026-27-jogador-masculina-097619.html";
@@ -108,6 +113,30 @@ function StoryCard({
   );
 }
 
+function PromoGameSkeleton() {
+  return (
+    <section
+      aria-hidden="true"
+      className="section-shell relative mx-auto w-full max-w-4xl scroll-mt-24 px-4 py-16 sm:px-8 lg:px-12"
+    >
+      <div className="liquid-panel mx-auto max-w-lg overflow-hidden p-6 sm:p-10">
+        <div className="mx-auto h-10 w-48 rounded-full bg-white/[0.08]" />
+        <div className="mx-auto mt-4 h-4 w-full max-w-sm rounded-full bg-white/[0.06]" />
+        <div className="mx-auto mt-2 h-4 w-5/6 rounded-full bg-white/[0.05]" />
+
+        <div className="mx-auto mt-10 grid w-full max-w-[280px] grid-cols-4 gap-3 sm:max-w-[340px] sm:gap-4">
+          {Array.from({ length: 16 }).map((_, index) => (
+            <div
+              key={index}
+              className="aspect-square rounded-2xl border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] sm:rounded-[1.25rem]"
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden pb-28 text-white selection:bg-white selection:text-black md:pb-0">
@@ -187,10 +216,11 @@ export default function Home() {
                 muted
                 playsInline
                 poster="/assets/hero-jersey-poster.webp"
-                preload="auto"
+                preload="metadata"
                 tabIndex={-1}
-                className="pointer-events-none relative z-10 h-[22rem] w-full max-w-[11rem] select-none object-contain sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]"
+                className="hero-media pointer-events-none relative z-10 h-[22rem] w-full max-w-[11rem] select-none object-contain sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]"
               >
+                <source src="/assets/hero-jersey-loop.webm" type="video/webm" />
                 <source src="/assets/hero-jersey-loop.mp4" type="video/mp4" />
               </video>
             </div>
@@ -238,7 +268,7 @@ export default function Home() {
 
       <section
         id="story"
-        className="relative mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-8 lg:px-12 lg:py-12"
+        className="section-shell relative mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-8 lg:px-12 lg:py-12"
       >
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)]">
           <article className="liquid-panel p-6 sm:p-10">
@@ -297,7 +327,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 lg:px-12 lg:py-16">
+      <section className="section-shell relative mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 lg:px-12 lg:py-16">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <article className="liquid-panel relative min-h-[24rem] overflow-hidden p-6 sm:min-h-[30rem] sm:p-10">
             <div className="absolute inset-0">
