@@ -124,8 +124,8 @@ export default function Home() {
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 pb-16 pt-24 sm:px-8 lg:px-12">
         <div className="w-full space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-center gap-2 sm:gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
-            <div className="liquid-panel p-4 sm:p-8">
+          <div className="grid grid-cols-[minmax(0,0.98fr)_minmax(0,1.02fr)] items-center gap-0.5 sm:gap-2 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-4">
+            <div className="liquid-panel p-4 pr-3 sm:p-8 sm:pr-5 lg:pr-6">
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] sm:gap-3 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.32em]">
                   <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
@@ -178,7 +178,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative flex min-h-[23rem] items-center justify-end sm:min-h-[30rem] lg:min-h-[34rem]">
+            <div className="relative -ml-1 flex min-h-[23rem] items-center justify-end sm:-ml-3 sm:min-h-[30rem] lg:-ml-4 lg:min-h-[34rem]">
               <JerseyFrameSequence className="relative z-10 h-[22rem] w-full max-w-[11rem] object-contain sm:h-[30rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]" />
             </div>
           </div>
