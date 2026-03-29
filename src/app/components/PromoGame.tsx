@@ -70,9 +70,9 @@ export default function PromoGame() {
             Promocao de Cupons
           </h2>
           <p className="text-[0.98rem] text-white/70 leading-relaxed font-light">
-            No tabuleiro 4x4, algumas casas nao liberam nada e outras escondem
-            cupons da campanha. Para sair com vantagem, voce precisa encontrar
-            2 acertos validos ao longo da rodada.
+            Nesse tabuleiro 4x4, existem casas vazias e casas com cupons
+            escondidos. Para sair com vantagem na campanha, voce precisa
+            acertar 2 cupons ao longo da rodada.
           </p>
         </div>
 

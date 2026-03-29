@@ -71,15 +71,17 @@ export default function Home() {
             <div className="liquid-panel p-5 sm:p-8 sm:pr-5 lg:pr-6">
               <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
                 <h1 className="max-w-3xl font-display text-[2.35rem] leading-[0.9] text-white sm:text-[4.1rem] lg:text-[5.4rem]">
-                  Promocao Mines.
-                  <span className="block text-white/[0.62]">Cupons da Nike.</span>
+                  Promocao Mines
+                  <span className="block text-white/[0.62]">
+                    de cupons Nike.
+                  </span>
                 </h1>
 
                 <p className="mt-4 max-w-[30rem] text-[0.94rem] leading-7 text-white/[0.72] sm:mt-5 sm:text-base sm:leading-8">
-                  Desca ate o tabuleiro, entre na rodada e encontre 2 cupons
-                  validos para liberar a sua vantagem dentro da campanha. Uma
-                  experiencia direta, visual e pensada para transformar a
-                  jogada em recompensa.
+                  Essa promocao exclusiva da Nike te coloca em um mini jogo
+                  onde voce pode encontrar cupons com descontasso na nova
+                  camisa da Selecao Brasileira para a Copa de 2026. Desca a
+                  pagina, entre na rodada e tente acertar 2 cupons.
                 </p>
 
                 <Link
