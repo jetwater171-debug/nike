@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import Link from "next/link";
 
 const PromoGame = dynamic(() => import("./components/PromoGame"), {
@@ -10,68 +9,7 @@ const PromoGame = dynamic(() => import("./components/PromoGame"), {
 const productUrl =
   "https://www.nike.com.br/camisa-brasil-jordan-ii-2026-27-jogador-masculina-097619.html";
 
-const heroStats = [
-  {
-    label: "Preco",
-    value: "R$ 749,99",
-    detail: "ou 7x de R$ 107,14 sem juros",
-  },
-  {
-    label: "Caimento",
-    value: "Player issue",
-    detail: "A Nike recomenda um tamanho acima para mais conforto.",
-  },
-  {
-    label: "Promocao",
-    value: "Cupons ativos",
-    detail: "A home tambem abre acesso a frete gratis e desconto na oferta.",
-  },
-];
-
 const mobileSignals = ["Aero-FIT", "Player issue", "P ao GGG"];
-
-const storyCards = [
-  {
-    eyebrow: "Promocao Nike",
-    title: "Cupons dentro da campanha",
-    text: "A pagina combina apresentacao premium da camisa com uma dinamica promocional pensada para liberar beneficios durante a navegacao.",
-  },
-  {
-    eyebrow: "Colecao Match",
-    title: "Mesma presenca de campo",
-    text: "A construcao replica a camisa usada pelos profissionais, com acabamento autentico e sensacao de partida.",
-  },
-  {
-    eyebrow: "Direcao visual",
-    title: "Azul royal com sombra",
-    text: "A base azul e preta recebe pontos em verde-agua e amarelo para deixar o uniforme mais ameaçador e raro.",
-  },
-];
-
-const productSpecs = [
-  "Futebol",
-  "Masculina",
-  "100% poliester",
-  "Lavavel a maquina",
-  "Design autentico",
-  "Importada",
-  "Cor azul",
-];
-
-const buildNotes = [
-  {
-    title: "Campanha com foco em conversao",
-    text: "A narrativa da landing foi ajustada para vender a camisa como produto principal e, ao mesmo tempo, posicionar a promocao de cupons como reforco da oferta.",
-  },
-  {
-    title: "Corpo fresco sob pressao",
-    text: "A pagina da Nike apresenta a Aero-FIT como a base de resfriamento da peça, feita para circular o ar e manter a sensacao seca em temperatura alta.",
-  },
-  {
-    title: "Beneficios sem poluir o hero",
-    text: "Os cupons entram como camada de incentivo logo abaixo da apresentacao principal, preservando o visual premium e mantendo a leitura comercial da pagina.",
-  },
-];
 
 function NikeSwoosh({ className }: { className?: string }) {
   return (
@@ -86,30 +24,6 @@ function NikeSwoosh({ className }: { className?: string }) {
         fill="currentColor"
       />
     </svg>
-  );
-}
-
-function StoryCard({
-  eyebrow,
-  title,
-  text,
-}: {
-  eyebrow: string;
-  title: string;
-  text: string;
-}) {
-  return (
-    <article className="liquid-panel h-full p-5 sm:p-6">
-      <p className="text-[0.68rem] uppercase tracking-[0.3em] text-white/[0.45]">
-        {eyebrow}
-      </p>
-      <h3 className="mt-3 font-display text-[1.65rem] text-white sm:mt-4 sm:text-2xl">
-        {title}
-      </h3>
-      <p className="mt-3 text-sm leading-6 text-white/[0.68] sm:leading-7">
-        {text}
-      </p>
-    </article>
   );
 }
 
@@ -235,141 +149,6 @@ export default function Home() {
               >
                 {signal}
               </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-            {heroStats.map((item, index) => (
-              <article
-                key={item.label}
-                className={`liquid-panel p-4 sm:p-5 ${
-                  index === 0 ? "col-span-2 sm:col-span-1" : ""
-                }`}
-              >
-                <p className="text-[0.68rem] uppercase tracking-[0.28em] text-white/[0.42]">
-                  {item.label}
-                </p>
-                <p
-                  className={`mt-3 font-semibold text-white ${
-                    index === 0
-                      ? "text-[1.9rem] sm:mt-4 sm:text-2xl"
-                      : "text-[1.15rem] sm:mt-4 sm:text-2xl"
-                  }`}
-                >
-                  {item.value}
-                </p>
-                <p className="mt-2 text-[0.82rem] leading-5 text-white/60 sm:text-sm sm:leading-6">
-                  {item.detail}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="story"
-        className="section-shell relative mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-8 lg:px-12 lg:py-12"
-      >
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)]">
-          <article className="liquid-panel p-6 sm:p-10">
-            <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.42]">
-              Manifesto
-            </p>
-            <h2 className="mt-4 max-w-3xl font-display text-[2.25rem] leading-tight text-white sm:mt-5 sm:text-5xl">
-              Uma promocao premium montada para vender a camisa e valorizar a oferta.
-            </h2>
-            <p className="mt-5 max-w-2xl text-[0.98rem] leading-7 text-white/70 sm:mt-6 sm:text-base sm:leading-8">
-              A narrativa oficial da Nike continua no centro, mas agora a pagina
-              tambem enquadra a camisa como nucleo de uma campanha promocional
-              de cupons. O visual segue limpo, escuro e mais editorial para nao
-              parecer uma oferta comum.
-            </p>
-
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {storyCards.map((item) => (
-                <StoryCard key={item.title} {...item} />
-              ))}
-            </div>
-          </article>
-
-          <aside className="liquid-panel p-6 sm:p-10">
-            <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.42]">
-              Ficha tecnica
-            </p>
-            <h2 className="mt-4 font-display text-[2rem] text-white sm:mt-5 sm:text-4xl">
-              O essencial da peca.
-            </h2>
-            <ul className="mt-6 space-y-3 text-[0.76rem] uppercase tracking-[0.18em] text-white/70 sm:mt-8 sm:space-y-4 sm:text-sm sm:tracking-[0.2em]">
-              {productSpecs.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-center justify-between gap-4 border-b border-white/10 pb-4"
-                >
-                  <span>{item}</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#8fe4d3]" />
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-white/5 p-5 sm:mt-8 sm:p-6">
-              <p className="text-[0.68rem] uppercase tracking-[0.3em] text-white/[0.42]">
-                Grade
-              </p>
-              <p className="mt-4 text-2xl font-semibold text-white">
-                P ao GGG
-              </p>
-              <p className="mt-3 text-sm leading-7 text-white/[0.63]">
-                A pagina oficial mostra a grade completa e ativa opcao de
-                personalizacao para o modelo.
-              </p>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <section className="section-shell relative mx-auto w-full max-w-7xl px-4 py-10 sm:px-8 lg:px-12 lg:py-16">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <article className="liquid-panel relative min-h-[24rem] overflow-hidden p-6 sm:min-h-[30rem] sm:p-10">
-            <div className="absolute inset-0">
-              <Image
-                src="/assets/nike-brazil-jordan-ii-a3.jpg"
-                alt="Detalhe da Camisa Brasil Jordan II 2026/27 Jogador Masculina"
-                fill
-                sizes="(max-width: 1024px) 100vw, 42vw"
-                className="object-cover object-top opacity-55"
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,4,4,0.08),rgba(4,4,4,0.58)_54%,rgba(4,4,4,0.92))]" />
-            </div>
-
-            <div className="relative z-10 flex h-full flex-col justify-end">
-              <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.48]">
-                Campanha promocional
-              </p>
-              <h2 className="mt-4 max-w-lg font-display text-[2.25rem] leading-tight text-white sm:mt-5 sm:text-5xl">
-                A camisa no centro. Os cupons como impulso.
-              </h2>
-              <p className="mt-4 max-w-lg text-[0.98rem] leading-7 text-white/[0.72] sm:mt-5 sm:text-base sm:leading-8">
-                O produto continua sendo o protagonista. A promocao entra como
-                camada de interesse para aumentar a permanencia, aquecer o lead
-                e empurrar o clique para a oferta oficial.
-              </p>
-            </div>
-          </article>
-
-          <div className="grid gap-6">
-            {buildNotes.map((item) => (
-              <article key={item.title} className="liquid-panel p-6 sm:p-10">
-                <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.42]">
-                  Insight
-                </p>
-                <h3 className="mt-4 font-display text-[2rem] text-white sm:mt-5 sm:text-3xl">
-                  {item.title}
-                </h3>
-                <p className="mt-4 max-w-2xl text-[0.98rem] leading-7 text-white/70 sm:text-base sm:leading-8">
-                  {item.text}
-                </p>
-              </article>
             ))}
           </div>
         </div>
