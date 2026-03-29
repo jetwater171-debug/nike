@@ -70,16 +70,7 @@ export default function Home() {
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-4">
             <div className="liquid-panel p-5 sm:p-8 sm:pr-5 lg:pr-6">
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] sm:gap-3 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.32em]">
-                  <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
-                  Promocao Mines Nike
-                </div>
-
-                <p className="mt-4 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.68rem] sm:tracking-[0.3em]">
-                  Cupons da campanha oficial
-                </p>
-
-                <h1 className="mt-3 max-w-3xl font-display text-[2.35rem] leading-[0.9] text-white sm:text-[4.1rem] lg:text-[5.4rem]">
+                <h1 className="max-w-3xl font-display text-[2.35rem] leading-[0.9] text-white sm:text-[4.1rem] lg:text-[5.4rem]">
                   Promocao Mines.
                   <span className="block text-white/[0.62]">Cupons da Nike.</span>
                 </h1>
@@ -91,34 +82,12 @@ export default function Home() {
                   buscar o cupom de desconto na mesma experiencia.
                 </p>
 
-                <div className="mt-4 sm:mt-6">
-                  <p className="text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.68rem] sm:tracking-[0.3em]">
-                    Preco
-                  </p>
-                  <p className="mt-1 text-[1.35rem] font-semibold text-white sm:text-[2rem]">
-                    R$ 749,99
-                  </p>
-                  <p className="text-[0.72rem] text-white/[0.58] sm:text-sm">
-                    7x de R$ 107,14 sem juros
-                  </p>
-                </div>
-
-                <div className="mt-5 grid gap-2 sm:mt-7 sm:flex sm:flex-wrap sm:gap-3">
-                  <Link
-                    href={productUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-4 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-black sm:min-h-12 sm:w-auto sm:px-7 sm:text-sm sm:tracking-[0.18em]"
-                  >
-                    Abrir na Nike
-                  </Link>
-                  <Link
-                    href="#promo"
-                    className="hidden min-h-12 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-7 text-sm font-semibold uppercase tracking-[0.18em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:inline-flex"
-                  >
-                    Rolar para iniciar
-                  </Link>
-                </div>
+                <Link
+                  href="#promo"
+                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:mt-7 sm:min-h-12 sm:px-7 sm:text-sm sm:tracking-[0.18em]"
+                >
+                  Rolar para iniciar
+                </Link>
               </div>
             </div>
 
