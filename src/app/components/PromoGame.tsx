@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   Ticket,
@@ -59,16 +59,38 @@ export default function PromoGame() {
   const [gameOver, setGameOver] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalState>(null);
+  const [isResolvingTurn, setIsResolvingTurn] = useState(false);
+  const progressModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
-  const isInteractionLocked = !gameStarted || gameOver || activeModal !== null;
+  const clearProgressModalTimeout = () => {
+    if (progressModalTimeoutRef.current) {
+      clearTimeout(progressModalTimeoutRef.current);
+      progressModalTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => clearProgressModalTimeout();
+  }, []);
+
+  const closeActiveModal = () => {
+    setActiveModal(null);
+  };
+
+  const isInteractionLocked =
+    !gameStarted || gameOver || activeModal !== null || isResolvingTurn;
 
   const startGame = () => {
+    clearProgressModalTimeout();
     setBoard(createBoard());
     setGrid(createHiddenGrid());
     setRewardHits(0);
     setCopied(false);
     setGameOver(false);
     setActiveModal(null);
+    setIsResolvingTurn(false);
     setGameStarted(true);
   };
 
@@ -99,7 +121,13 @@ export default function PromoGame() {
       return;
     }
 
-    setActiveModal("progress");
+    setIsResolvingTurn(true);
+    clearProgressModalTimeout();
+    progressModalTimeoutRef.current = setTimeout(() => {
+      setIsResolvingTurn(false);
+      setActiveModal("progress");
+      progressModalTimeoutRef.current = null;
+    }, 650);
   };
 
   const copyCoupon = () => {
@@ -119,10 +147,10 @@ export default function PromoGame() {
             Promocao Mines Nike
           </h2>
           <p className="text-[0.98rem] font-light leading-relaxed text-white/70">
-            Essa e uma promocao da Nike para testar a sua sorte e te colocar na
-            disputa por descontassos na nova camisa da Selecao Brasileira. No
-            tabuleiro 4x4 existem 4 bombas, 5 casas sem premiacao e varios
-            cupons escondidos. Para ganhar, voce precisa acertar 2 cupons.
+            Essa e uma promocao da Nike para testar a sua sorte e concorrer a
+            descontassos na nova camisa da Selecao Brasileira. No tabuleiro 4x4
+            existem 4 bombas, 5 casas sem premiacao e varios cupons
+            escondidos. Para levar vantagem, voce precisa acertar 2 premios.
           </p>
         </div>
 
@@ -305,7 +333,8 @@ export default function PromoGame() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="promo-fade absolute inset-0 bg-black/72 backdrop-blur-md"
-            onClick={() => setActiveModal(null)}
+            onClick={closeActiveModal}
+            onTouchEnd={closeActiveModal}
           />
 
           <div className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 sm:p-7">
@@ -320,20 +349,26 @@ export default function PromoGame() {
               </div>
 
               <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
-                Primeiro acerto
+                Primeiro premio
               </p>
               <h3 className="mt-3 font-display text-[2rem] leading-none text-white sm:text-[2.2rem]">
-                Cupom encontrado
+                Acerto confirmado
               </h3>
               <p className="mt-4 text-sm leading-7 text-white/[0.68]">
-                Boa. Voce ja encontrou 1 dos 2 cupons da rodada. Agora falta
-                so mais um acerto para destravar a sua vantagem na campanha.
+                Boa. Voce ja encontrou o primeiro premio da rodada. Agora falta
+                so mais um acerto para liberar a sua vantagem na campanha.
               </p>
+
+              <div className="mt-6 flex items-center justify-center gap-2 text-[0.68rem] uppercase tracking-[0.2em] text-white/[0.42]">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                1 de 2 premios
+              </div>
 
               <button
                 type="button"
-                onClick={() => setActiveModal(null)}
-                className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+                onClick={closeActiveModal}
+                onTouchEnd={closeActiveModal}
+                className="mt-6 inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Continuar
               </button>
