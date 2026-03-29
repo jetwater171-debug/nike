@@ -2,120 +2,168 @@
 
 import { useEffect, useRef } from "react";
 
-const fps = 30;
-const frameDuration = 1000 / fps;
-const columns = 10;
-const rows = 8;
-const totalFrames = 238;
+const frameCount = 238;
+const frames = Array.from(
+  { length: frameCount },
+  (_, index) => `/assets/jersey-frames/frame-${String(index + 1).padStart(3, "0")}.webp`,
+);
 
-const sheets = [
-  { src: "/assets/jersey-sprites/sheet-1.webp", frames: 80 },
-  { src: "/assets/jersey-sprites/sheet-2.webp", frames: 80 },
-  { src: "/assets/jersey-sprites/sheet-3.webp", frames: 78 },
-];
+const frameDuration = 1000 / 30;
+const eagerFrameCount = 36;
+const preloadBatchSize = 12;
+const preloadAhead = 8;
 
-function resolveFrame(frameIndex: number) {
-  let remaining = frameIndex;
+type IdleHandle = number;
+type IdleCallback = (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void;
 
-  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex += 1) {
-    const sheet = sheets[sheetIndex];
-
-    if (remaining < sheet.frames) {
-      return {
-        sheetIndex,
-        frameWithinSheet: remaining,
-      };
-    }
-
-    remaining -= sheet.frames;
-  }
-
-  return {
-    sheetIndex: sheets.length - 1,
-    frameWithinSheet: 0,
-  };
-}
+type IdleWindow = Window & {
+  cancelIdleCallback?: (handle: IdleHandle) => void;
+  requestIdleCallback?: (callback: IdleCallback, options?: { timeout: number }) => IdleHandle;
+};
 
 export function JerseyFrameSequence({
   className = "",
 }: {
   className?: string;
 }) {
-  const spriteRef = useRef<HTMLDivElement | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
-    sheets.forEach(({ src }) => {
-      const img = new window.Image();
-      img.decoding = "async";
-      img.src = src;
-    });
+    const imageCache = new Array<HTMLImageElement | null>(frames.length).fill(null);
+    const frameReady = new Array<boolean>(frames.length).fill(false);
+    const idleWindow = window as IdleWindow;
 
-    let animationFrame = 0;
-    let lastFrame = -1;
-    let activeSheet = -1;
-    let startTime = performance.now();
+    let nextFrameToWarm = 0;
+    let warmTimeout = 0;
+    let idleHandle: IdleHandle | null = null;
+    let disposed = false;
 
-    const applyFrame = (frameIndex: number) => {
-      const sprite = spriteRef.current;
+    const markReady = (index: number) => {
+      frameReady[index] = true;
+    };
 
-      if (!sprite) {
+    const loadFrame = (index: number) => {
+      if (index < 0 || index >= frames.length || imageCache[index]) {
         return;
       }
 
-      const { sheetIndex, frameWithinSheet } = resolveFrame(frameIndex);
-      const column = frameWithinSheet % columns;
-      const row = Math.floor(frameWithinSheet / columns);
-      const x = columns > 1 ? (column / (columns - 1)) * 100 : 0;
-      const y = rows > 1 ? (row / (rows - 1)) * 100 : 0;
+      const img = new window.Image();
+      img.decoding = index < 12 ? "sync" : "async";
+      img.fetchPriority = index < 8 ? "high" : "auto";
+      img.src = frames[index];
 
-      if (sheetIndex !== activeSheet) {
-        sprite.style.backgroundImage = `url(${sheets[sheetIndex].src})`;
-        activeSheet = sheetIndex;
+      if (img.complete) {
+        markReady(index);
+      } else {
+        img.onload = () => markReady(index);
       }
 
-      sprite.style.backgroundPosition = `${x}% ${y}%`;
+      imageCache[index] = img;
     };
 
-    applyFrame(0);
+    const scheduleWarm = () => {
+      if (disposed || nextFrameToWarm >= frames.length) {
+        return;
+      }
+
+      const runWarm = () => {
+        const limit = Math.min(nextFrameToWarm + preloadBatchSize, frames.length);
+
+        while (nextFrameToWarm < limit) {
+          loadFrame(nextFrameToWarm);
+          nextFrameToWarm += 1;
+        }
+
+        scheduleWarm();
+      };
+
+      if (idleWindow.requestIdleCallback) {
+        idleHandle = idleWindow.requestIdleCallback(
+          () => {
+            idleHandle = null;
+            runWarm();
+          },
+          { timeout: 180 },
+        );
+        return;
+      }
+
+      warmTimeout = window.setTimeout(runWarm, 120);
+    };
+
+    while (nextFrameToWarm < Math.min(eagerFrameCount, frames.length)) {
+      loadFrame(nextFrameToWarm);
+      nextFrameToWarm += 1;
+    }
+
+    scheduleWarm();
+
+    let animationFrame = 0;
+    let startTime = performance.now();
+    let renderedFrame = 0;
+
+    const renderFrame = (frameIndex: number) => {
+      const imgElement = imgRef.current;
+      const frame = imageCache[frameIndex];
+
+      if (!imgElement || !frame || !frameReady[frameIndex]) {
+        return false;
+      }
+
+      imgElement.src = frame.src;
+      renderedFrame = frameIndex;
+      return true;
+    };
 
     const tick = (now: number) => {
       if (document.visibilityState !== "visible") {
-        startTime = now - Math.max(lastFrame, 0) * frameDuration;
+        startTime = now - renderedFrame * frameDuration;
         animationFrame = window.requestAnimationFrame(tick);
         return;
       }
 
-      const frameIndex =
-        Math.floor((now - startTime) / frameDuration) % totalFrames;
+      const desiredFrame = Math.floor((now - startTime) / frameDuration) % frames.length;
+      let frameToRender = desiredFrame;
 
-      if (frameIndex !== lastFrame) {
-        lastFrame = frameIndex;
-        applyFrame(frameIndex);
+      for (let offset = 1; offset <= preloadAhead; offset += 1) {
+        loadFrame((desiredFrame + offset) % frames.length);
+      }
+
+      while (frameToRender !== renderedFrame && !frameReady[frameToRender]) {
+        frameToRender = (frameToRender - 1 + frames.length) % frames.length;
+      }
+
+      if (frameToRender !== renderedFrame) {
+        renderFrame(frameToRender);
       }
 
       animationFrame = window.requestAnimationFrame(tick);
     };
 
+    renderFrame(0);
     animationFrame = window.requestAnimationFrame(tick);
 
     return () => {
+      disposed = true;
+      if (warmTimeout) {
+        window.clearTimeout(warmTimeout);
+      }
+      if (idleHandle !== null && idleWindow.cancelIdleCallback) {
+        idleWindow.cancelIdleCallback(idleHandle);
+      }
       window.cancelAnimationFrame(animationFrame);
     };
   }, []);
 
   return (
-    <div
-      ref={spriteRef}
-      aria-label="Camisa Brasil Jordan II 2026/27 em movimento"
-      role="img"
+    <img
+      ref={imgRef}
+      src={frames[0]}
+      alt="Camisa Brasil Jordan II 2026/27 em movimento"
       className={className}
-      style={{
-        aspectRatio: "280 / 498",
-        backgroundImage: `url(${sheets[0].src})`,
-        backgroundRepeat: "no-repeat",
-        backgroundSize: `${columns * 100}% ${rows * 100}%`,
-        backgroundPosition: "0% 0%",
-      }}
+      draggable={false}
+      loading="eager"
+      fetchPriority="high"
     />
   );
 }
