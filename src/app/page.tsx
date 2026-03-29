@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import HeroScrollVideo from "./components/HeroScrollVideo";
 
 const PromoGame = dynamic(() => import("./components/PromoGame"), {
   ssr: false,
@@ -70,9 +71,9 @@ export default function Home() {
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-4">
             <div className="liquid-panel p-5 sm:p-8 sm:pr-5 lg:pr-6">
               <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
-                <h1 className="font-hero w-full max-w-none text-[1.76rem] tracking-[-0.045em] text-white sm:text-[4.25rem] lg:max-w-[11ch] lg:text-[5.7rem]">
+                <h1 className="font-hero w-full max-w-none text-[1.92rem] text-white sm:text-[4.25rem] lg:max-w-[11ch] lg:text-[5.7rem]">
                   Promocao Mines
-                  <span className="mt-1 block whitespace-nowrap text-[0.82em] text-white/[0.62] sm:mt-2 sm:text-[1em]">
+                  <span className="mt-1 block text-[0.84em] text-white/[0.62] sm:mt-2 sm:text-[1em]">
                     de cupons Nike
                   </span>
                 </h1>
@@ -93,23 +94,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative flex min-h-[20rem] items-center justify-center sm:min-h-[28rem] lg:-ml-4 lg:min-h-[34rem] lg:justify-end">
-              <video
-                aria-hidden="true"
-                autoPlay
-                disablePictureInPicture
-                loop
-                muted
-                playsInline
-                poster="/assets/hero-jersey-poster.webp"
-                preload="metadata"
-                tabIndex={-1}
-                className="hero-media pointer-events-none relative z-10 h-[19rem] w-full max-w-[11.5rem] select-none object-contain sm:h-[28rem] sm:max-w-[14rem] lg:h-[34rem] lg:max-w-[16rem]"
-              >
-                <source src="/assets/hero-jersey-loop.webm" type="video/webm" />
-                <source src="/assets/hero-jersey-loop.mp4" type="video/mp4" />
-              </video>
-            </div>
+            <HeroScrollVideo className="lg:-mr-2" />
           </div>
 
           <div className="grid grid-cols-3 gap-2 px-1 md:hidden">

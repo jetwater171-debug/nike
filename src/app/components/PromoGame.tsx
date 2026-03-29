@@ -2,24 +2,12 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  AlertTriangle,
-  Ticket,
-  Copy,
-  Check,
-  RotateCcw,
-} from "lucide-react";
+import { Truck, Ticket, Copy, Check, RotateCcw } from "lucide-react";
 
-type CellState = "hidden" | "empty" | "bomb" | "coupon";
-type ModalState = "progress" | "bomb" | "success" | null;
+type CellState = "hidden" | "empty" | "shipping" | "coupon";
+type ModalState = "progress" | "success" | null;
 
-const TOTAL_CELLS = 16;
 const COUPON_CODE = "JORDAN15";
-const BOARD_TEMPLATE: CellState[] = [
-  ...Array(4).fill("bomb"),
-  ...Array(5).fill("empty"),
-  ...Array(7).fill("coupon"),
-];
 
 function NikeSwoosh({ className }: { className?: string }) {
   return (
@@ -38,24 +26,12 @@ function NikeSwoosh({ className }: { className?: string }) {
 }
 
 function createHiddenGrid() {
-  return Array(TOTAL_CELLS).fill("hidden") as CellState[];
-}
-
-function createBoard() {
-  const board = [...BOARD_TEMPLATE];
-
-  for (let index = board.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [board[index], board[swapIndex]] = [board[swapIndex], board[index]];
-  }
-
-  return board;
+  return Array(16).fill("hidden") as CellState[];
 }
 
 export default function PromoGame() {
-  const [board, setBoard] = useState<CellState[]>(createBoard);
   const [grid, setGrid] = useState<CellState[]>(createHiddenGrid);
-  const [rewardHits, setRewardHits] = useState(0);
+  const [clicks, setClicks] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -80,55 +56,61 @@ export default function PromoGame() {
     setActiveModal(null);
   };
 
-  const isInteractionLocked =
-    !gameStarted || gameOver || activeModal !== null || isResolvingTurn;
-
   const startGame = () => {
     clearProgressModalTimeout();
-    setBoard(createBoard());
     setGrid(createHiddenGrid());
-    setRewardHits(0);
-    setCopied(false);
+    setClicks(0);
+    setGameStarted(true);
     setGameOver(false);
+    setCopied(false);
     setActiveModal(null);
     setIsResolvingTurn(false);
-    setGameStarted(true);
   };
 
   const handleCellClick = (index: number) => {
-    if (grid[index] !== "hidden" || isInteractionLocked) return;
+    if (
+      grid[index] !== "hidden" ||
+      !gameStarted ||
+      gameOver ||
+      activeModal !== null ||
+      isResolvingTurn
+    ) {
+      return;
+    }
 
-    const outcome = board[index];
+    const newClicks = clicks + 1;
+    let prize: CellState = "empty";
+
+    if (newClicks === 1) {
+      prize = "empty";
+    } else if (newClicks === 2) {
+      prize = "shipping";
+    } else if (newClicks === 3) {
+      prize = "empty";
+    } else if (newClicks === 4) {
+      prize = "coupon";
+    }
+
     const nextGrid = [...grid];
-    nextGrid[index] = outcome;
+    nextGrid[index] = prize;
     setGrid(nextGrid);
+    setClicks(newClicks);
 
-    if (outcome === "bomb") {
-      setGameOver(true);
-      setActiveModal("bomb");
+    if (prize === "shipping") {
+      setIsResolvingTurn(true);
+      clearProgressModalTimeout();
+      progressModalTimeoutRef.current = setTimeout(() => {
+        setIsResolvingTurn(false);
+        setActiveModal("progress");
+        progressModalTimeoutRef.current = null;
+      }, 650);
       return;
     }
 
-    if (outcome === "empty") {
-      return;
-    }
-
-    const nextRewardHits = rewardHits + 1;
-    setRewardHits(nextRewardHits);
-
-    if (nextRewardHits >= 2) {
+    if (prize === "coupon") {
       setGameOver(true);
       setActiveModal("success");
-      return;
     }
-
-    setIsResolvingTurn(true);
-    clearProgressModalTimeout();
-    progressModalTimeoutRef.current = setTimeout(() => {
-      setIsResolvingTurn(false);
-      setActiveModal("progress");
-      progressModalTimeoutRef.current = null;
-    }, 650);
   };
 
   const copyCoupon = () => {
@@ -137,6 +119,13 @@ export default function PromoGame() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const canInteract = (cell: CellState) =>
+    gameStarted &&
+    cell === "hidden" &&
+    !gameOver &&
+    activeModal === null &&
+    !isResolvingTurn;
+
   return (
     <section
       id="promo"
@@ -144,14 +133,15 @@ export default function PromoGame() {
     >
       <div className="relative z-10 mx-auto max-w-lg">
         <div className="mb-10 text-center">
-          <h2 className="mb-4 bg-gradient-to-r from-white to-white/60 bg-clip-text font-display text-[2.25rem] text-transparent sm:text-5xl">
+          <h2 className="font-hero mb-4 text-[2rem] text-white sm:text-[3.6rem]">
             Promocao Mines Nike
           </h2>
           <p className="text-[0.98rem] font-light leading-relaxed text-white/70">
             Essa e uma promocao da Nike para testar a sua sorte e concorrer a
-            descontassos na nova camisa da Selecao Brasileira. No tabuleiro 4x4
-            existem 4 bombas, 5 casas sem premiacao e varios cupons
-            escondidos. Para levar vantagem, voce precisa acertar 2 premios.
+            descontassos na nova camisa da Selecao Brasileira. Ao longo da
+            rodada, algumas tentativas nao liberam nada e outras escondem
+            premios da campanha. Para sair com vantagem, voce precisa acertar 2
+            premios.
           </p>
         </div>
 
@@ -160,18 +150,18 @@ export default function PromoGame() {
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
-              <div className="absolute inset-0 rounded-[inherit] bg-black/82 backdrop-blur-md" />
+              <div className="absolute inset-0 rounded-[inherit] bg-black/92 backdrop-blur-lg" />
               <div className="promo-pop relative z-10 flex max-w-sm flex-col items-center text-center">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
                 </p>
-                <h3 className="mt-4 font-display text-[2rem] leading-none text-white sm:text-[2.3rem]">
+                <h3 className="font-hero mt-4 text-[1.7rem] text-white sm:text-[2.3rem]">
                   Assuma o risco
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-white/[0.66]">
                   Toque no botao para liberar o tabuleiro e comecar a sua
-                  tentativa. Aqui voce vai encarar bombas, casas vazias e
-                  cupons espalhados pela rodada.
+                  tentativa. A rodada mistura casas vazias e premios escondidos
+                  na campanha.
                 </p>
 
                 <button
@@ -186,88 +176,84 @@ export default function PromoGame() {
           )}
 
           <div className="relative z-10 mx-auto grid w-full max-w-[280px] grid-cols-4 gap-3 sm:max-w-[340px] sm:gap-4">
-            {grid.map((cell, index) => {
-              const canInteract = gameStarted && cell === "hidden" && !isInteractionLocked;
-
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => handleCellClick(index)}
-                  disabled={!canInteract}
-                  className={`relative aspect-square w-full rounded-2xl perspective-1000 sm:rounded-[1.25rem] ${
-                    canInteract
-                      ? "transition-transform duration-200 hover:scale-[1.035] active:scale-[0.97]"
-                      : ""
-                  }`}
-                  style={{ transformStyle: "preserve-3d" }}
+            {grid.map((cell, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleCellClick(index)}
+                disabled={!canInteract(cell)}
+                className={`relative aspect-square w-full rounded-2xl perspective-1000 sm:rounded-[1.25rem] ${
+                  canInteract(cell)
+                    ? "transition-transform duration-200 hover:scale-[1.035] active:scale-[0.97]"
+                    : ""
+                }`}
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <div
+                  className="promo-cell-inner absolute inset-0 h-full w-full"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform:
+                      cell === "hidden" ? "rotateY(0deg)" : "rotateY(180deg)",
+                  }}
                 >
-                  <div
-                    className="promo-cell-inner absolute inset-0 h-full w-full"
-                    style={{
-                      transformStyle: "preserve-3d",
-                      transform:
-                        cell === "hidden" ? "rotateY(0deg)" : "rotateY(180deg)",
-                    }}
-                  >
-                    <div className="backface-hidden absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-br from-white/[0.08] to-white/[0.02] shadow-inner sm:rounded-[1.25rem]">
-                      <div className="absolute inset-x-2 top-2 h-8 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.12),transparent_72%)] blur-lg" />
-                      <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.24] to-transparent" />
-                    </div>
-
-                    <div
-                      className={`backface-hidden absolute inset-0 flex h-full w-full items-center justify-center rounded-2xl border shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] sm:rounded-[1.25rem] ${
-                        cell === "empty"
-                          ? "overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.09),rgba(255,255,255,0.025)_48%,rgba(255,255,255,0.02)_100%)] text-white/20"
-                          : cell === "bomb"
-                          ? "border-red-500/30 bg-red-500/10 text-red-300"
-                          : cell === "coupon"
-                          ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
-                          : ""
-                      }`}
-                      style={{ transform: "rotateY(180deg)" }}
-                    >
-                      {cell === "empty" && (
-                        <div className="promo-enter relative flex h-full w-full flex-col items-center justify-center overflow-hidden px-2 text-center">
-                          <div
-                            aria-hidden="true"
-                            className="promo-empty-glow absolute inset-x-2 top-2 h-10 rounded-full bg-[radial-gradient(circle,rgba(143,228,211,0.18),transparent_72%)] blur-xl"
-                          />
-                          <div
-                            aria-hidden="true"
-                            className="promo-empty-sheen absolute inset-y-0 left-[-60%] w-[55%] skew-x-[-24deg] bg-gradient-to-r from-transparent via-white/[0.2] to-transparent blur-[2px]"
-                          />
-                          <div className="promo-empty-float relative flex flex-col items-center">
-                            <NikeSwoosh className="h-3 w-auto text-white/80 drop-shadow-[0_0_16px_rgba(255,255,255,0.16)] sm:h-4" />
-                            <span className="promo-empty-label mt-1.5 text-[0.42rem] uppercase tracking-[0.2em] text-white/[0.58] sm:text-[0.5rem]">
-                              Sem premiacao
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {cell === "bomb" && (
-                        <div className="promo-enter flex flex-col items-center justify-center">
-                          <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8" />
-                          <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-red-200/80 sm:text-[0.5rem]">
-                            Bomba
-                          </span>
-                        </div>
-                      )}
-
-                      {cell === "coupon" && (
-                        <div className="promo-enter flex flex-col items-center justify-center">
-                          <Ticket className="h-7 w-7 sm:h-9 sm:w-9" />
-                          <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-emerald-200/80 sm:text-[0.5rem]">
-                            Cupom
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                  <div className="backface-hidden absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-br from-white/[0.08] to-white/[0.02] shadow-inner sm:rounded-[1.25rem]">
+                    <div className="absolute inset-x-2 top-2 h-8 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.12),transparent_72%)] blur-lg" />
+                    <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.24] to-transparent" />
                   </div>
-                </button>
-              );
-            })}
+
+                  <div
+                    className={`backface-hidden absolute inset-0 flex h-full w-full items-center justify-center rounded-2xl border shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] sm:rounded-[1.25rem] ${
+                      cell === "empty"
+                        ? "overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.09),rgba(255,255,255,0.025)_48%,rgba(255,255,255,0.02)_100%)] text-white/20"
+                        : cell === "shipping"
+                        ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                        : cell === "coupon"
+                        ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                        : ""
+                    }`}
+                    style={{ transform: "rotateY(180deg)" }}
+                  >
+                    {cell === "empty" && (
+                      <div className="promo-enter relative flex h-full w-full flex-col items-center justify-center overflow-hidden px-2 text-center">
+                        <div
+                          aria-hidden="true"
+                          className="promo-empty-glow absolute inset-x-2 top-2 h-10 rounded-full bg-[radial-gradient(circle,rgba(143,228,211,0.18),transparent_72%)] blur-xl"
+                        />
+                        <div
+                          aria-hidden="true"
+                          className="promo-empty-sheen absolute inset-y-0 left-[-60%] w-[55%] skew-x-[-24deg] bg-gradient-to-r from-transparent via-white/[0.2] to-transparent blur-[2px]"
+                        />
+                        <div className="promo-empty-float relative flex flex-col items-center">
+                          <NikeSwoosh className="h-3 w-auto text-white/80 drop-shadow-[0_0_16px_rgba(255,255,255,0.16)] sm:h-4" />
+                          <span className="promo-empty-label mt-1.5 text-[0.42rem] uppercase tracking-[0.2em] text-white/[0.58] sm:text-[0.5rem]">
+                            Sem premiacao
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {cell === "shipping" && (
+                      <div className="promo-enter flex flex-col items-center justify-center">
+                        <Truck className="h-6 w-6 sm:h-8 sm:w-8" />
+                        <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-blue-200/80 sm:text-[0.5rem]">
+                          Frete
+                        </span>
+                      </div>
+                    )}
+
+                    {cell === "coupon" && (
+                      <div className="promo-enter flex flex-col items-center justify-center">
+                        <Ticket className="h-7 w-7 sm:h-9 sm:w-9" />
+                        <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-emerald-200/80 sm:text-[0.5rem]">
+                          Cupom
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
 
           <style
@@ -341,27 +327,32 @@ export default function PromoGame() {
           <div className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 sm:p-7">
             <div
               aria-hidden="true"
-              className="promo-empty-glow absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(16,185,129,0.22),transparent_70%)] blur-3xl"
+              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(96,165,250,0.28),transparent_70%)] blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-0 left-[-35%] w-1/2 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/[0.14] to-transparent"
             />
 
             <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.16)]">
-                <Ticket className="h-7 w-7 text-emerald-300" />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10 shadow-[0_0_30px_rgba(96,165,250,0.16)]">
+                <Truck className="h-7 w-7 text-blue-300" />
               </div>
 
-              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
-                Primeiro premio
+              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-blue-200/70">
+                Cupom liberado
               </p>
-              <h3 className="mt-3 font-display text-[2rem] leading-none text-white sm:text-[2.2rem]">
-                Acerto confirmado
+              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
+                Frete gratis
               </h3>
               <p className="mt-4 text-sm leading-7 text-white/[0.68]">
-                Boa. Voce ja encontrou o primeiro premio da rodada. Agora falta
-                so mais um acerto para liberar a sua vantagem na campanha.
+                Voce ganhou o cupom de frete gratis. Falta acertar mais um
+                premio para seguir com esse beneficio ja reservado no seu
+                carrinho.
               </p>
 
               <div className="mt-6 flex items-center justify-center gap-2 text-[0.68rem] uppercase tracking-[0.2em] text-white/[0.42]">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-300" />
                 1 de 2 premios
               </div>
 
@@ -372,45 +363,6 @@ export default function PromoGame() {
                 className="mt-6 inline-flex min-h-12 w-full touch-manipulation items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Continuar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeModal === "bomb" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="promo-fade absolute inset-0 bg-black/72 backdrop-blur-md" />
-
-          <div className="promo-pop liquid-panel relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 sm:p-7">
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(239,68,68,0.22),transparent_70%)] blur-3xl"
-            />
-
-            <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-red-400/30 bg-red-500/10 shadow-[0_0_30px_rgba(239,68,68,0.14)]">
-                <AlertTriangle className="h-7 w-7 text-red-300" />
-              </div>
-
-              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-red-200/70">
-                Rodada encerrada
-              </p>
-              <h3 className="mt-3 font-display text-[2rem] leading-none text-white sm:text-[2.2rem]">
-                Voce caiu na bomba
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
-                Essa casa encerrou a sua tentativa. Respira, inicia outra rodada
-                e tenta achar os 2 cupons antes de topar com uma bomba.
-              </p>
-
-              <button
-                type="button"
-                onClick={startGame}
-                className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Tentar de novo
               </button>
             </div>
           </div>
@@ -435,12 +387,13 @@ export default function PromoGame() {
               <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
                 Desconto liberado
               </p>
-              <h3 className="mt-3 font-display text-[2rem] leading-none text-white sm:text-[2.2rem]">
+              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
                 Cupom confirmado
               </h3>
               <p className="mt-4 text-sm leading-7 text-white/[0.68]">
-                Voce acertou 2 premios e liberou o desconto da campanha para
-                finalizar a nova camisa da Selecao com mais vantagem.
+                Voce chegou ao segundo premio da rodada e liberou o desconto da
+                campanha para finalizar a nova camisa da Selecao com mais
+                vantagem.
               </p>
 
               <div className="relative mx-auto mt-6 max-w-[19rem] overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-2">
