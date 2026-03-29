@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import PromoGame from "./components/PromoGame";
 
 const productUrl =
   "https://www.nike.com.br/camisa-brasil-jordan-ii-2026-27-jogador-masculina-097619.html";
@@ -16,9 +17,9 @@ const heroStats = [
     detail: "A Nike recomenda um tamanho acima para mais conforto.",
   },
   {
-    label: "Codigo",
-    value: "IU1074-417",
-    detail: "Edicao Match masculina para futebol.",
+    label: "Promocao",
+    value: "Cupons ativos",
+    detail: "A home tambem abre acesso a frete gratis e desconto na oferta.",
   },
 ];
 
@@ -26,9 +27,9 @@ const mobileSignals = ["Aero-FIT", "Player issue", "P ao GGG"];
 
 const storyCards = [
   {
-    eyebrow: "Nike Aero-FIT",
-    title: "Ventilacao de elite",
-    text: "Leveza, elasticidade e fluxo de ar direto na pele para segurar o ritmo quando o jogo sobe.",
+    eyebrow: "Promocao Nike",
+    title: "Cupons dentro da campanha",
+    text: "A pagina combina apresentacao premium da camisa com uma dinamica promocional pensada para liberar beneficios durante a navegacao.",
   },
   {
     eyebrow: "Colecao Match",
@@ -54,16 +55,16 @@ const productSpecs = [
 
 const buildNotes = [
   {
-    title: "Bastidores do design",
-    text: "A leitura visual parte de um uniforme que parece bonito e perigoso ao mesmo tempo, com grafismo pensado para intimidar antes do primeiro toque.",
+    title: "Campanha com foco em conversao",
+    text: "A narrativa da landing foi ajustada para vender a camisa como produto principal e, ao mesmo tempo, posicionar a promocao de cupons como reforco da oferta.",
   },
   {
     title: "Corpo fresco sob pressao",
     text: "A pagina da Nike apresenta a Aero-FIT como a base de resfriamento da peça, feita para circular o ar e manter a sensacao seca em temperatura alta.",
   },
   {
-    title: "Tamanhos e personalizacao",
-    text: "A grade vai de P a GGG e a camisa aparece no site com opcao de personalizacao, reforcando o carater de produto principal da colecao.",
+    title: "Beneficios sem poluir o hero",
+    text: "Os cupons entram como camada de incentivo logo abaixo da apresentacao principal, preservando o visual premium e mantendo a leitura comercial da pagina.",
   },
 ];
 
@@ -128,22 +129,22 @@ export default function Home() {
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.58] sm:gap-3 sm:px-4 sm:text-[0.68rem] sm:tracking-[0.32em]">
                   <span className="h-2 w-2 rounded-full bg-[#8fe4d3]" />
-                  Brasil Jordan II
+                  Promocao Nike Brasil
                 </div>
 
                 <p className="mt-4 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.68rem] sm:tracking-[0.3em]">
-                  Edicao jogador
+                  Camisa + cupons da campanha
                 </p>
 
                 <h1 className="mt-3 font-display text-[2.2rem] leading-[0.86] text-white sm:text-[4.3rem] lg:text-[5.6rem]">
                   Brasil.
-                  <span className="block text-white/[0.62]">Edicao jogador.</span>
+                  <span className="block text-white/[0.62]">Promocao premium.</span>
                 </h1>
 
                 <p className="mt-3 max-w-[15rem] text-[0.84rem] leading-5 text-white/[0.68] sm:mt-5 sm:max-w-md sm:text-base sm:leading-7">
-                  A camisa Match com Aero-FIT abre a home mostrando a peca em
-                  movimento, com leitura limpa de frente e costas em fundo
-                  preto.
+                  A campanha da Nike apresenta a camisa do Brasil em movimento
+                  e conduz o usuario para uma dinamica promocional com cupons,
+                  frete gratis e oferta ativa na mesma jornada.
                 </p>
 
                 <div className="mt-4 sm:mt-6">
@@ -168,10 +169,10 @@ export default function Home() {
                     Abrir na Nike
                   </Link>
                   <Link
-                    href="#story"
+                    href="#promo"
                     className="hidden min-h-12 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-7 text-sm font-semibold uppercase tracking-[0.18em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:inline-flex"
                   >
-                    Explorar a camisa
+                    Ver a promocao
                   </Link>
                 </div>
               </div>
@@ -245,13 +246,13 @@ export default function Home() {
               Manifesto
             </p>
             <h2 className="mt-4 max-w-3xl font-display text-[2.25rem] leading-tight text-white sm:mt-5 sm:text-5xl">
-              Um uniforme desenhado para parecer frio, tecnico e ameacador.
+              Uma promocao premium montada para vender a camisa e valorizar a oferta.
             </h2>
             <p className="mt-5 max-w-2xl text-[0.98rem] leading-7 text-white/70 sm:mt-6 sm:text-base sm:leading-8">
-              A narrativa oficial da Nike coloca a camisa nessa linha entre
-              beleza e perigo. O resultado e uma peca com energia mais sombria,
-              pensada para carregar a presenca da Selecao e o corte autentico de
-              uma camisa de jogo.
+              A narrativa oficial da Nike continua no centro, mas agora a pagina
+              tambem enquadra a camisa como nucleo de uma campanha promocional
+              de cupons. O visual segue limpo, escuro e mais editorial para nao
+              parecer uma oferta comum.
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -312,15 +313,15 @@ export default function Home() {
 
             <div className="relative z-10 flex h-full flex-col justify-end">
               <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/[0.48]">
-                Lado sombrio do futebol
+                Campanha promocional
               </p>
               <h2 className="mt-4 max-w-lg font-display text-[2.25rem] leading-tight text-white sm:mt-5 sm:text-5xl">
-                Presenca de colecao, leitura de jogo.
+                A camisa no centro. Os cupons como impulso.
               </h2>
               <p className="mt-4 max-w-lg text-[0.98rem] leading-7 text-white/[0.72] sm:mt-5 sm:text-base sm:leading-8">
-                A direcao criativa da camisa trabalha uma sensacao de ataque,
-                com contraste escuro e detalhes vivos que reforcam o impacto da
-                peca mesmo fora do campo.
+                O produto continua sendo o protagonista. A promocao entra como
+                camada de interesse para aumentar a permanencia, aquecer o lead
+                e empurrar o clique para a oferta oficial.
               </p>
             </div>
           </article>
@@ -343,9 +344,11 @@ export default function Home() {
         </div>
       </section>
 
+      <PromoGame />
+
       <footer className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 text-sm text-white/40 sm:px-8 lg:px-12">
         <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p>Camisa Brasil Jordan II 2026/27 Jogador Masculina.</p>
+          <p>Camisa Brasil Jordan II 2026/27 Jogador Masculina em campanha promocional.</p>
           <Link
             href={productUrl}
             target="_blank"
