@@ -128,58 +128,60 @@ export default function DadosLeadForm() {
               />
             </div>
 
-            <div>
-              <FieldLabel>Numero de telefone</FieldLabel>
+            <div className="relative">
+              <FieldLabel>Email</FieldLabel>
               <input
-                type="tel"
-                value={phone}
-                onChange={(event) => setPhone(formatPhone(event.target.value))}
-                placeholder="(11) 99999-9999"
-                inputMode="tel"
-                autoComplete="tel"
+                type="email"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value.replace(/\s+/g, ""))
+                }
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => {
+                  window.setTimeout(() => setEmailFocused(false), 120);
+                }}
+                placeholder="voce@email.com"
+                inputMode="email"
+                autoComplete="email"
+                spellCheck={false}
                 className="w-full rounded-[1.4rem] border border-white/[0.1] bg-white/[0.04] px-4 py-4 text-[0.98rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
               />
+
+              {emailFocused && emailSuggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-[calc(100%+0.7rem)] z-20 overflow-hidden rounded-[1.4rem] border border-white/[0.1] bg-[#0a0a0a]/95 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+                  {emailSuggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setEmail(suggestion);
+                        setEmailFocused(false);
+                      }}
+                      className="flex w-full items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 text-left text-sm text-white/[0.82] transition-colors duration-200 last:border-b-0 hover:bg-white/[0.05]"
+                    >
+                      <span className="truncate">{suggestion}</span>
+                      <span className="text-[0.64rem] uppercase tracking-[0.18em] text-white/[0.34]">
+                        usar
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="relative">
-            <FieldLabel>Email</FieldLabel>
+          <div>
+            <FieldLabel>Numero de telefone</FieldLabel>
             <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value.replace(/\s+/g, ""))}
-              onFocus={() => setEmailFocused(true)}
-              onBlur={() => {
-                window.setTimeout(() => setEmailFocused(false), 120);
-              }}
-              placeholder="voce@email.com"
-              inputMode="email"
-              autoComplete="email"
-              spellCheck={false}
+              type="tel"
+              value={phone}
+              onChange={(event) => setPhone(formatPhone(event.target.value))}
+              placeholder="(11) 99999-9999"
+              inputMode="tel"
+              autoComplete="tel"
               className="w-full rounded-[1.4rem] border border-white/[0.1] bg-white/[0.04] px-4 py-4 text-[0.98rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
             />
-
-            {emailFocused && emailSuggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-[calc(100%+0.7rem)] z-20 overflow-hidden rounded-[1.4rem] border border-white/[0.1] bg-[#0a0a0a]/95 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-                {emailSuggestions.map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => {
-                      setEmail(suggestion);
-                      setEmailFocused(false);
-                    }}
-                    className="flex w-full items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 text-left text-sm text-white/[0.82] transition-colors duration-200 last:border-b-0 hover:bg-white/[0.05]"
-                  >
-                    <span className="truncate">{suggestion}</span>
-                    <span className="text-[0.64rem] uppercase tracking-[0.18em] text-white/[0.34]">
-                      usar
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
