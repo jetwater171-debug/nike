@@ -170,25 +170,6 @@ export default function Home() {
         </div>
       </footer>
 
-      <div className="mobile-buy-bar md:hidden">
-        <div>
-          <p className="text-[0.6rem] uppercase tracking-[0.24em] text-white/[0.46]">
-            Camisa Brasil Jordan II 26/27
-          </p>
-          <p className="mt-1 text-lg font-semibold text-white">R$ 749,99</p>
-          <p className="text-[0.72rem] text-white/[0.58]">
-            7x de R$ 107,14 sem juros
-          </p>
-        </div>
-        <Link
-          href={productUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-white px-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-black"
-        >
-          Ver na Nike
-        </Link>
-      </div>
     </main>
   );
 }
