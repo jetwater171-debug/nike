@@ -57,6 +57,29 @@ function resolveGateway(rawBody = {}, payments = {}) {
     return 'ativushub';
 }
 
+function listEnabledGateways(payments = {}) {
+    const enabled = [];
+    if (payments?.gateways?.ativushub?.enabled !== false) enabled.push('ativushub');
+    if (payments?.gateways?.ghostspay?.enabled === true) enabled.push('ghostspay');
+    if (payments?.gateways?.sunize?.enabled === true) enabled.push('sunize');
+    if (payments?.gateways?.paradise?.enabled === true) enabled.push('paradise');
+    return enabled;
+}
+
+function buildGatewayAttemptOrder(rawBody = {}, payments = {}) {
+    const primary = resolveGateway(rawBody, payments);
+    const enabled = listEnabledGateways(payments);
+    const ordered = [primary, ...enabled];
+    return ordered.filter((gatewayId, index) => ordered.indexOf(gatewayId) === index);
+}
+
+function hasAtivushubCredentials(config = {}) {
+    return Boolean(
+        String(config.apiKeyBase64 || '').trim() ||
+        String(config.apiKey || '').trim()
+    );
+}
+
 function hasGhostspayCredentials(config = {}) {
     return Boolean(
         String(config.basicAuthBase64 || '').trim() ||
@@ -73,6 +96,16 @@ function hasSunizeCredentials(config = {}) {
 
 function hasParadiseCredentials(config = {}) {
     return Boolean(String(config.apiKey || '').trim());
+}
+
+function createGatewayAttemptError(gateway, statusCode, publicMessage, detail = null, code = '') {
+    const error = new Error(`${gateway || 'gateway'}:${code || 'create_failed'}`);
+    error.gateway = String(gateway || '').trim();
+    error.statusCode = Number(statusCode || 502) || 502;
+    error.publicMessage = String(publicMessage || 'Falha ao gerar o PIX.').trim() || 'Falha ao gerar o PIX.';
+    error.detail = detail;
+    error.errorCode = String(code || '').trim();
+    return error;
 }
 
 function toE164Phone(value = '') {
@@ -760,8 +793,10 @@ export default async function handler(req, res) {
         }
 
         const payments = await getPaymentsConfig();
-        const gateway = resolveGateway(rawBody, payments);
-        const gatewayConfig = payments?.gateways?.[gateway] || {};
+        const primaryGateway = resolveGateway(rawBody, payments);
+        const gatewayCandidates = buildGatewayAttemptOrder(rawBody, payments);
+        let gateway = primaryGateway;
+        let gatewayConfig = payments?.gateways?.[gateway] || {};
 
         const { amount, personal = {}, address = {}, extra = {}, shipping = {}, reward: rawReward = null, bump, upsell = null } = rawBody;
         const value = toBrlAmount(amount);
@@ -822,7 +857,7 @@ export default async function handler(req, res) {
         const orderId = sessionId || `order_${Date.now()}`;
         const pixCreateInflightKey = buildPixCreateInflightKey({
             sessionId,
-            gateway,
+            gateway: primaryGateway,
             shippingId: String(normalizedShipping?.id || '').trim(),
             rewardId: String(normalizedReward?.id || '').trim(),
             totalAmount,
@@ -863,16 +898,30 @@ export default async function handler(req, res) {
             });
         }
 
-        const reusable = await findReusablePixBySession({
-            sessionId,
-            gateway,
-            gatewayConfig,
-            totalAmount,
-            shippingId: String(normalizedShipping?.id || '').trim(),
-            rewardId: String(normalizedReward?.id || '').trim(),
-            upsellEnabled
-        });
+        let reusable = null;
+        let reusableGateway = gateway;
+        let reusableGatewayConfig = gatewayConfig;
+        for (const gatewayCandidate of gatewayCandidates) {
+            const gatewayCandidateConfig = payments?.gateways?.[gatewayCandidate] || {};
+            const reusableCandidate = await findReusablePixBySession({
+                sessionId,
+                gateway: gatewayCandidate,
+                gatewayConfig: gatewayCandidateConfig,
+                totalAmount,
+                shippingId: String(normalizedShipping?.id || '').trim(),
+                rewardId: String(normalizedReward?.id || '').trim(),
+                upsellEnabled
+            }).catch(() => null);
+            if (reusableCandidate) {
+                reusable = reusableCandidate;
+                reusableGateway = gatewayCandidate;
+                reusableGatewayConfig = gatewayCandidateConfig;
+                break;
+            }
+        }
         if (reusable) {
+            gateway = reusableGateway;
+            gatewayConfig = reusableGatewayConfig;
             // Reused PIX should still ensure UTMify has the pending order snapshot.
             const reusableTxid = String(reusable.idTransaction || '').trim();
             const reusableUtmJob = {
@@ -920,11 +969,30 @@ export default async function handler(req, res) {
             let paymentQrUrl = '';
             let statusRaw = '';
             let externalId = '';
+            const gatewayAttemptErrors = [];
 
+            for (const gatewayCandidate of gatewayCandidates) {
+                gateway = gatewayCandidate;
+                gatewayConfig = payments?.gateways?.[gateway] || {};
+                response = null;
+                data = null;
+                txid = '';
+                paymentCode = '';
+                paymentCodeBase64 = '';
+                paymentQrUrl = '';
+                statusRaw = '';
+                externalId = '';
+
+                try {
             if (gateway === 'ghostspay') {
                 if (!hasGhostspayCredentials(gatewayConfig)) {
-                    createInflightError = new Error('ghostspay_missing_credentials');
-                    return res.status(500).json({ error: 'Credenciais GhostsPay nao configuradas.' });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        500,
+                        'Credenciais GhostsPay nao configuradas.',
+                        null,
+                        'ghostspay_missing_credentials'
+                    );
                 }
 
             const ghostItems = items.map((item) => ({
@@ -977,11 +1045,13 @@ export default async function handler(req, res) {
 
                 ({ response, data } = await requestGhostspayCreate(gatewayConfig, ghostPayload));
                 if (!response?.ok) {
-                    createInflightError = new Error('ghostspay_create_failed');
-                    return res.status(response?.status || 502).json({
-                        error: 'Falha ao gerar o PIX.',
-                        detail: data
-                    });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        response?.status || 502,
+                        'Falha ao gerar o PIX.',
+                        data,
+                        'ghostspay_create_failed'
+                    );
                 }
 
                 const ghostData = resolveGhostspayResponse(data);
@@ -1015,8 +1085,13 @@ export default async function handler(req, res) {
                 }
             } else if (gateway === 'sunize') {
                 if (!hasSunizeCredentials(gatewayConfig)) {
-                    createInflightError = new Error('sunize_missing_credentials');
-                    return res.status(500).json({ error: 'Credenciais Sunize nao configuradas.' });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        500,
+                        'Credenciais Sunize nao configuradas.',
+                        null,
+                        'sunize_missing_credentials'
+                    );
                 }
 
                 const documentType = resolveDocumentType(cpf);
@@ -1107,18 +1182,22 @@ export default async function handler(req, res) {
                     }
                 }
                 if (!response?.ok) {
-                    createInflightError = new Error('sunize_create_failed');
-                    return res.status(response?.status || 502).json({
-                        error: 'Falha ao gerar o PIX.',
-                        detail: data
-                    });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        response?.status || 502,
+                        'Falha ao gerar o PIX.',
+                        data,
+                        'sunize_create_failed'
+                    );
                 }
                 if (data?.hasError === true) {
-                    createInflightError = new Error('sunize_create_error');
-                    return res.status(502).json({
-                        error: 'Falha ao gerar o PIX.',
-                        detail: data
-                    });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        502,
+                        'Falha ao gerar o PIX.',
+                        data,
+                        'sunize_create_error'
+                    );
                 }
 
                 const sunizeData = resolveSunizeResponse(data);
@@ -1130,8 +1209,13 @@ export default async function handler(req, res) {
                 externalId = sunizeData.externalId || externalId;
             } else if (gateway === 'paradise') {
                 if (!hasParadiseCredentials(gatewayConfig)) {
-                    createInflightError = new Error('paradise_missing_credentials');
-                    return res.status(500).json({ error: 'Credenciais Paradise nao configuradas.' });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        500,
+                        'Credenciais Paradise nao configuradas.',
+                        null,
+                        'paradise_missing_credentials'
+                    );
                 }
 
                 const paradiseReferenceBase = upsellEnabled ? `${orderId}-upsell` : orderId;
@@ -1178,11 +1262,13 @@ export default async function handler(req, res) {
 
                 ({ response, data } = await requestParadiseCreate(gatewayConfig, paradisePayload));
                 if (!response?.ok || data?.success === false || String(data?.status || '').toLowerCase() === 'error') {
-                    createInflightError = new Error('paradise_create_failed');
-                    return res.status(response?.status || 502).json({
-                        error: 'Falha ao gerar o PIX.',
-                        detail: data
-                    });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        response?.status || 502,
+                        'Falha ao gerar o PIX.',
+                        data,
+                        'paradise_create_failed'
+                    );
                 }
 
                 const paradiseData = resolveParadiseResponse(data);
@@ -1215,13 +1301,15 @@ export default async function handler(req, res) {
                     }
                 }
             } else {
-                const ativusAuthConfigured = Boolean(
-                    String(gatewayConfig.apiKeyBase64 || '').trim() ||
-                    String(gatewayConfig.apiKey || '').trim()
-                );
+                const ativusAuthConfigured = hasAtivushubCredentials(gatewayConfig);
                 if (!ativusAuthConfigured) {
-                    createInflightError = new Error('ativushub_missing_credentials');
-                    return res.status(500).json({ error: 'API Key da AtivusHUB nao configurada.' });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        500,
+                        'API Key da AtivusHUB nao configurada.',
+                        null,
+                        'ativushub_missing_credentials'
+                    );
                 }
 
             const sellerId = await getAtivushubSellerId(gatewayConfig);
@@ -1279,11 +1367,13 @@ export default async function handler(req, res) {
 
                 ({ response, data } = await requestAtivushubCreate(gatewayConfig, ativusPayload));
                 if (!response?.ok) {
-                    createInflightError = new Error('ativushub_create_failed');
-                    return res.status(response?.status || 502).json({
-                        error: 'Falha ao gerar o PIX.',
-                        detail: data
-                    });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        response?.status || 502,
+                        'Falha ao gerar o PIX.',
+                        data,
+                        'ativushub_create_failed'
+                    );
                 }
 
                 txid = String(data?.idTransaction || data?.idtransaction || '').trim();
@@ -1293,19 +1383,54 @@ export default async function handler(req, res) {
 
                 const ativusError = pickAtivusCreateError(data);
                 if (!txid && (ativusError.code || ativusError.message)) {
-                    createInflightError = new Error(`ativushub_create_business_error:${ativusError.code || 'unknown'}`);
-                    return res.status(mapAtivusErrorCodeToHttpStatus(ativusError.code, response?.status || 502)).json({
-                        error: ativusError.message || 'Falha ao gerar o PIX.',
-                        detail: data
-                    });
+                    throw createGatewayAttemptError(
+                        gateway,
+                        mapAtivusErrorCodeToHttpStatus(ativusError.code, response?.status || 502),
+                        ativusError.message || 'Falha ao gerar o PIX.',
+                        data,
+                        `ativushub_create_business_error:${ativusError.code || 'unknown'}`
+                    );
                 }
+            }
+                } catch (gatewayError) {
+                    createInflightError = gatewayError;
+                    gatewayAttemptErrors.push({
+                        gateway,
+                        statusCode: Number(gatewayError?.statusCode || 502) || 502,
+                        error: String(gatewayError?.publicMessage || gatewayError?.message || 'Falha ao gerar o PIX.'),
+                        detail: gatewayError?.detail || null,
+                        code: String(gatewayError?.errorCode || '').trim()
+                    });
+                    continue;
+                }
+
+                if (txid) {
+                    break;
+                }
+
+                const missingTxidError = createGatewayAttemptError(
+                    gateway,
+                    502,
+                    'Gateway retornou PIX sem identificador de transacao.',
+                    data,
+                    'missing_txid'
+                );
+                createInflightError = missingTxidError;
+                gatewayAttemptErrors.push({
+                    gateway,
+                    statusCode: 502,
+                    error: missingTxidError.publicMessage,
+                    detail: data,
+                    code: 'missing_txid'
+                });
             }
 
             if (!txid) {
-                createInflightError = new Error('missing_txid');
-                return res.status(502).json({
-                    error: 'Gateway retornou PIX sem identificador de transacao.',
-                    detail: data
+                const lastGatewayError = gatewayAttemptErrors[gatewayAttemptErrors.length - 1] || {};
+                return res.status(Number(lastGatewayError.statusCode || 502) || 502).json({
+                    error: String(lastGatewayError.error || 'Falha ao gerar o PIX.'),
+                    detail: lastGatewayError.detail || null,
+                    attemptedGateways: gatewayAttemptErrors
                 });
             }
 
