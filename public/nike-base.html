@@ -831,13 +831,19 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = hiddenSelectors.join(',') + '{display:none !important;}' +
-      '.codex-shipping-result{margin-top:12px;padding:14px 16px;border:1px solid #d5d5d5;border-radius:18px;background:#f7f7f7;color:#111;display:grid;gap:4px;font-family:var(--font-helvetica,Helvetica Neue,Helvetica,sans-serif);}' +
+      '.codex-shipping-result{margin-top:12px;display:grid;gap:10px;font-family:var(--font-helvetica,Helvetica Neue,Helvetica,sans-serif);}' +
       '.codex-shipping-result[hidden]{display:none !important;}' +
+      '.codex-shipping-result[data-status="loading"],.codex-shipping-result[data-status="error"]{padding:14px 16px;border:1px solid #d5d5d5;border-radius:18px;background:#f7f7f7;color:#111;}' +
       '.codex-shipping-result[data-status="loading"]{background:#f4f4f4;color:#555;}' +
-      '.codex-shipping-result[data-status="success"]{background:#f3fbf6;border-color:#b9e2c4;color:#14532d;}' +
       '.codex-shipping-result[data-status="error"]{background:#fff5f5;border-color:#f0c4c4;color:#991b1b;}' +
       '.codex-shipping-result__title{font-size:14px;font-weight:600;line-height:1.35;}' +
       '.codex-shipping-result__detail{font-size:13px;line-height:1.45;}' +
+      '.codex-shipping-result__address{font-size:14px;font-weight:500;line-height:1.45;color:#111;padding:0 2px;}' +
+      '.codex-shipping-card{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:16px 14px;border-radius:14px;background:#f5f5f5;color:#111;align-items:center;}' +
+      '.codex-shipping-card__service{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:500;line-height:1.2;}' +
+      '.codex-shipping-card__eta{grid-column:1 / 2;font-size:14px;line-height:1.35;color:#5b5b5b;padding-left:32px;}' +
+      '.codex-shipping-card__price{font-size:17px;font-weight:600;line-height:1.2;color:#0f6a3f;text-align:right;white-space:nowrap;}' +
+      '.codex-shipping-card__icon{width:22px;height:22px;color:#111;flex:none;}' +
       '[data-testid="zipcode-button"][aria-busy="true"]{opacity:.72;pointer-events:none;}';
     document.head.appendChild(style);
   }
@@ -910,6 +916,30 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       '<div class="codex-shipping-result__detail">' + detail + '</div>';
   }
 
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderShippingSuccess(result, address) {
+    result.hidden = false;
+    result.dataset.status = 'success';
+    result.innerHTML =
+      '<div class="codex-shipping-result__address">' + escapeHtml(address) + '</div>' +
+      '<div class="codex-shipping-card">' +
+        '<div class="codex-shipping-card__service">' +
+          '<svg class="codex-shipping-card__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6.75A.75.75 0 0 1 3.75 6h9.5a.75.75 0 0 1 .75.75V14h1.24a1.5 1.5 0 0 1 1.2.6l1.84 2.45h1.47A.75.75 0 0 1 20.5 17.8v1.45a.75.75 0 0 1-.75.75H19a2.5 2.5 0 0 1-5 0H9a2.5 2.5 0 0 1-5 0h-.25A.75.75 0 0 1 3 19.25V6.75Zm1.5.75v11h.09a2.5 2.5 0 0 1 4.82 0h4.18a2.5 2.5 0 0 1 4.82 0h.59v-.7h-1.08a.75.75 0 0 1-.6-.3l-2.07-2.75H13.5a.75.75 0 0 1-.75-.75V7.5h-8.25Zm2 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor"/></svg>' +
+          '<span>Normal</span>' +
+        '</div>' +
+        '<div class="codex-shipping-card__price">Frete gr&aacute;tis</div>' +
+        '<div class="codex-shipping-card__eta">3 dias &uacute;teis</div>' +
+      '</div>';
+  }
+
   function bindCepLookup() {
     const form = document.querySelector('[data-testid="product-shipping-content"]');
     const input = document.querySelector('[data-testid="product-shipping-input"]');
@@ -956,10 +986,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
         const line1 = [data.logradouro, data.complemento].filter(Boolean).join(', ');
         const line2 = [data.bairro, data.localidade && (data.localidade + '/' + data.uf)].filter(Boolean).join(' • ');
-        const destination = [line1, line2].filter(Boolean).join(' • ');
-        const detail = (destination ? destination + '. ' : '') + 'Entrega disponivel para esse CEP com frete gratis aplicado na sua oferta.';
+        const destination = [line1, line2].filter(Boolean).join(' • ') || ('CEP ' + formatCep(cep));
 
-        renderShippingResult(result, 'success', 'CEP atendido', detail);
+        renderShippingSuccess(result, destination);
       } catch (error) {
         renderShippingResult(result, 'error', 'Nao foi possivel consultar o CEP', 'Confere o numero digitado e tenta novamente.');
       } finally {
