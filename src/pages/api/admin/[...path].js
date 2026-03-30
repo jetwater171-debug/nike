@@ -112,11 +112,19 @@ const FUNNEL_OVERVIEW_STAGES = [
     },
     {
         key: 'checkout',
+        label: 'Identificacao',
+        shortLabel: 'Ident.',
+        source: 'page',
+        page: 'checkout',
+        description: 'Confirmacao de dados e entrega'
+    },
+    {
+        key: 'pagamento',
         label: 'Pagamento',
         shortLabel: 'Pagamento',
         source: 'page',
-        page: 'checkout',
-        description: 'Etapa antes da geracao do PIX'
+        page: 'pagamento',
+        description: 'Escolha final do Pix e revisao do pedido'
     },
     {
         key: 'pix',

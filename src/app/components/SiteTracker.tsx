@@ -9,7 +9,9 @@ const PAGE_BY_PATH: Record<string, string> = {
   "/dados": "dados",
   "/carrinho": "carrinho",
   "/checkout": "checkout",
-  "/pagamento": "checkout",
+  "/checkout/pagamento": "pagamento",
+  "/pagamento": "pagamento",
+  "/pix": "pix",
 };
 
 export default function SiteTracker() {

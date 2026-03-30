@@ -649,7 +649,7 @@ export default function CheckoutPageClient() {
       },
     });
 
-    router.push("/pagamento");
+    router.push("/checkout/pagamento");
   };
 
   return (
