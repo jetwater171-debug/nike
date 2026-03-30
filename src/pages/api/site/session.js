@@ -1,6 +1,6 @@
 const { ensureAllowedRequest, issueSessionCookie } = require('../../../server/request-guard');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
 
     if (req.method !== 'GET' && req.method !== 'POST') {
@@ -14,4 +14,4 @@ module.exports = async (req, res) => {
 
     issueSessionCookie(req, res);
     res.status(200).json({ ok: true });
-};
+}

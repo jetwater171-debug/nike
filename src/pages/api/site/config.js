@@ -1,7 +1,7 @@
 const { ensureAllowedRequest } = require('../../../server/request-guard');
 const { getSettings } = require('../../../server/settings-store');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
 
     if (req.method !== 'GET') {
@@ -30,5 +30,5 @@ module.exports = async (req, res) => {
         },
         features
     });
-};
+}
 

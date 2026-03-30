@@ -1,7 +1,7 @@
 const { upsertLead } = require('../../../server/lead-store');
 const { ensureAllowedRequest } = require('../../../server/request-guard');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
 
     if (req.method !== 'POST') {
@@ -65,5 +65,5 @@ module.exports = async (req, res) => {
     } catch (error) {
         res.status(500).json({ ok: false, error: error.message || String(error) });
     }
-};
+}
 

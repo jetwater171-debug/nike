@@ -2,7 +2,7 @@ const { ensureAllowedRequest } = require('../../../server/request-guard');
 const { upsertPageview } = require('../../../server/pageviews-store');
 const { enqueueDispatch, processDispatchQueue } = require('../../../server/dispatch-queue');
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
 
     if (req.method !== 'POST') {
@@ -34,5 +34,5 @@ module.exports = async (req, res) => {
     // UTMfy events are sent only on key conversion moments (checkout/pix).
 
     res.status(200).json({ ok: true });
-};
+}
 

@@ -372,7 +372,7 @@ function resolveStatusGateway(body = {}, leadData = null, payments = {}) {
     return 'ativushub';
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
 
     if (req.method !== 'POST') {
@@ -867,5 +867,5 @@ module.exports = async (req, res) => {
         paymentCodeBase64,
         paymentQrUrl
     });
-};
+}
 

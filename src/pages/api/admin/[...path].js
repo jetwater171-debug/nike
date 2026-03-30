@@ -2598,7 +2598,7 @@ async function processQueue(req, res) {
     res.status(200).json({ ok: true, ...result });
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
 
     if (!ensureAllowedRequest(req, res, { requireSession: false })) {
@@ -2657,5 +2657,5 @@ module.exports = async (req, res) => {
             res.status(404).json({ error: 'Not found' });
             return;
     }
-};
+}
 

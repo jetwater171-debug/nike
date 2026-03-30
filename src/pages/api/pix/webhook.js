@@ -567,7 +567,7 @@ function resolveWebhookGateway(query = {}, body = {}, payments = {}) {
     return 'ativushub';
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     if (req.method !== 'POST') {
         res.status(405).json({ status: 'method_not_allowed' });
         return;
@@ -979,5 +979,5 @@ module.exports = async (req, res) => {
     }
 
     res.status(200).json({ status: 'success', gateway });
-};
+}
 
