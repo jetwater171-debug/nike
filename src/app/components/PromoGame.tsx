@@ -4,6 +4,8 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Truck, Ticket } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { trackLeadEvent, trackPageView } from "@/lib/site-tracking";
 
 type CellState = "hidden" | "empty" | "shipping" | "coupon";
 type ModalState = "progress" | "success" | null;
@@ -40,6 +42,7 @@ function PromoModalPortal({ children }: { children: React.ReactNode }) {
 }
 
 export default function PromoGame({ claimHref }: PromoGameProps) {
+  const router = useRouter();
   const [grid, setGrid] = useState<CellState[]>(createHiddenGrid);
   const [clicks, setClicks] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
@@ -101,6 +104,12 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     setGameOver(false);
     setActiveModal(null);
     setIsResolvingTurn(false);
+    void trackPageView("promo");
+    void trackLeadEvent({
+      event: "promo_started",
+      stage: "promo",
+      page: "promo",
+    });
   };
 
   const handleCellClick = (index: number) => {
@@ -138,6 +147,15 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
       progressModalTimeoutRef.current = setTimeout(() => {
         setIsResolvingTurn(false);
         setActiveModal("progress");
+        void trackLeadEvent({
+          event: "promo_shipping_reward",
+          stage: "promo",
+          page: "promo",
+          reward: {
+            id: "shipping",
+            name: "Frete gratis",
+          },
+        });
         progressModalTimeoutRef.current = null;
       }, 650);
       return;
@@ -146,7 +164,27 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     if (prize === "coupon") {
       setGameOver(true);
       setActiveModal("success");
+      void trackLeadEvent({
+        event: "promo_discount_reward",
+        stage: "promo",
+        page: "promo",
+        amount: 139.19,
+        reward: {
+          id: "coupon",
+          name: "Desconto liberado",
+        },
+      });
     }
+  };
+
+  const handleClaimClick = async () => {
+    await trackLeadEvent({
+      event: "promo_claim_click",
+      stage: "promo",
+      page: "promo",
+      amount: 139.19,
+    });
+    router.push(claimHref);
   };
 
   const canInteract = (cell: CellState) =>
@@ -301,12 +339,13 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                 </div>
               </div>
 
-              <Link
-                href={claimHref}
+              <button
+                type="button"
+                onClick={handleClaimClick}
                 className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-5 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Resgatar camisa agora
-              </Link>
+              </button>
             </div>
           </div>
         </div>

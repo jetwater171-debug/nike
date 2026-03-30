@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Anton, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import SiteTracker from "./components/SiteTracker";
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${cormorantGaramond.variable} ${anton.variable}`}>
+        <SiteTracker />
         {children}
       </body>
     </html>

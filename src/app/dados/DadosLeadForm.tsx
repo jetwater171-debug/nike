@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { readLeadDraft, saveLeadDraft, trackLeadEvent } from "@/lib/site-tracking";
 
 const EMAIL_DOMAINS = [
   "gmail.com",
@@ -70,16 +71,43 @@ function FieldLabel({ children }: { children: string }) {
 }
 
 export default function DadosLeadForm() {
-  const [fullName, setFullName] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const router = useRouter();
+  const draft = readLeadDraft();
+  const [fullName, setFullName] = useState(draft.name || "");
+  const [cpf, setCpf] = useState(draft.cpf || "");
+  const [email, setEmail] = useState(draft.email || "");
+  const [phone, setPhone] = useState(draft.phone || "");
   const [emailFocused, setEmailFocused] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailSuggestions = useMemo(
     () => buildEmailSuggestions(email),
     [email],
   );
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const personal = {
+      name: fullName.trim(),
+      cpf,
+      email: email.trim(),
+      phone,
+      phoneDigits: phone.replace(/\D/g, ""),
+    };
+
+    saveLeadDraft(personal);
+
+    await trackLeadEvent({
+      event: "lead_submit",
+      stage: "dados",
+      page: "dados",
+      personal,
+    });
+
+    router.push("/nike");
+  };
 
   return (
     <div className="liquid-panel relative overflow-visible rounded-[1.85rem] p-5 sm:p-6">
@@ -196,12 +224,14 @@ export default function DadosLeadForm() {
           </p>
         </div>
 
-        <Link
-          href="/nike"
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
           className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-5 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
         >
-          Resgatar
-        </Link>
+          {isSubmitting ? "Resgatando..." : "Resgatar"}
+        </button>
       </div>
     </div>
   );
