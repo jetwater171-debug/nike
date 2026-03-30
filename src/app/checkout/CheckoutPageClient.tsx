@@ -362,7 +362,7 @@ function AddressModal({
                 type="text"
                 value={number}
                 onChange={(event) => setNumber(event.target.value)}
-                placeholder="402"
+                placeholder=""
                 className="h-14 w-full rounded-2xl border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
               />
             </div>
@@ -373,7 +373,7 @@ function AddressModal({
                 type="text"
                 value={complement}
                 onChange={(event) => setComplement(event.target.value)}
-                placeholder="Apto 31"
+                placeholder=""
                 className="h-14 w-full rounded-2xl border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
               />
             </div>
@@ -764,7 +764,7 @@ export default function CheckoutPageClient() {
                     type="text"
                     value={number}
                     onChange={(event) => setNumber(event.target.value)}
-                    placeholder="402"
+                    placeholder=""
                     className="h-14 w-full rounded-2xl border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
                   />
                 </div>
@@ -776,7 +776,7 @@ export default function CheckoutPageClient() {
                     type="text"
                     value={complement}
                     onChange={(event) => setComplement(event.target.value)}
-                    placeholder="Apto 31"
+                    placeholder=""
                     className="h-14 w-full rounded-2xl border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
                   />
                 </div>
