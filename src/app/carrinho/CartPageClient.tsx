@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import NikeCheckoutHeader from "../components/NikeCheckoutHeader";
+import NikeCheckoutSteps from "../components/NikeCheckoutSteps";
 import { trackLeadEvent } from "@/lib/site-tracking";
 
 type CartShipping = {
@@ -41,6 +42,7 @@ type CartState = {
 };
 
 const CART_STORAGE_KEY = "nikepromo.cartState";
+const ORIGINAL_PRICE_VALUE = 749.99;
 const OFFER_PRICE_VALUE = 139.19;
 const NORMAL_SHIPPING = {
   id: "normal",
@@ -127,54 +129,6 @@ function persistCartState(next: CartState) {
   } catch {
     // Ignore storage limits.
   }
-}
-
-function CheckoutSteps() {
-  const steps = [
-    { number: 1, label: "Carrinho", active: true },
-    { number: 2, label: "Identificacao", active: false },
-    { number: 3, label: "Pagamento", active: false },
-  ];
-
-  return (
-    <div className="overflow-hidden rounded-2xl border border-black/10 bg-[#ececec]">
-      <div className="flex">
-        {steps.map((step, index) => (
-          <div
-            key={step.label}
-            className={`relative flex min-h-12 flex-1 items-center justify-center gap-2 px-3 text-[0.84rem] font-semibold ${
-              step.active ? "bg-white text-black" : "bg-[#e7e7e7] text-[#757575]"
-            }`}
-          >
-            {index > 0 && (
-              <span
-                aria-hidden="true"
-                className="absolute left-0 top-0 h-full w-5 bg-white"
-                style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-              />
-            )}
-            {index < steps.length - 1 && (
-              <span
-                aria-hidden="true"
-                className={`absolute -right-5 top-0 h-full w-5 ${
-                  step.active ? "bg-white" : "bg-[#e7e7e7]"
-                }`}
-                style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-              />
-            )}
-            <span
-              className={`relative z-10 inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.68rem] ${
-                step.active ? "bg-black text-white" : "bg-[#8d8d8d] text-white"
-              }`}
-            >
-              {step.number}
-            </span>
-            <span className="relative z-10 whitespace-nowrap">{step.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 export default function CartPageClient() {
@@ -269,6 +223,16 @@ export default function CartPageClient() {
   const total = useMemo(
     () => Number((subtotal + shippingOption.price).toFixed(2)),
     [shippingOption.price, subtotal],
+  );
+  const campaignSavingsValue = useMemo(
+    () =>
+      Number(
+        Math.max(
+          ORIGINAL_PRICE_VALUE * cart.quantity - cart.priceValue * cart.quantity,
+          0,
+        ).toFixed(2),
+      ),
+    [cart.priceValue, cart.quantity],
   );
 
   const totalLabel = useMemo(() => formatCurrency(total), [total]);
@@ -481,12 +445,12 @@ export default function CartPageClient() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/nike" />
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-20">
-        <CheckoutSteps />
+      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-[76px]">
+        <NikeCheckoutSteps activeStep={1} />
 
         {noticeVisible && (
-          <div className="mt-5 flex items-start justify-between gap-4 rounded-2xl bg-[#f7f7f7] px-4 py-4">
-            <p className="text-[1rem] font-medium leading-6 text-black">
+          <div className="mt-5 flex items-start justify-between gap-4 rounded-[14px] border border-black/8 bg-[#f7f7f7] px-4 py-4">
+            <p className="text-[0.98rem] font-medium leading-6 text-black">
               Os produtos no carrinho nao estao reservados. Finalize seu pedido
               antes que o estoque acabe.
             </p>
@@ -504,10 +468,10 @@ export default function CartPageClient() {
         <section className="mt-6 border-b border-black/10 pb-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="max-w-[18rem] text-[1.75rem] font-semibold leading-[1.16]">
+              <h1 className="max-w-[18rem] text-[1.12rem] font-medium leading-7">
                 {cart.title}
               </h1>
-              <div className="mt-4 space-y-1.5 text-[1rem] leading-7 text-black">
+              <div className="mt-4 space-y-0.5 text-[1rem] leading-7 text-black">
                 <p>Quantidade: {cart.quantity}</p>
                 <p>Cor: {cart.color}</p>
                 <p>Tamanho: {cart.size}</p>
@@ -516,8 +480,8 @@ export default function CartPageClient() {
                   <p>Personalizacao: selecionada</p>
                 )}
               </div>
-              <p className="mt-4 text-[1rem] font-medium text-[#cc1818]">
-                Oferta da campanha reservada neste carrinho.
+              <p className="mt-4 text-[0.98rem] font-medium text-[#cc1818]">
+                Cupom aplicado na campanha. Sua oferta continua reservada.
               </p>
             </div>
 
@@ -525,13 +489,13 @@ export default function CartPageClient() {
               type="button"
               aria-label="Remover produto"
               onClick={handleRemoveProduct}
-              className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-full border border-black/10 text-black transition-colors hover:bg-black/[0.04]"
+              className="inline-flex h-10 w-10 flex-none items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
             >
               <Trash2 className="h-5 w-5" strokeWidth={1.9} />
             </button>
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-[1.6rem] bg-[#f1f1f1]">
+          <div className="mt-6 overflow-hidden bg-[#f1f1f1]">
             <Image
               src={cart.image}
               alt={cart.title}
@@ -545,7 +509,7 @@ export default function CartPageClient() {
 
         <section className="border-b border-black/10 py-6">
           <div className="flex items-center justify-between gap-4">
-            <div className="inline-flex overflow-hidden rounded-xl border border-black/12">
+            <div className="inline-flex overflow-hidden border border-black/12">
               <button
                 type="button"
                 onClick={() => handleQuantityChange("decrease")}
@@ -566,23 +530,26 @@ export default function CartPageClient() {
             </div>
 
             <div className="text-right">
-              <p className="text-[1.9rem] font-semibold leading-none">
+              <p className="text-[2rem] font-semibold leading-none">
                 {totalLabel}
               </p>
-              <p className="mt-2 text-[1rem] font-medium text-[#1b6d38]">
+              <p className="mt-2 text-[0.98rem] font-medium text-[#1b6d38]">
                 {shippingState.status === "success" &&
                 shippingOption.id === EXPRESS_SHIPPING.id
                   ? "Nike Expresso selecionado"
                   : "Frete gratis da campanha"}
+              </p>
+              <p className="mt-1 text-[0.92rem] text-[#1b6d38]">
+                Voce economiza {formatCurrency(campaignSavingsValue)}
               </p>
             </div>
           </div>
         </section>
 
         <section className="border-b border-black/10 py-7">
-          <h2 className="text-[2rem] font-semibold leading-none">Prazo de entrega</h2>
+          <h2 className="text-[1.95rem] font-semibold leading-none">Prazo de entrega</h2>
 
-          <div className="mt-5 flex overflow-hidden rounded-2xl border border-black/16">
+          <div className="mt-5 flex overflow-hidden rounded-[14px] border border-black/16">
             <input
               type="text"
               value={cep}
@@ -611,7 +578,7 @@ export default function CartPageClient() {
               <p className="text-[1rem] font-medium leading-6 text-black">
                 {shippingState.address}
               </p>
-              <div className="rounded-2xl bg-[#eef8f1] px-4 py-3 text-[0.95rem] leading-6 text-[#0f6a3f]">
+              <div className="rounded-[14px] bg-[#eef8f1] px-4 py-3 text-[0.95rem] leading-6 text-[#0f6a3f]">
                 Seu cupom de frete gratis ja esta aplicado nesta entrega.
               </div>
 
@@ -623,9 +590,9 @@ export default function CartPageClient() {
                     key={option.id}
                     type="button"
                     onClick={() => void handleSelectShipping(option)}
-                    className={`grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 rounded-2xl border px-4 py-4 text-left transition-colors ${
+                    className={`grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 rounded-[14px] border px-4 py-4 text-left transition-colors ${
                       selected
-                        ? "border-black bg-[#f5f5f5]"
+                        ? "border-black/18 bg-[#f3f3f3]"
                         : "border-black/10 bg-white hover:bg-[#f8f8f8]"
                     }`}
                   >
@@ -658,18 +625,18 @@ export default function CartPageClient() {
           )}
 
           {shippingState.status === "error" && (
-            <p className="mt-4 rounded-2xl border border-[#f0d1d1] bg-[#fff6f6] px-4 py-3 text-[0.95rem] text-[#9a1d1d]">
+            <p className="mt-4 rounded-[14px] border border-[#f0d1d1] bg-[#fff6f6] px-4 py-3 text-[0.95rem] text-[#9a1d1d]">
               {shippingState.message}
             </p>
           )}
         </section>
 
         <section className="border-b border-black/10 py-7">
-          <h2 className="text-[2rem] font-semibold leading-none">
+          <h2 className="text-[1.95rem] font-semibold leading-none">
             Cupom de desconto
           </h2>
 
-          <div className="mt-5 flex overflow-hidden rounded-2xl border border-black/16">
+          <div className="mt-5 flex overflow-hidden rounded-[14px] border border-black/16">
             <input
               type="text"
               value={coupon}
@@ -697,14 +664,14 @@ export default function CartPageClient() {
           </div>
 
           {couponMessage && (
-            <p className="mt-4 rounded-2xl bg-[#f5f5f5] px-4 py-3 text-[0.95rem] leading-6 text-black/78">
+            <p className="mt-4 rounded-[14px] bg-[#f5f5f5] px-4 py-3 text-[0.95rem] leading-6 text-black/78">
               {couponMessage}
             </p>
           )}
         </section>
 
         <section className="py-7">
-          <h2 className="text-[2rem] font-semibold leading-none">Resumo</h2>
+          <h2 className="text-[1.95rem] font-semibold leading-none">Resumo</h2>
 
           <div className="mt-6 space-y-3 text-[1.1rem]">
             <div className="flex items-center justify-between gap-4">
@@ -737,7 +704,7 @@ export default function CartPageClient() {
             </div>
           </div>
 
-          <div className="mt-7 rounded-[1.4rem] bg-[#f6f6f6] px-4 py-3 text-[0.94rem] leading-6 text-black/68">
+          <div className="mt-7 rounded-[14px] bg-[#f6f6f6] px-4 py-3 text-[0.94rem] leading-6 text-black/68">
             <div className="flex items-start gap-3">
               <Info className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2.1} />
               <p>
@@ -750,7 +717,7 @@ export default function CartPageClient() {
           <button
             type="button"
             onClick={handleContinue}
-            className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1.02rem] font-medium text-white transition-transform duration-300 hover:scale-[1.01]"
+            className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1.02rem] font-medium text-white"
           >
             Continuar
           </button>

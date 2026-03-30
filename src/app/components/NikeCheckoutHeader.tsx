@@ -24,12 +24,12 @@ export default function NikeCheckoutHeader({
   backHref,
 }: NikeCheckoutHeaderProps) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/[0.96] backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-[38rem] items-center justify-between px-4">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white">
+      <div className="mx-auto flex h-[60px] w-full max-w-[38rem] items-center justify-between px-4">
         <Link
           href={backHref}
           aria-label="Voltar"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-black transition-colors duration-200 hover:bg-black/[0.04]"
+          className="inline-flex h-10 w-10 items-center justify-center text-black transition-colors duration-200 hover:bg-black/[0.04]"
         >
           <svg
             aria-hidden="true"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import NikeCheckoutHeader from "../../components/NikeCheckoutHeader";
+import NikeCheckoutSteps from "../../components/NikeCheckoutSteps";
 import { readLeadDraft, trackLeadEvent } from "@/lib/site-tracking";
 
 type LeadDraft = {
@@ -118,54 +119,6 @@ function buildShippingFromCart(input?: CheckoutShipping): CheckoutShipping {
     ...base,
     ...parsed,
   };
-}
-
-function CheckoutSteps() {
-  const steps = [
-    { number: 1, label: "Carrinho", active: false },
-    { number: 2, label: "Identificacao", active: false },
-    { number: 3, label: "Pagamento", active: true },
-  ];
-
-  return (
-    <div className="overflow-hidden rounded-2xl border border-black/10 bg-[#ececec]">
-      <div className="flex">
-        {steps.map((step, index) => (
-          <div
-            key={step.label}
-            className={`relative flex min-h-12 flex-1 items-center justify-center gap-2 px-3 text-[0.84rem] font-semibold ${
-              step.active ? "bg-white text-black" : "bg-[#e7e7e7] text-[#757575]"
-            }`}
-          >
-            {index > 0 && (
-              <span
-                aria-hidden="true"
-                className="absolute left-0 top-0 h-full w-5 bg-white"
-                style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-              />
-            )}
-            {index < steps.length - 1 && (
-              <span
-                aria-hidden="true"
-                className={`absolute -right-5 top-0 h-full w-5 ${
-                  step.active ? "bg-white" : "bg-[#e7e7e7]"
-                }`}
-                style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-              />
-            )}
-            <span
-              className={`relative z-10 inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.68rem] ${
-                step.active ? "bg-black text-white" : "bg-[#8d8d8d] text-white"
-              }`}
-            >
-              {step.number}
-            </span>
-            <span className="relative z-10 whitespace-nowrap">{step.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 export default function CheckoutPagamentoPage() {
@@ -288,22 +241,22 @@ export default function CheckoutPagamentoPage() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/checkout" />
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-20">
-        <CheckoutSteps />
+      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-[76px]">
+        <NikeCheckoutSteps activeStep={3} />
 
         <section className="border-b border-black/10 py-8">
-          <h1 className="text-[2.35rem] font-semibold leading-none">
+          <h1 className="text-[2.15rem] font-medium leading-none">
             Pagamento
           </h1>
 
-          <div className="mt-7 rounded-[1.8rem] border border-black/10 p-5">
+          <div className="mt-7 rounded-[14px] border border-black/10 p-5">
             <h2 className="text-[1.2rem] font-semibold">
               Selecione um meio de pagamento
             </h2>
 
             <button
               type="button"
-              className="mt-5 flex w-full items-start gap-4 rounded-[1.4rem] border border-black bg-[#f7f7f7] px-4 py-4 text-left"
+              className="mt-5 flex w-full items-start gap-4 rounded-[14px] border border-black bg-[#f7f7f7] px-4 py-4 text-left"
             >
               <span className="mt-1 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full border border-black">
                 <span className="h-3 w-3 rounded-full bg-black" />
@@ -320,7 +273,7 @@ export default function CheckoutPagamentoPage() {
 
         <section className="py-8">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-[2.2rem] font-semibold leading-none">
+            <h2 className="text-[2rem] font-medium leading-none">
               Revise o pedido
             </h2>
           </div>
@@ -337,7 +290,7 @@ export default function CheckoutPagamentoPage() {
             </div>
 
             <div className="mt-5 flex items-start gap-4">
-              <div className="overflow-hidden rounded-[1.1rem] bg-[#f3f3f3]">
+              <div className="overflow-hidden bg-[#f3f3f3]">
                 <Image
                   src={cart.image || DEFAULT_CART.image || ""}
                   alt={cart.title || DEFAULT_CART.title || "Camisa Nike"}
@@ -412,7 +365,7 @@ export default function CheckoutPagamentoPage() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-[1.6rem] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
+            <div className="mt-6 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
               <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
                 Cupom aplicado
               </p>
@@ -425,7 +378,7 @@ export default function CheckoutPagamentoPage() {
           <button
             type="button"
             onClick={() => void handleFinalize()}
-            className="mt-8 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white transition-transform duration-300 hover:scale-[1.01]"
+            className="mt-8 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white"
           >
             Finalizar compra
           </button>

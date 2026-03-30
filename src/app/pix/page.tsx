@@ -709,22 +709,22 @@ export default function PixPage() {
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/[0.98] backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-[38rem] items-center justify-between px-4">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white">
+        <div className="mx-auto flex h-[60px] w-full max-w-[38rem] items-center justify-between px-4">
           <NikeSwoosh className="h-5 w-auto text-black" />
           <Link
             href="/checkout/pagamento"
             aria-label="Fechar"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-black transition-colors duration-200 hover:bg-black/[0.04]"
+            className="inline-flex h-10 w-10 items-center justify-center text-black transition-colors duration-200 hover:bg-black/[0.04]"
           >
             <X className="h-5 w-5" strokeWidth={1.9} />
           </Link>
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-14 pt-20">
+      <div className="mx-auto w-full max-w-[38rem] px-4 pb-14 pt-[76px]">
         <section className="border-b border-black/10 py-7">
-          <h1 className="max-w-[30rem] text-[2.5rem] font-semibold leading-[1.06] tracking-[-0.04em]">
+          <h1 className="max-w-[30rem] text-[2.15rem] font-medium leading-[1.12] tracking-[-0.03em]">
             Pague com Pix para garantir sua compra
           </h1>
 
@@ -749,7 +749,7 @@ export default function PixPage() {
           </div>
 
           {pixStatus === "paid" && (
-            <div className="mt-7 rounded-[1.7rem] border border-[#cde8d7] bg-[#f2fbf5] px-5 py-4 text-[#185233]">
+            <div className="mt-7 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-5 py-4 text-[#185233]">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 flex-none text-[#0f6a3f]" strokeWidth={2.2} />
                 <div>
@@ -765,7 +765,7 @@ export default function PixPage() {
           )}
 
           {(pixStatus === "refused" || pixStatus === "refunded") && (
-            <div className="mt-7 rounded-[1.7rem] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
+            <div className="mt-7 rounded-[14px] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
               <p className="text-[1rem] font-semibold">
                 Esse Pix nao esta mais ativo.
               </p>
@@ -776,13 +776,13 @@ export default function PixPage() {
           )}
 
           {error && (
-            <div className="mt-7 rounded-[1.7rem] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
+            <div className="mt-7 rounded-[14px] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
               <p className="text-[0.95rem] leading-6">{error}</p>
             </div>
           )}
 
-          <div className="mt-8 rounded-[1.35rem] border border-black/10 bg-[#f7f7f7] p-4">
-            <div className="min-h-[5.5rem] break-all rounded-[1rem] border border-black/8 bg-white px-4 py-3 text-[0.92rem] leading-6 text-black/62">
+          <div className="mt-8 rounded-[12px] border border-black/10 bg-[#f3f3f3] p-3">
+            <div className="min-h-[5.5rem] break-all rounded-[10px] border border-black/8 bg-white px-4 py-3 text-[0.92rem] leading-6 text-black/62">
               {isLoading && !pix?.paymentCode ? (
                 <div className="flex min-h-[4rem] items-center gap-3 text-black/46">
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -798,7 +798,7 @@ export default function PixPage() {
             type="button"
             onClick={() => void handleCopyPix()}
             disabled={!pix?.paymentCode}
-            className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-black px-6 text-[1.03rem] font-medium text-white transition-transform duration-300 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-black px-6 text-[1.03rem] font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
             {copyState === "copied" ? "Codigo Pix copiado" : "Copiar codigo Pix"}
             <Copy className="h-4 w-4" strokeWidth={2} />
@@ -807,7 +807,7 @@ export default function PixPage() {
           <button
             type="button"
             onClick={handleShowQr}
-            className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full border border-black px-6 text-[1.03rem] font-medium text-black transition-transform duration-300 hover:scale-[1.01]"
+            className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full border border-black px-6 text-[1.03rem] font-medium text-black"
           >
             Pagar com QR Code
             <QrCode className="h-4 w-4" strokeWidth={2} />
@@ -840,18 +840,18 @@ export default function PixPage() {
               setActiveAccordion((current) => (current === "qr" ? "copy" : "qr"))
             }
           >
-            <div className="rounded-[2rem] border border-black/10 bg-[#f8f8f8] p-5">
+            <div className="rounded-[14px] border border-black/10 bg-[#f8f8f8] p-5">
               {qrSource ? (
-                <div className="mx-auto flex w-full max-w-[17rem] items-center justify-center rounded-[1.6rem] bg-white p-4 shadow-[0_18px_44px_rgba(0,0,0,0.08)]">
+                <div className="mx-auto flex w-full max-w-[17rem] items-center justify-center rounded-[12px] bg-white p-4 shadow-[0_18px_44px_rgba(0,0,0,0.08)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={qrSource}
                     alt="QR Code Pix"
-                    className="h-auto w-full rounded-[1rem]"
+                    className="h-auto w-full"
                   />
                 </div>
               ) : (
-                <div className="flex min-h-[18rem] items-center justify-center rounded-[1.6rem] border border-dashed border-black/14 bg-white px-5 text-center text-[0.98rem] leading-7 text-black/48">
+                <div className="flex min-h-[18rem] items-center justify-center rounded-[12px] border border-dashed border-black/14 bg-white px-5 text-center text-[0.98rem] leading-7 text-black/48">
                   O QR Code ainda esta sendo preparado. Enquanto isso, voce ja pode pagar com o codigo copia e cola acima.
                 </div>
               )}
@@ -864,7 +864,7 @@ export default function PixPage() {
         </section>
 
         <section className="border-b border-black/10 py-8">
-          <h2 className="text-[2rem] font-semibold leading-none">Resumo da compra</h2>
+          <h2 className="text-[1.95rem] font-medium leading-none">Resumo da compra</h2>
 
           <div className="mt-7 space-y-4 text-[1.02rem]">
             <div className="flex items-center justify-between gap-4">
@@ -887,7 +887,7 @@ export default function PixPage() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-[1.6rem] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
+          <div className="mt-6 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
             <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
               Cupom aplicado
             </p>
@@ -898,7 +898,7 @@ export default function PixPage() {
         </section>
 
         <section className="border-b border-black/10 py-8">
-          <h2 className="text-[2rem] font-semibold leading-none">Endereco de entrega</h2>
+          <h2 className="text-[1.95rem] font-medium leading-none">Endereco de entrega</h2>
 
           <div className="mt-6 text-[1rem] leading-8 text-black/72">
             <p className="font-medium text-black">{lead.name || "-"}</p>
@@ -917,10 +917,10 @@ export default function PixPage() {
         </section>
 
         <section className="py-8">
-          <h2 className="text-[2rem] font-semibold leading-none">Itens do carrinho</h2>
+          <h2 className="text-[1.95rem] font-medium leading-none">Itens do carrinho</h2>
 
           <div className="mt-6 flex items-start gap-4">
-            <div className="overflow-hidden rounded-[1.2rem] bg-[#f3f3f3]">
+            <div className="overflow-hidden bg-[#f3f3f3]">
               <Image
                 src={cart.image || DEFAULT_CART.image || ""}
                 alt={cart.title || DEFAULT_CART.title || "Camisa Nike"}

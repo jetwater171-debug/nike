@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Search, Truck, X } from "lucide-react";
+import { Search, Truck, X } from "lucide-react";
 import NikeCheckoutHeader from "../components/NikeCheckoutHeader";
+import NikeCheckoutSteps from "../components/NikeCheckoutSteps";
 import { readLeadDraft, trackLeadEvent } from "@/lib/site-tracking";
 
 type LeadDraft = {
@@ -37,10 +38,6 @@ type CartState = {
   quantity?: number;
   priceValue?: number;
   shipping?: CheckoutShipping;
-};
-
-type CheckoutStepsProps = {
-  activeStep: 1 | 2 | 3;
 };
 
 const CART_STORAGE_KEY = "nikepromo.cartState";
@@ -141,58 +138,6 @@ function buildShippingFromCart(input?: CheckoutShipping): CheckoutShipping {
         ? base.couponApplied
         : shippingId === NORMAL_SHIPPING.id,
   };
-}
-
-function CheckoutSteps({ activeStep }: CheckoutStepsProps) {
-  const steps = [
-    { number: 1, label: "Carrinho" },
-    { number: 2, label: "Identificacao" },
-    { number: 3, label: "Pagamento" },
-  ] as const;
-
-  return (
-    <div className="overflow-hidden rounded-2xl border border-black/10 bg-[#ececec]">
-      <div className="flex">
-        {steps.map((step, index) => {
-          const isActive = step.number === activeStep;
-
-          return (
-            <div
-              key={step.label}
-              className={`relative flex min-h-12 flex-1 items-center justify-center gap-2 px-3 text-[0.84rem] font-semibold ${
-                isActive ? "bg-white text-black" : "bg-[#e7e7e7] text-[#757575]"
-              }`}
-            >
-              {index > 0 && (
-                <span
-                  aria-hidden="true"
-                  className="absolute left-0 top-0 h-full w-5 bg-white"
-                  style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-                />
-              )}
-              {index < steps.length - 1 && (
-                <span
-                  aria-hidden="true"
-                  className={`absolute -right-5 top-0 h-full w-5 ${
-                    isActive ? "bg-white" : "bg-[#e7e7e7]"
-                  }`}
-                  style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-                />
-              )}
-              <span
-                className={`relative z-10 inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.68rem] ${
-                  isActive ? "bg-black text-white" : "bg-[#8d8d8d] text-white"
-                }`}
-              >
-                {step.number}
-              </span>
-              <span className="relative z-10 whitespace-nowrap">{step.label}</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 }
 
 type AddressModalProps = {
@@ -306,9 +251,9 @@ function AddressModal({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/52 p-0 sm:items-center sm:p-4">
-      <div className="w-full max-w-[38rem] rounded-t-[2rem] bg-white px-5 pb-6 pt-5 text-black sm:rounded-[2rem] sm:px-6">
+      <div className="w-full max-w-[38rem] rounded-t-[2rem] bg-white px-5 pb-6 pt-5 text-black sm:rounded-none sm:px-6">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-[1.9rem] font-semibold">Cadastrar endereco</h2>
+          <h2 className="text-[2rem] font-medium">Cadastrar endereco</h2>
           <button
             type="button"
             onClick={onClose}
@@ -321,7 +266,7 @@ function AddressModal({
         <div className="mt-6 grid gap-4">
           <div>
             <label className="mb-2 block text-[0.95rem] text-black/82">CEP</label>
-            <div className="flex overflow-hidden rounded-2xl border border-black/16">
+            <div className="flex overflow-hidden rounded-[14px] border border-black/16">
               <input
                 type="text"
                 value={cep}
@@ -348,7 +293,7 @@ function AddressModal({
               value={street}
               readOnly
               placeholder="O endereco vai aparecer aqui"
-              className="h-14 w-full rounded-2xl border border-black/12 bg-[#f5f5f5] px-5 text-[1rem] text-black/72 outline-none placeholder:text-black/34"
+              className="h-14 w-full rounded-[14px] border border-black/12 bg-[#f5f5f5] px-5 text-[1rem] text-black/72 outline-none placeholder:text-black/34"
             />
             {addressHint && (
               <p className="mt-2 text-[0.92rem] text-black/56">{addressHint}</p>
@@ -363,7 +308,7 @@ function AddressModal({
                 value={number}
                 onChange={(event) => setNumber(event.target.value)}
                 placeholder=""
-                className="h-14 w-full rounded-2xl border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                className="h-14 w-full rounded-[14px] border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
               />
             </div>
 
@@ -374,14 +319,14 @@ function AddressModal({
                 value={complement}
                 onChange={(event) => setComplement(event.target.value)}
                 placeholder=""
-                className="h-14 w-full rounded-2xl border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                className="h-14 w-full rounded-[14px] border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
               />
             </div>
           </div>
 
           {message && (
             <p
-              className={`rounded-2xl px-4 py-3 text-[0.95rem] leading-6 ${
+              className={`rounded-[14px] px-4 py-3 text-[0.95rem] leading-6 ${
                 lookupState === "error"
                   ? "bg-[#fff4f4] text-[#a11d1d]"
                   : "bg-[#f4f7f7] text-black/66"
@@ -656,39 +601,33 @@ export default function CheckoutPageClient() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/carrinho" />
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-20">
-        <CheckoutSteps activeStep={2} />
+      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-[76px]">
+        <NikeCheckoutSteps activeStep={2} />
 
         <section className="border-b border-black/10 py-8">
-          <h1 className="text-[2.35rem] font-semibold leading-none">
+          <h1 className="text-[2.15rem] font-medium leading-none">
             Identificacao
           </h1>
 
-          <div className="mt-6 rounded-[1.8rem] border border-[#cde8d7] bg-[#f2fbf5] p-5">
-            <div className="flex items-center justify-between gap-3">
-              <span className="inline-flex min-h-8 items-center rounded-full bg-[#daf2e3] px-3 text-[0.82rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
-                Cupom aplicado
-              </span>
-              <span className="text-[0.95rem] font-semibold text-[#0f6a3f]">
-                Economia de {formatCurrency(campaignSavingsValue)}
-              </span>
-            </div>
-
-            <p className="mt-4 text-[1rem] leading-6 text-[#185233]">
-              Voce esta usando o desconto que ganhou na campanha da camisa.
+          <div className="mt-6 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4">
+            <p className="text-[0.88rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
+              Cupom aplicado
             </p>
-
-            <div className="mt-4 flex items-end gap-3">
-              <span className="text-[1.05rem] font-medium text-black/42 line-through">
+            <div className="mt-2 flex items-end gap-3">
+              <span className="text-[1rem] text-black/42 line-through">
                 {formatCurrency(ORIGINAL_PRICE_VALUE)}
               </span>
-              <span className="text-[2rem] font-semibold leading-none text-[#0f6a3f]">
+              <span className="text-[1.6rem] font-semibold leading-none text-[#0f6a3f]">
                 {formatCurrency(productPriceValue)}
               </span>
             </div>
+            <p className="mt-2 text-[0.98rem] leading-6 text-[#185233]">
+              Voce esta economizando {formatCurrency(campaignSavingsValue)} na oferta liberada.
+            </p>
           </div>
 
           <div className="mt-8 space-y-6">
+            <h2 className="text-[1.1rem] font-semibold">Dados</h2>
             <div>
               <p className="text-[0.96rem] text-black/56">Nome</p>
               <p className="mt-1 text-[1.08rem] font-medium text-black">
@@ -720,15 +659,15 @@ export default function CheckoutPageClient() {
         </section>
 
         <section className="border-b border-black/10 py-8">
-          <h2 className="text-[2.2rem] font-semibold leading-none">
+          <h2 className="text-[2rem] font-medium leading-none">
             Endereco de entrega
           </h2>
 
           {addressReady ? (
-            <div className="mt-6 rounded-[1.8rem] border border-black/10 bg-[#fafafa] p-5">
+            <div className="mt-6">
               <div className="flex items-start gap-4">
                 <div className="mt-1 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full border border-black/18">
-                  <MapPin className="h-3.5 w-3.5" strokeWidth={2.1} />
+                  <span className="h-3 w-3 rounded-full bg-black" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[1.08rem] font-semibold">Endereco de Entrega</p>
@@ -765,7 +704,7 @@ export default function CheckoutPageClient() {
                     value={number}
                     onChange={(event) => setNumber(event.target.value)}
                     placeholder=""
-                    className="h-14 w-full rounded-2xl border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                    className="h-14 w-full rounded-[14px] border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
                   />
                 </div>
                 <div>
@@ -777,7 +716,7 @@ export default function CheckoutPageClient() {
                     value={complement}
                     onChange={(event) => setComplement(event.target.value)}
                     placeholder=""
-                    className="h-14 w-full rounded-2xl border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                    className="h-14 w-full rounded-[14px] border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
                   />
                 </div>
               </div>
@@ -802,11 +741,11 @@ export default function CheckoutPageClient() {
         </section>
 
         <section className="py-8">
-          <h2 className="text-[2.2rem] font-semibold leading-none">
+          <h2 className="text-[2rem] font-medium leading-none">
             Escolha o tipo de entrega
           </h2>
 
-          <div className="mt-6 rounded-[1.8rem] border border-black/10 p-4">
+          <div className="mt-6 rounded-[14px] border border-black/10 p-4">
             <p className="px-2 text-[1rem] font-semibold">Entrega 1 de 1</p>
 
             <div className="mt-4 grid gap-3">
@@ -818,9 +757,9 @@ export default function CheckoutPageClient() {
                     key={option.id}
                     type="button"
                     onClick={() => void handleSelectShipping(option)}
-                    className={`flex items-start gap-4 rounded-[1.4rem] border px-4 py-4 text-left transition-colors ${
+                    className={`flex items-start gap-4 rounded-[14px] border px-4 py-4 text-left transition-colors ${
                       isSelected
-                        ? "border-black bg-[#f7f7f7]"
+                        ? "border-black/16 bg-[#f7f7f7]"
                         : "border-black/10 bg-white"
                     }`}
                   >
@@ -857,7 +796,7 @@ export default function CheckoutPageClient() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-[1.6rem] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
+          <div className="mt-5 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
             <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
               Oferta ativa
             </p>
