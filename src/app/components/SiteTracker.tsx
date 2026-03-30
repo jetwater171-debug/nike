@@ -7,6 +7,8 @@ import { initTrackingForPage } from "@/lib/site-tracking";
 const PAGE_BY_PATH: Record<string, string> = {
   "/": "home",
   "/dados": "dados",
+  "/carrinho": "carrinho",
+  "/pagamento": "checkout",
 };
 
 export default function SiteTracker() {

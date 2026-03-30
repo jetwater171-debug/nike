@@ -15,17 +15,18 @@ const STAGE_SCORE = {
     personal: 3,
     nike: 4,
     cep: 4,
-    checkout: 4,
-    processing: 5,
-    success: 6,
-    pix: 7,
-    orderbump: 8,
-    upsell_iof: 9,
-    'upsell-iof': 9,
-    upsell_correios: 10,
-    'upsell-correios': 10,
-    upsell: 11,
-    complete: 12
+    carrinho: 5,
+    checkout: 6,
+    processing: 7,
+    success: 8,
+    pix: 9,
+    orderbump: 10,
+    upsell_iof: 11,
+    'upsell-iof': 11,
+    upsell_correios: 12,
+    'upsell-correios': 12,
+    upsell: 13,
+    complete: 14
 };
 
 function toText(value, maxLen = 255) {

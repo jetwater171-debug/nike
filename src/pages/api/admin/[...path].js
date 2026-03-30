@@ -103,6 +103,22 @@ const FUNNEL_OVERVIEW_STAGES = [
         description: 'Oferta final com produto'
     },
     {
+        key: 'carrinho',
+        label: 'Carrinho',
+        shortLabel: 'Carrinho',
+        source: 'page',
+        page: 'carrinho',
+        description: 'Produto enviado para o carrinho'
+    },
+    {
+        key: 'checkout',
+        label: 'Pagamento',
+        shortLabel: 'Pagamento',
+        source: 'page',
+        page: 'checkout',
+        description: 'Etapa antes da geracao do PIX'
+    },
+    {
         key: 'pix',
         label: 'PIX visualizado',
         shortLabel: 'PIX view',
