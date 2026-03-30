@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'NikeFuturaND-CnXBold';
+  font-weight: 400;
+  font-style: normal;
+  /* font-display: swap; */
+  src: url('https://static.nike.com.br/fonts/Futura/Nike-Futura-ot-300.woff2')
+    format('woff2');
+}

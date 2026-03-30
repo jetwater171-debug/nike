@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002F","\u002Fguia-de-produtos-nike","\u002Fguia-de-produtos-nike\u002F[journalContentSlug]","\u002Fguia-de-produtos-nike\u002Fautores\u002F[journalAuthorSlug]","\u002Fhub","\u002Fhub\u002F[hubContentSlug]","\u002Fsc\u002F[staticPageSlug]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
