@@ -337,9 +337,9 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
-              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.34)] backdrop-blur-[1px]" />
-              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.035)_0%,rgba(3,3,3,0.01)_26%,rgba(3,3,3,0.16)_68%,rgba(3,3,3,0.28)_100%)]" />
-              <div className="promo-pop relative z-10 flex max-w-md flex-col items-center rounded-[1.7rem] border border-white/[0.08] bg-black/[0.48] px-5 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-7 sm:py-7">
+              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.2)] backdrop-blur-[0.5px]" />
+              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(3,3,3,0.005)_24%,rgba(3,3,3,0.08)_66%,rgba(3,3,3,0.18)_100%)]" />
+              <div className="promo-pop relative z-10 flex max-w-md flex-col items-center rounded-[1.7rem] border border-white/[0.08] bg-black/[0.58] px-5 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-7 sm:py-7">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
                 </p>
@@ -364,8 +364,8 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
           )}
 
           <div
-            className={`relative z-10 mx-auto grid w-full max-w-[390px] grid-cols-4 gap-4 transition-[opacity,filter] duration-300 sm:max-w-[472px] sm:gap-5 ${
-              gameStarted ? "opacity-100 blur-0" : "opacity-[0.72] blur-0"
+            className={`relative z-10 mx-auto grid w-full max-w-[406px] grid-cols-4 gap-[1.05rem] transition-[opacity,filter] duration-300 sm:max-w-[496px] sm:gap-[1.3rem] ${
+              gameStarted ? "opacity-100 blur-0" : "opacity-[0.84] blur-0"
             }`}
           >
             {grid.map((cell, index) => (
@@ -389,7 +389,13 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                       cell === "hidden" ? "rotateY(0deg)" : "rotateY(180deg)",
                   }}
                 >
-                  <div className="backface-hidden absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-br from-white/[0.08] to-white/[0.02] shadow-inner sm:rounded-[1.25rem]">
+                  <div
+                    className={`backface-hidden absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border shadow-inner sm:rounded-[1.25rem] ${
+                      gameStarted
+                        ? "border-white/[0.1] bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+                        : "border-white/[0.18] bg-gradient-to-br from-white/[0.16] to-white/[0.05]"
+                    }`}
+                  >
                     <div className="absolute inset-x-2 top-2 h-8 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.12),transparent_72%)] blur-lg" />
                     <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.24] to-transparent" />
                   </div>
