@@ -69,8 +69,12 @@ function listEnabledGateways(payments = {}) {
 function buildGatewayAttemptOrder(rawBody = {}, payments = {}) {
     const primary = resolveGateway(rawBody, payments);
     const enabled = listEnabledGateways(payments);
-    const ordered = [primary, ...enabled];
-    return ordered.filter((gatewayId, index) => ordered.indexOf(gatewayId) === index);
+    const ordered = [primary, ...enabled, 'ativushub', 'ghostspay', 'sunize', 'paradise'];
+    return ordered.filter((gatewayId, index) => {
+        if (ordered.indexOf(gatewayId) !== index) return false;
+        if (gatewayId === primary) return true;
+        return canAttemptGateway(gatewayId, payments);
+    });
 }
 
 function hasAtivushubCredentials(config = {}) {
@@ -106,6 +110,14 @@ function createGatewayAttemptError(gateway, statusCode, publicMessage, detail = 
     error.detail = detail;
     error.errorCode = String(code || '').trim();
     return error;
+}
+
+function canAttemptGateway(gateway, payments = {}) {
+    const config = payments?.gateways?.[gateway] || {};
+    if (gateway === 'ghostspay') return hasGhostspayCredentials(config);
+    if (gateway === 'sunize') return hasSunizeCredentials(config);
+    if (gateway === 'paradise') return hasParadiseCredentials(config);
+    return hasAtivushubCredentials(config);
 }
 
 function toE164Phone(value = '') {
