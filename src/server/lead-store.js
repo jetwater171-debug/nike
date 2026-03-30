@@ -135,9 +135,12 @@ function buildLeadRecord(input = {}, req = null) {
     const utm = input.utm && typeof input.utm === 'object' ? input.utm : {};
 
     const street = toText(address.street || address.streetLine || '', 240);
-    const cityLine = toText(address.cityLine || '', 140);
-    const city = toText(address.city || cityLine.split('-')[0] || '', 100);
-    const state = toText(address.state || cityLine.split('-')[1] || '', 20);
+    const cityLine = String(toText(address.cityLine || '', 140) || '');
+    const [cityFromLine = '', stateFromLine = ''] = cityLine
+        .split('-')
+        .map((part) => String(part || '').trim());
+    const city = toText(address.city || cityFromLine || '', 100);
+    const state = toText(address.state || stateFromLine || '', 20);
 
     const forwardedFor = req?.headers?.['x-forwarded-for'];
     const clientIp = typeof forwardedFor === 'string' && forwardedFor
