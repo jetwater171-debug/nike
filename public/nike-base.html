@@ -1232,6 +1232,32 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     });
   }
 
+  function enableSizeP() {
+    const input = document.querySelector('[data-testid="product-size-P"]');
+    if (!input) {
+      return;
+    }
+
+    input.removeAttribute('disabled');
+    input.removeAttribute('data-status');
+    input.setAttribute('data-description', 'P');
+
+    const blockedVisual = input.closest('span[role="presentation"]');
+    if (blockedVisual) {
+      blockedVisual.className = '';
+      blockedVisual.removeAttribute('role');
+      blockedVisual.style.background = 'transparent';
+    }
+
+    const wrapper = input.closest('div');
+    if (wrapper) {
+      wrapper.hidden = false;
+      wrapper.style.display = '';
+      wrapper.style.visibility = 'visible';
+      wrapper.style.opacity = '1';
+    }
+  }
+
   function formatCep(value) {
     const digits = value.replace(/\D/g, '').slice(0, 8);
     if (digits.length <= 5) {
@@ -1502,6 +1528,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     });
 
     preserveSizes();
+    enableSizeP();
     updateOfferPrice();
     setStoredCartState(buildCartState());
     bindCepLookup();
