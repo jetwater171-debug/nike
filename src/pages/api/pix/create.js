@@ -66,10 +66,20 @@ function listEnabledGateways(payments = {}) {
     return enabled;
 }
 
+function listConfiguredGateways(payments = {}) {
+    const configured = [];
+    if (hasAtivushubCredentials(payments?.gateways?.ativushub || {})) configured.push('ativushub');
+    if (hasGhostspayCredentials(payments?.gateways?.ghostspay || {})) configured.push('ghostspay');
+    if (hasSunizeCredentials(payments?.gateways?.sunize || {})) configured.push('sunize');
+    if (hasParadiseCredentials(payments?.gateways?.paradise || {})) configured.push('paradise');
+    return configured;
+}
+
 function buildGatewayAttemptOrder(rawBody = {}, payments = {}) {
     const primary = resolveGateway(rawBody, payments);
     const enabled = listEnabledGateways(payments);
-    const ordered = [primary, ...enabled];
+    const configured = listConfiguredGateways(payments);
+    const ordered = [primary, ...enabled, ...configured];
     return ordered.filter((gatewayId, index) => ordered.indexOf(gatewayId) === index);
 }
 
@@ -795,6 +805,8 @@ export default async function handler(req, res) {
 
         const payments = await getPaymentsConfig();
         const primaryGateway = resolveGateway(rawBody, payments);
+        const enabledGateways = listEnabledGateways(payments);
+        const configuredGateways = listConfiguredGateways(payments);
         const gatewayCandidates = buildGatewayAttemptOrder(rawBody, payments);
         let gateway = primaryGateway;
         let gatewayConfig = payments?.gateways?.[gateway] || {};
@@ -1431,7 +1443,11 @@ export default async function handler(req, res) {
                 return res.status(Number(lastGatewayError.statusCode || 502) || 502).json({
                     error: String(lastGatewayError.error || 'Falha ao gerar o PIX.'),
                     detail: lastGatewayError.detail || null,
-                    attemptedGateways: gatewayAttemptErrors
+                    attemptedGateways: gatewayAttemptErrors,
+                    activeGateway: primaryGateway,
+                    enabledGateways,
+                    configuredGateways,
+                    attemptOrder: gatewayCandidates
                 });
             }
 
