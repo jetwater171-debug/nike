@@ -1,0 +1,7 @@
+[
+  "<link rel=\"preload\" as=\"image\" imageSrcSet=\"/static.nike.com.br/v11-288-0/images/brands/logo.svg 1x, /static.nike.com.br/v11-288-0/images/brands/logo.svg 2x\"",
+  "<link rel=\"preload\" as=\"image\" imageSrcSet=\"/imgnike-a.akamaihd.net/80x80/09761915A3.jpg 80w, /imgnike-a.akamaihd.net/120x120/09761915A3.jpg 120w, /imgnike-a.akamaihd.net/250x250/09761915A3.jpg 250w, /imgnike-a.akamaihd.net/360x360/09761915A3.jpg 360w, /imgnike-a.akamaihd.net/768x768/09761915A3.jpg 768w, /imgnike-a.akamaihd.net/1024x1024/09761915A3.jpg 1024w, /imgnike-a.akamaihd.net/1366x1366/09761915A3.jpg 1366w, /imgnike-a.akamaihd.net/1920x1920/09761915A3.jpg 1920w\"",
+  "<link rel=\"preload\" as=\"image\" imageSrcSet=\"/imgnike-a.akamaihd.net/360x360/09761915A3.jpg 1x, /imgnike-a.akamaihd.net/768x768/09761915A3.jpg 2x\"",
+  "<link rel=\"preload\" as=\"image\" imageSrcSet=\"/imgnike-a.akamaihd.net/360x360/09761915A4.jpg 1x, /imgnike-a.akamaihd.net/768x768/09761915A4.jpg 2x\"",
+  "<link rel=\"preload\" as=\"image\" imageSrcSet=\"/imgnike-a.akamaihd.net/360x360/09761915A5.jpg 1x, /imgnike-a.akamaihd.net/768x768/09761915A5.jpg 2x\""
+]

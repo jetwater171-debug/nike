@@ -1,0 +1,62 @@
+[
+  {
+    "src": "/static.nike.com.br/v11-288-0/images/brands/jordan.svg",
+    "srcset": "/static.nike.com.br/v11-288-0/images/brands/jordan.svg 1x..."
+  },
+  {
+    "src": "/static.nike.com.br/v11-288-0/images/brands/snkrs.svg",
+    "srcset": "/static.nike.com.br/v11-288-0/images/brands/snkrs.svg 1x, /s..."
+  },
+  {
+    "src": "/static.nike.com.br/v11-288-0/images/brands/logo.svg",
+    "srcset": "/static.nike.com.br/v11-288-0/images/brands/logo.svg 1x, /st..."
+  },
+  {
+    "src": "/static.nike.com.br/v11-288-0/images/brands/logo.svg",
+    "srcset": "/static.nike.com.br/v11-288-0/images/brands/logo.svg 1x, /st..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/strapi/nike/icon_release_shoes_b57187fa62/icon_release_shoes_b57187fa62.png",
+    "srcset": "none"
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/strapi/nike/gift_card_99aa6b2828/gift_card_99aa6b2828.png",
+    "srcset": "none"
+  },
+  {
+    "src": "/static.nike.com.br/v11-288-0/images/product/pdp/share.svg",
+    "srcset": "/static.nike.com.br/v11-288-0/images/product/pdp/share.svg 1..."
+  },
+  {
+    "src": "/static.nike.com.br/v11-288-0/images/personalization/personalization.svg",
+    "srcset": "/static.nike.com.br/v11-288-0/images/personalization/persona..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/1920x1920/09761915A3.jpg",
+    "srcset": "/imgnike-a.akamaihd.net/80x80/09761915A3.jpg 80w, /imgnike-a..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/1920x1920/09761915A4.jpg",
+    "srcset": "/imgnike-a.akamaihd.net/80x80/09761915A4.jpg 80w, /imgnike-a..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/1920x1920/09761915A5.jpg",
+    "srcset": "/imgnike-a.akamaihd.net/80x80/09761915A5.jpg 80w, /imgnike-a..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/1920x1920/09761915A6.jpg",
+    "srcset": "/imgnike-a.akamaihd.net/80x80/09761915A6.jpg 80w, /imgnike-a..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/1920x1920/09761915A7.jpg",
+    "srcset": "/imgnike-a.akamaihd.net/80x80/09761915A7.jpg 80w, /imgnike-a..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/1920x1920/09761915A8.jpg",
+    "srcset": "/imgnike-a.akamaihd.net/80x80/09761915A8.jpg 80w, /imgnike-a..."
+  },
+  {
+    "src": "/imgnike-a.akamaihd.net/1920x1920/09761915A9.jpg",
+    "srcset": "/imgnike-a.akamaihd.net/80x80/09761915A9.jpg 80w, /imgnike-a..."
+  }
+]
