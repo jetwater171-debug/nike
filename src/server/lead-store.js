@@ -9,20 +9,23 @@ const SUPABASE_LEADS_TABLE = process.env.SUPABASE_LEADS_TABLE || 'leads';
 const TERMINAL_EVENTS = new Set(['pix_confirmed', 'pix_refunded', 'pix_refused']);
 const STAGE_SCORE = {
     home: 1,
+    promo: 2,
     quiz: 2,
+    dados: 3,
     personal: 3,
+    nike: 4,
     cep: 4,
+    checkout: 4,
     processing: 5,
     success: 6,
-    checkout: 7,
+    pix: 7,
     orderbump: 8,
-    pix: 9,
-    upsell_iof: 10,
-    'upsell-iof': 10,
-    upsell_correios: 11,
-    'upsell-correios': 11,
-    upsell: 12,
-    complete: 13
+    upsell_iof: 9,
+    'upsell-iof': 9,
+    upsell_correios: 10,
+    'upsell-correios': 10,
+    upsell: 11,
+    complete: 12
 };
 
 function toText(value, maxLen = 255) {
