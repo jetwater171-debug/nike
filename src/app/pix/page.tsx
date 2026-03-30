@@ -13,7 +13,12 @@ import {
   QrCode,
   X,
 } from "lucide-react";
-import { getLeadSessionId, readLeadDraft, trackLeadEvent } from "@/lib/site-tracking";
+import {
+  getLeadSessionId,
+  readLeadDraft,
+  readUtmParams,
+  trackLeadEvent,
+} from "@/lib/site-tracking";
 
 type LeadDraft = {
   name?: string;
@@ -587,12 +592,16 @@ export default function PixPage() {
             amount: totalAmount,
             stage: "pix",
             page: "pix",
-            event: "pix_view",
+            event: "pix_create_requested",
+            sourceUrl: window.location.href,
+            sourceStage: "checkout_pagamento",
+            utm: readUtmParams(),
             personal: {
               name: storedLead.name || "",
               cpf: storedLead.cpf || "",
               email: storedLead.email || "",
               phone: storedLead.phone || "",
+              phoneDigits: String(storedLead.phone || "").replace(/\D/g, ""),
             },
             address: {
               cep: normalizedShipping.cep || "",
@@ -611,7 +620,7 @@ export default function PixPage() {
             shipping: {
               id: normalizedShipping.id || "normal",
               name: normalizedShipping.name || "Normal",
-              price: totalAmount,
+              price: shippingFee,
               originalPrice: shippingFee,
               basePrice: shippingFee,
               eta: normalizedShipping.eta || "",
