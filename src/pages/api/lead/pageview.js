@@ -1,6 +1,7 @@
 const { ensureAllowedRequest } = require('../../../server/request-guard');
 const { upsertPageview } = require('../../../server/pageviews-store');
-const { enqueueDispatch, processDispatchQueue } = require('../../../server/dispatch-queue');
+const { upsertLead } = require('../../../server/lead-store');
+const { insertLeadEvent } = require('../../../server/lead-events-store');
 
 export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -21,7 +22,21 @@ export default async function handler(req, res) {
         return;
     }
 
-    const result = await upsertPageview(body.sessionId, body.page);
+    const pageviewPayload = {
+        event: 'page_view',
+        stage: body.page || '',
+        page: body.page || '',
+        sessionId: body.sessionId || body.session_id || '',
+        sourceUrl: body.sourceUrl || '',
+        utm: body.utm || {},
+        metadata: {
+            received_at: new Date().toISOString(),
+            user_agent: req.headers['user-agent'] || '',
+            referrer: req.headers['referer'] || ''
+        }
+    };
+
+    const result = await upsertPageview(pageviewPayload.sessionId, pageviewPayload.page);
     if (!result.ok && result.reason === 'missing_supabase_config') {
         res.status(202).json({ ok: false, reason: result.reason });
         return;
@@ -31,7 +46,17 @@ export default async function handler(req, res) {
         return;
     }
 
-    // UTMfy events are sent only on key conversion moments (checkout/pix).
+    const leadResult = await upsertLead(pageviewPayload, req);
+    if (!leadResult.ok && leadResult.reason !== 'missing_supabase_config') {
+        res.status(502).json({ ok: false, reason: leadResult.reason, detail: leadResult.detail || '' });
+        return;
+    }
+
+    const eventResult = await insertLeadEvent(pageviewPayload, req);
+    if (!eventResult.ok && eventResult.reason !== 'missing_supabase_config') {
+        res.status(207).json({ ok: true, warning: 'lead_event_log_failed', detail: eventResult.detail || '' });
+        return;
+    }
 
     res.status(200).json({ ok: true });
 }

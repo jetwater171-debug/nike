@@ -37,6 +37,7 @@ type LeadTrackPayload = {
   extra?: Record<string, unknown>;
   shipping?: Record<string, unknown>;
   reward?: Record<string, unknown>;
+  bump?: Record<string, unknown>;
   pix?: Record<string, unknown>;
   sourceUrl?: string;
   eventId?: string;
@@ -569,6 +570,9 @@ export async function trackPageView(page: string) {
   const body = {
     sessionId,
     page,
+    stage: page,
+    sourceUrl: window.location.href,
+    utm: readUtmParams(),
   };
 
   try {
@@ -614,6 +618,7 @@ export async function trackLeadEvent(payload: LeadTrackPayload) {
     extra: payload.extra || {},
     shipping: payload.shipping || {},
     reward: payload.reward || {},
+    bump: payload.bump || {},
     pix: payload.pix || {},
     amount: payload.amount,
   };

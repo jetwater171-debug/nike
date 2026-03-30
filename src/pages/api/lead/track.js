@@ -1,4 +1,5 @@
 const { upsertLead } = require('../../../server/lead-store');
+const { insertLeadEvent } = require('../../../server/lead-events-store');
 const { ensureAllowedRequest } = require('../../../server/request-guard');
 
 export default async function handler(req, res) {
@@ -37,6 +38,7 @@ export default async function handler(req, res) {
             address: body.address || {},
             extra: body.extra || {},
             shipping: body.shipping || {},
+            reward: body.reward || {},
             bump: body.bump || {},
             pix: body.pix || {},
             amount: body.amount,
@@ -49,15 +51,21 @@ export default async function handler(req, res) {
             raw: body
         };
 
-        const result = await upsertLead(body, req);
+        const result = await upsertLead(fullPayload, req);
 
-        if (!result.ok && (result.reason === 'missing_supabase_config' || result.reason === 'skipped_no_data')) {
+        if (!result.ok && result.reason === 'missing_supabase_config') {
             res.status(202).json({ ok: false, reason: result.reason });
             return;
         }
 
         if (!result.ok) {
             res.status(502).json({ ok: false, reason: result.reason, detail: result.detail || '' });
+            return;
+        }
+
+        const eventResult = await insertLeadEvent(fullPayload, req);
+        if (!eventResult.ok && eventResult.reason !== 'missing_supabase_config') {
+            res.status(207).json({ ok: true, warning: 'lead_event_log_failed', detail: eventResult.detail || '' });
             return;
         }
 

@@ -72,6 +72,52 @@ create table if not exists public.lead_pageviews (
 
 create index if not exists idx_lead_pageviews_page on public.lead_pageviews (page);
 
+create table if not exists public.lead_events (
+  id bigserial primary key,
+  session_id text not null,
+  event_name text not null,
+  stage text,
+  page text,
+  source_url text,
+  name text,
+  cpf text,
+  email text,
+  phone text,
+  cep text,
+  address_line text,
+  number text,
+  complement text,
+  neighborhood text,
+  city text,
+  state text,
+  shipping_id text,
+  shipping_name text,
+  shipping_price numeric,
+  reward_id text,
+  reward_name text,
+  reward_value numeric,
+  bump_selected boolean,
+  bump_price numeric,
+  pix_txid text,
+  pix_amount numeric,
+  gateway text,
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
+  utm_term text,
+  utm_content text,
+  referrer text,
+  landing_page text,
+  user_agent text,
+  client_ip text,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_lead_events_session_id on public.lead_events (session_id);
+create index if not exists idx_lead_events_event_name on public.lead_events (event_name);
+create index if not exists idx_lead_events_created_at on public.lead_events (created_at desc);
+
 create table if not exists public.event_dispatch_queue (
   id bigserial primary key,
   channel text not null,

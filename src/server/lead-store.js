@@ -61,20 +61,6 @@ function asObject(input) {
     return input && typeof input === 'object' && !Array.isArray(input) ? input : {};
 }
 
-function hasMeaningfulLeadData(record) {
-    return Boolean(
-        record.name ||
-        record.cpf ||
-        record.email ||
-        record.phone ||
-        record.cep ||
-        record.address_line ||
-        record.shipping_id ||
-        record.pix_txid ||
-        record.pix_amount
-    );
-}
-
 function scoreEvent(eventName) {
     const ev = String(eventName || '').trim().toLowerCase();
     if (!ev) return 0;
@@ -109,7 +95,7 @@ function mergeTrackingPayload(input = {}, existingPayload = {}) {
         ...incoming
     };
 
-    ['utm', 'personal', 'address', 'extra', 'shipping', 'bump', 'pix', 'metadata'].forEach((key) => {
+    ['utm', 'personal', 'address', 'extra', 'shipping', 'reward', 'bump', 'pix', 'metadata'].forEach((key) => {
         const next = {
             ...asObject(existing[key]),
             ...asObject(incoming[key])
@@ -179,7 +165,7 @@ function buildLeadRecord(input = {}, req = null) {
         fbclid: toText(utm.fbclid || input.fbclid, 120),
         ttclid: toText(utm.ttclid || input.ttclid, 120),
         referrer: toText(utm.referrer || input.referrer, 240),
-        landing_page: toText(utm.landing_page || input.landing_page, 240),
+        landing_page: toText(utm.landing_page || input.landing_page || input.page || '', 240),
         source_url: toText(input.sourceUrl, 300),
         user_agent: toText(req?.headers?.['user-agent'] || input.userAgent, 300),
         client_ip: toText(clientIp || input.clientIp, 80),
@@ -201,9 +187,6 @@ async function upsertLead(input = {}, req = null) {
     const existing = existingRes?.ok ? existingRes.data : null;
     const mergedInput = mergeTrackingPayload(input, existing?.payload);
     const record = buildLeadRecord(mergedInput, req);
-    if (!hasMeaningfulLeadData(record)) {
-        return { ok: false, reason: 'skipped_no_data' };
-    }
     if (existing) {
         const existingPayload = asObject(existing?.payload);
         const incomingPix = asObject(mergedInput?.pix);
