@@ -224,16 +224,16 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
           <div
             role="dialog"
             aria-modal="true"
-            className="promo-pop liquid-panel pointer-events-auto relative z-10 w-full max-w-md overflow-hidden rounded-[2rem] p-6 shadow-[0_34px_120px_rgba(0,0,0,0.74)] sm:p-7"
+            className="promo-pop liquid-panel pointer-events-auto relative z-10 w-full max-w-[21.75rem] overflow-hidden rounded-[1.7rem] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.74)] sm:max-w-sm sm:p-6"
             onClick={(event) => event.stopPropagation()}
           >
             <div
               aria-hidden="true"
-              className="absolute inset-x-8 top-0 h-28 bg-[radial-gradient(circle,rgba(255,255,255,0.18),transparent_72%)] blur-3xl"
+              className="absolute inset-x-8 top-0 h-24 bg-[radial-gradient(circle,rgba(255,255,255,0.16),transparent_72%)] blur-3xl"
             />
             <div
               aria-hidden="true"
-              className="absolute inset-x-10 bottom-8 h-28 bg-[radial-gradient(circle,rgba(16,185,129,0.18),transparent_72%)] blur-3xl"
+              className="absolute inset-x-10 bottom-6 h-20 bg-[radial-gradient(circle,rgba(16,185,129,0.16),transparent_72%)] blur-3xl"
             />
             <div
               aria-hidden="true"
@@ -241,61 +241,61 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
             />
 
             <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_30px_rgba(16,185,129,0.14)]">
-                <Ticket className="h-7 w-7 text-emerald-300" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_24px_rgba(16,185,129,0.14)]">
+                <Ticket className="h-6 w-6 text-emerald-300" />
               </div>
 
-              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-emerald-200/70">
+              <p className="mt-4 text-[0.6rem] uppercase tracking-[0.26em] text-emerald-200/70">
                 Desconto liberado
               </p>
-              <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
+              <h3 className="mt-2.5 font-hero text-[1.45rem] text-white sm:text-[1.9rem]">
                 Oferta confirmada
               </h3>
-              <p className="mt-4 text-sm leading-7 text-white/[0.68]">
+              <p className="mt-3 text-[0.92rem] leading-6 text-white/[0.68]">
                 Voce bateu os 2 premios da rodada e agora ja pode seguir para a
                 nova camisa com a oferta desta campanha destravada.
               </p>
 
-              <div className="relative mx-auto mt-6 w-full max-w-[20.8rem] overflow-hidden rounded-[1.85rem] border border-white/[0.1] bg-[linear-gradient(180deg,rgba(255,255,255,0.085),rgba(255,255,255,0.035))] px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:px-6 sm:py-7">
+              <div className="relative mx-auto mt-5 w-full max-w-[18.3rem] overflow-hidden rounded-[1.5rem] border border-white/[0.1] bg-[linear-gradient(180deg,rgba(255,255,255,0.085),rgba(255,255,255,0.035))] px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:max-w-[18.8rem] sm:px-5 sm:py-6">
                 <div
                   aria-hidden="true"
-                  className="absolute inset-x-6 top-0 h-16 bg-[radial-gradient(circle,rgba(255,255,255,0.16),transparent_72%)] blur-2xl"
+                  className="absolute inset-x-6 top-0 h-12 bg-[radial-gradient(circle,rgba(255,255,255,0.16),transparent_72%)] blur-2xl"
                 />
                 <div
                   aria-hidden="true"
-                  className="absolute inset-x-10 bottom-0 h-20 bg-[radial-gradient(circle,rgba(16,185,129,0.14),transparent_72%)] blur-2xl"
+                  className="absolute inset-x-10 bottom-0 h-14 bg-[radial-gradient(circle,rgba(16,185,129,0.14),transparent_72%)] blur-2xl"
                 />
 
                 <div className="relative text-center">
                   <NikeSwoosh className="mx-auto h-4 w-auto text-white/72" />
-                  <p className="mt-5 text-[0.66rem] uppercase tracking-[0.26em] text-white/[0.38]">
+                  <p className="mt-4 text-[0.58rem] uppercase tracking-[0.24em] text-white/[0.38]">
                     Campanha nike
                   </p>
-                  <p className="mx-auto mt-3 max-w-[12ch] font-hero text-[2rem] leading-[0.9] text-white sm:text-[2.35rem]">
+                  <p className="mx-auto mt-2.5 max-w-[12ch] font-hero text-[1.55rem] leading-[0.92] text-white sm:text-[1.85rem]">
                     Descontasso na camisa do Brasil
                   </p>
 
-                  <div className="mt-6 flex items-center justify-center gap-2">
-                    <span className="text-[0.78rem] uppercase tracking-[0.08em] text-white/[0.42]">
+                  <div className="mt-4.5 flex items-center justify-center gap-2">
+                    <span className="text-[0.7rem] uppercase tracking-[0.08em] text-white/[0.42]">
                       de
                     </span>
-                    <span className="relative text-[1.15rem] font-medium text-white/[0.4]">
+                    <span className="relative text-[1rem] font-medium text-white/[0.4]">
                       R$ 749,99
                       <span className="absolute left-[-4%] right-[-4%] top-1/2 h-[2px] -translate-y-1/2 rotate-[-6deg] bg-[#d84d4d]" />
                     </span>
                   </div>
 
-                  <div className="mt-2 flex items-end justify-center gap-2">
-                    <span className="text-[1.7rem] leading-none text-white/[0.84] sm:text-[2rem]">
+                  <div className="mt-1.5 flex items-end justify-center gap-2">
+                    <span className="text-[1.45rem] leading-none text-white/[0.84] sm:text-[1.7rem]">
                       por
                     </span>
-                    <span className="font-hero text-[3.7rem] leading-none text-emerald-400 drop-shadow-[0_0_20px_rgba(74,222,128,0.22)] sm:text-[4.4rem]">
+                    <span className="font-hero text-[2.95rem] leading-none text-emerald-400 drop-shadow-[0_0_20px_rgba(74,222,128,0.22)] sm:text-[3.4rem]">
                       R$ 139,19
                     </span>
                   </div>
 
-                  <div className="mx-auto mt-5 h-px w-20 bg-gradient-to-r from-transparent via-white/[0.18] to-transparent" />
-                  <p className="mt-5 text-sm leading-7 text-white/[0.58]">
+                  <div className="mx-auto mt-4 h-px w-16 bg-gradient-to-r from-transparent via-white/[0.18] to-transparent" />
+                  <p className="mt-4 text-[0.88rem] leading-6 text-white/[0.58]">
                     Sua oferta reservada segue para a proxima etapa do resgate.
                   </p>
                 </div>
@@ -303,7 +303,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
               <Link
                 href={claimHref}
-                className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+                className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-5 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Resgatar camisa agora
               </Link>
@@ -337,9 +337,9 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
-              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.62)] backdrop-blur-[2px]" />
-              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(3,3,3,0.02)_30%,rgba(3,3,3,0.28)_72%,rgba(3,3,3,0.48)_100%)]" />
-              <div className="promo-pop relative z-10 flex max-w-md flex-col items-center rounded-[1.8rem] border border-white/[0.08] bg-black/[0.34] px-5 py-7 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-7 sm:py-8">
+              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.34)] backdrop-blur-[1px]" />
+              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.035)_0%,rgba(3,3,3,0.01)_26%,rgba(3,3,3,0.16)_68%,rgba(3,3,3,0.28)_100%)]" />
+              <div className="promo-pop relative z-10 flex max-w-md flex-col items-center rounded-[1.7rem] border border-white/[0.08] bg-black/[0.48] px-5 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-7 sm:py-7">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
                 </p>
@@ -364,8 +364,8 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
           )}
 
           <div
-            className={`relative z-10 mx-auto grid w-full max-w-[344px] grid-cols-4 gap-3.5 transition-[opacity,filter] duration-300 sm:max-w-[420px] sm:gap-[1.125rem] ${
-              gameStarted ? "opacity-100 blur-0" : "opacity-[0.42] blur-[0.25px]"
+            className={`relative z-10 mx-auto grid w-full max-w-[390px] grid-cols-4 gap-4 transition-[opacity,filter] duration-300 sm:max-w-[472px] sm:gap-5 ${
+              gameStarted ? "opacity-100 blur-0" : "opacity-[0.72] blur-0"
             }`}
           >
             {grid.map((cell, index) => (

@@ -82,27 +82,27 @@ export default function DadosLeadForm() {
   );
 
   return (
-    <div className="liquid-panel relative overflow-visible rounded-[2rem] p-6 sm:p-8">
+    <div className="liquid-panel relative overflow-visible rounded-[1.85rem] p-5 sm:p-6">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-10 top-0 h-20 bg-[radial-gradient(circle,rgba(255,255,255,0.1),transparent_72%)] blur-3xl"
+        className="pointer-events-none absolute inset-x-10 top-0 h-16 bg-[radial-gradient(circle,rgba(255,255,255,0.1),transparent_72%)] blur-3xl"
       />
 
       <div className="relative z-10">
-        <div className="mb-6">
+        <div className="mb-4">
           <p className="text-[0.68rem] uppercase tracking-[0.28em] text-white/[0.42]">
             Resgate da campanha
           </p>
-          <h2 className="font-hero mt-4 text-[2.15rem] text-white sm:text-[2.8rem]">
+          <h2 className="font-hero mt-3 text-[1.8rem] text-white sm:text-[2.35rem]">
             Preencha seus dados
           </h2>
-          <p className="mt-3 max-w-xl text-sm leading-7 text-white/[0.68]">
+          <p className="mt-2.5 max-w-xl text-[0.92rem] leading-6 text-white/[0.68]">
             Para resgatar o cupom da campanha, preencha suas informacoes abaixo.
             Assim voce segue para a proxima etapa com a oferta reservada.
           </p>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           <div>
             <FieldLabel>Nome completo</FieldLabel>
             <input
@@ -111,11 +111,11 @@ export default function DadosLeadForm() {
               onChange={(event) => setFullName(event.target.value)}
               placeholder="Digite seu nome completo"
               autoComplete="name"
-              className="w-full rounded-[1.4rem] border border-white/[0.1] bg-white/[0.04] px-4 py-4 text-[0.98rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
+              className="w-full rounded-[1.2rem] border border-white/[0.1] bg-white/[0.04] px-4 py-3.5 text-[0.96rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <FieldLabel>CPF</FieldLabel>
               <input
@@ -125,7 +125,7 @@ export default function DadosLeadForm() {
                 placeholder="000.000.000-00"
                 inputMode="numeric"
                 autoComplete="off"
-                className="w-full rounded-[1.4rem] border border-white/[0.1] bg-white/[0.04] px-4 py-4 text-[0.98rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
+                className="w-full rounded-[1.2rem] border border-white/[0.1] bg-white/[0.04] px-4 py-3.5 text-[0.96rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
               />
             </div>
 
@@ -145,11 +145,11 @@ export default function DadosLeadForm() {
                 inputMode="email"
                 autoComplete="email"
                 spellCheck={false}
-                className="w-full rounded-[1.4rem] border border-white/[0.1] bg-white/[0.04] px-4 py-4 text-[0.98rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
+                className="w-full rounded-[1.2rem] border border-white/[0.1] bg-white/[0.04] px-4 py-3.5 text-[0.96rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
               />
 
               {emailFocused && emailSuggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-[calc(100%+0.7rem)] z-20 overflow-hidden rounded-[1.4rem] border border-white/[0.1] bg-[#0a0a0a]/95 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+                <div className="absolute left-0 right-0 top-[calc(100%+0.55rem)] z-20 overflow-hidden rounded-[1.2rem] border border-white/[0.1] bg-[#0a0a0a]/95 shadow-[0_20px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
                   {emailSuggestions.map((suggestion) => (
                     <button
                       key={suggestion}
@@ -159,7 +159,7 @@ export default function DadosLeadForm() {
                         setEmail(suggestion);
                         setEmailFocused(false);
                       }}
-                      className="flex w-full items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 text-left text-sm text-white/[0.82] transition-colors duration-200 last:border-b-0 hover:bg-white/[0.05]"
+                      className="flex w-full items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-2.5 text-left text-sm text-white/[0.82] transition-colors duration-200 last:border-b-0 hover:bg-white/[0.05]"
                     >
                       <span className="truncate">{suggestion}</span>
                       <span className="text-[0.64rem] uppercase tracking-[0.18em] text-white/[0.34]">
@@ -181,16 +181,16 @@ export default function DadosLeadForm() {
               placeholder="(11) 99999-9999"
               inputMode="tel"
               autoComplete="tel"
-              className="w-full rounded-[1.4rem] border border-white/[0.1] bg-white/[0.04] px-4 py-4 text-[0.98rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
+              className="w-full rounded-[1.2rem] border border-white/[0.1] bg-white/[0.04] px-4 py-3.5 text-[0.96rem] text-white outline-none transition-colors duration-300 placeholder:text-white/[0.26] focus:border-white/[0.22] focus:bg-white/[0.06]"
             />
           </div>
         </div>
 
-        <div className="mt-6 rounded-[1.5rem] border border-white/[0.08] bg-white/[0.03] px-4 py-4">
+        <div className="mt-4 rounded-[1.2rem] border border-white/[0.08] bg-white/[0.03] px-4 py-3">
           <p className="text-[0.68rem] uppercase tracking-[0.22em] text-white/[0.38]">
             Oferta reservada
           </p>
-          <p className="mt-2 text-sm leading-7 text-white/[0.6]">
+          <p className="mt-1.5 text-[0.9rem] leading-6 text-white/[0.6]">
             Depois de preencher os dados, voce segue com a mesma oferta da
             campanha para concluir o resgate.
           </p>
@@ -198,7 +198,7 @@ export default function DadosLeadForm() {
 
         <Link
           href="/nike"
-          className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-5 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
         >
           Resgatar
         </Link>

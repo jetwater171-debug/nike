@@ -3,7 +3,7 @@ import DadosLeadForm from "./DadosLeadForm";
 
 export default function DadosPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black px-4 pb-16 pt-24 text-white sm:px-8 lg:px-12">
+    <main className="relative min-h-screen overflow-hidden bg-black px-4 pb-8 pt-20 text-white sm:px-8 sm:pb-10 sm:pt-22 lg:px-12">
       <NikeLiquidHeader />
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
@@ -11,7 +11,7 @@ export default function DadosPage() {
         <div className="absolute inset-x-0 bottom-0 h-48 bg-[linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,0.42))]" />
       </div>
 
-      <section className="relative mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-3xl items-center">
+      <section className="relative mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-[42rem] items-center">
         <div className="w-full">
           <DadosLeadForm />
         </div>
