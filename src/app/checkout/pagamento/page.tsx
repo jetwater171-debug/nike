@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import NikeCheckoutHeader from "../../components/NikeCheckoutHeader";
 import NikeCheckoutSteps from "../../components/NikeCheckoutSteps";
+import { createPixForCurrentSession } from "@/lib/pix-client";
 import { readLeadDraft, trackLeadEvent } from "@/lib/site-tracking";
 
 type LeadDraft = {
@@ -128,6 +129,8 @@ export default function CheckoutPagamentoPage() {
   const [shipping, setShipping] = useState<CheckoutShipping>(
     DEFAULT_CART.shipping || {},
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const storedLead = readLeadDraft() as LeadDraft;
@@ -205,36 +208,56 @@ export default function CheckoutPagamentoPage() {
       : "Entrega em ate 5 dias uteis";
 
   const handleFinalize = async () => {
-    await trackLeadEvent({
-      event: "payment_submit",
-      stage: "pagamento",
-      page: "pagamento",
-      amount: totalPriceValue,
-      personal: {
-        name: lead.name || "",
-        cpf: lead.cpf || "",
-        email: lead.email || "",
-        phone: lead.phone || "",
-      },
-      address: {
-        cep: shipping.cep || "",
-        street: shipping.street || "",
-        neighborhood: shipping.neighborhood || "",
-        city: shipping.city || "",
-        state: shipping.state || "",
-      },
-      extra: {
-        number: shipping.number || "",
-        complement: shipping.complement || "",
-      },
-      shipping: {
-        id: shipping.id || "",
-        name: shipping.name || "",
-        price: shipping.price || 0,
-      },
-    });
+    if (isSubmitting) return;
 
-    router.push("/pix");
+    try {
+      setSubmitError("");
+      setIsSubmitting(true);
+
+      await trackLeadEvent({
+        event: "payment_submit",
+        stage: "pagamento",
+        page: "pagamento",
+        amount: totalPriceValue,
+        personal: {
+          name: lead.name || "",
+          cpf: lead.cpf || "",
+          email: lead.email || "",
+          phone: lead.phone || "",
+        },
+        address: {
+          cep: shipping.cep || "",
+          street: shipping.street || "",
+          neighborhood: shipping.neighborhood || "",
+          city: shipping.city || "",
+          state: shipping.state || "",
+        },
+        extra: {
+          number: shipping.number || "",
+          complement: shipping.complement || "",
+        },
+        shipping: {
+          id: shipping.id || "",
+          name: shipping.name || "",
+          price: shipping.price || 0,
+        },
+      });
+
+      await createPixForCurrentSession({
+        sourceUrl: window.location.href,
+        sourceStage: "checkout_pagamento",
+      });
+
+      router.push("/pix");
+    } catch (requestError) {
+      setSubmitError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Nao foi possivel gerar o Pix agora.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -375,12 +398,19 @@ export default function CheckoutPagamentoPage() {
             </div>
           </div>
 
+          {submitError && (
+            <div className="mt-8 rounded-[14px] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
+              <p className="text-[0.95rem] leading-6">{submitError}</p>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={() => void handleFinalize()}
-            className="mt-8 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white"
+            disabled={isSubmitting}
+            className="mt-8 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Finalizar compra
+            {isSubmitting ? "Gerando Pix..." : "Finalizar compra"}
           </button>
         </section>
       </div>

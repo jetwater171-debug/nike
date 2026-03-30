@@ -16,55 +16,21 @@ import {
 import {
   getLeadSessionId,
   readLeadDraft,
-  readUtmParams,
   trackLeadEvent,
 } from "@/lib/site-tracking";
-
-type LeadDraft = {
-  name?: string;
-  cpf?: string;
-  email?: string;
-  phone?: string;
-};
-
-type CheckoutShipping = {
-  id?: string;
-  cep?: string;
-  address?: string;
-  street?: string;
-  neighborhood?: string;
-  city?: string;
-  state?: string;
-  number?: string;
-  complement?: string;
-  eta?: string;
-  name?: string;
-  price?: number;
-  couponApplied?: boolean;
-};
-
-type CartState = {
-  title?: string;
-  color?: string;
-  size?: string;
-  sku?: string;
-  quantity?: number;
-  image?: string;
-  priceValue?: number;
-  shipping?: CheckoutShipping;
-};
-
-type PixData = {
-  idTransaction: string;
-  paymentCode?: string;
-  paymentCodeBase64?: string;
-  paymentQrUrl?: string;
-  status?: string;
-  gateway?: string;
-  amount?: number;
-  createdAt: number;
-  orderNumber: string;
-};
+import {
+  createPixForCurrentSession,
+  DEFAULT_CART,
+  DEFAULT_PRICE_VALUE,
+  persistPixState,
+  PIX_UI_EXPIRATION_MS,
+  readStoredCartState,
+  readStoredPixState,
+  type CartState,
+  type CheckoutShipping,
+  type LeadDraft,
+  type PixData,
+} from "@/lib/pix-client";
 
 type PixStatusResponse = {
   ok?: boolean;
@@ -77,28 +43,7 @@ type PixStatusResponse = {
 
 type PixStatus = "waiting_payment" | "paid" | "refused" | "refunded";
 
-const CART_STORAGE_KEY = "nikepromo.cartState";
-const PIX_STORAGE_KEY = "nikepromo.pixState";
 const ORIGINAL_PRICE_VALUE = 749.99;
-const DEFAULT_PRICE_VALUE = 139.19;
-const PIX_UI_EXPIRATION_MS = 60 * 60 * 1000;
-
-const DEFAULT_CART: CartState = {
-  title: "Camisa Brasil Jordan II 2026/27 Jogador Masculina",
-  color: "Azul",
-  size: "M",
-  sku: "IU1074-417",
-  quantity: 1,
-  image: "/assets/nike-brazil-jordan-ii-a3.jpg",
-  priceValue: DEFAULT_PRICE_VALUE,
-  shipping: {
-    id: "normal",
-    name: "Normal",
-    eta: "5 dias uteis",
-    price: 0,
-    couponApplied: true,
-  },
-};
 
 function NikeSwoosh({ className }: { className?: string }) {
   return (
@@ -135,46 +80,6 @@ function normalizePixStatus(value: string): PixStatus {
     return value;
   }
   return "waiting_payment";
-}
-
-function readStoredCartState(): CartState {
-  if (typeof window === "undefined") return DEFAULT_CART;
-
-  try {
-    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-    if (!raw) return DEFAULT_CART;
-    const parsed = JSON.parse(raw) as CartState;
-    return {
-      ...DEFAULT_CART,
-      ...parsed,
-      shipping: {
-        ...DEFAULT_CART.shipping,
-        ...(parsed.shipping || {}),
-      },
-    };
-  } catch {
-    return DEFAULT_CART;
-  }
-}
-
-function persistPixState(pix: PixData) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(PIX_STORAGE_KEY, JSON.stringify(pix));
-  } catch {
-    // Ignore storage failures.
-  }
-}
-
-function readStoredPixState() {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(PIX_STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as PixData;
-  } catch {
-    return null;
-  }
 }
 
 function parseAddressLine(address: string) {
@@ -548,127 +453,15 @@ export default function PixPage() {
 
   useEffect(() => {
     const run = async () => {
-      const storedLead = readLeadDraft() as LeadDraft;
-      const storedCart = readStoredCartState();
-      const normalizedShipping = buildShippingFromCart(storedCart.shipping);
-      const sessionId = getLeadSessionId();
-
-      const quantityValue = Number(storedCart.quantity || 1);
-      const productUnit = Number(storedCart.priceValue || DEFAULT_PRICE_VALUE);
-      const productSubtotal = Number((productUnit * quantityValue).toFixed(2));
-      const shippingFee = Number(normalizedShipping.price || 0);
-      const totalAmount = Number((productSubtotal + shippingFee).toFixed(2));
-
-      if (!storedLead.name || !storedLead.cpf || !storedLead.email || !storedLead.phone) {
-        setError("Volte uma etapa e confirme seus dados antes de gerar o Pix.");
-        setIsLoading(false);
-        return;
-      }
-
-      if (
-        !normalizedShipping.cep ||
-        !normalizedShipping.street ||
-        !normalizedShipping.city ||
-        !normalizedShipping.state
-      ) {
-        setError("Volte para a identificacao e confirme o endereco de entrega.");
-        setIsLoading(false);
-        return;
-      }
-
       try {
         setError("");
         setIsLoading(true);
-
-        const response = await fetch("/api/pix/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "same-origin",
-          cache: "no-store",
-          body: JSON.stringify({
-            sessionId,
-            amount: totalAmount,
-            stage: "pix",
-            page: "pix",
-            event: "pix_create_requested",
-            sourceUrl: window.location.href,
-            sourceStage: "checkout_pagamento",
-            utm: readUtmParams(),
-            personal: {
-              name: storedLead.name || "",
-              cpf: storedLead.cpf || "",
-              email: storedLead.email || "",
-              phone: storedLead.phone || "",
-              phoneDigits: String(storedLead.phone || "").replace(/\D/g, ""),
-            },
-            address: {
-              cep: normalizedShipping.cep || "",
-              street: normalizedShipping.street || "",
-              neighborhood: normalizedShipping.neighborhood || "",
-              city: normalizedShipping.city || "",
-              state: normalizedShipping.state || "",
-            },
-            extra: {
-              number: normalizedShipping.number || "",
-              complement: normalizedShipping.complement || "",
-              productSubtotal,
-              shippingSubtotal: shippingFee,
-              sku: storedCart.sku || "",
-            },
-            shipping: {
-              id: normalizedShipping.id || "normal",
-              name: normalizedShipping.name || "Normal",
-              price: shippingFee,
-              originalPrice: shippingFee,
-              basePrice: shippingFee,
-              eta: normalizedShipping.eta || "",
-              couponApplied: normalizedShipping.couponApplied !== false,
-            },
-            reward: {
-              id: "bag",
-            },
-          }),
+        const nextPix = await createPixForCurrentSession({
+          sourceUrl: window.location.href,
+          sourceStage: "checkout_pagamento",
         });
-
-        const data = (await response.json().catch(() => ({}))) as {
-          error?: string;
-          idTransaction?: string;
-          paymentCode?: string;
-          paymentCodeBase64?: string;
-          paymentQrUrl?: string;
-          amount?: number;
-          status?: string;
-          gateway?: string;
-        };
-
-        if (!response.ok || !String(data.idTransaction || "").trim()) {
-          throw new Error(String(data.error || "Falha ao gerar o Pix."));
-        }
-
-        const cached = readStoredPixState();
-        const sameTransaction =
-          cached &&
-          String(cached.idTransaction || "").trim() === String(data.idTransaction || "").trim();
-        const nextPix: PixData = {
-          idTransaction: String(data.idTransaction || "").trim(),
-          paymentCode: String(data.paymentCode || "").trim(),
-          paymentCodeBase64: String(data.paymentCodeBase64 || "").trim(),
-          paymentQrUrl: String(data.paymentQrUrl || "").trim(),
-          status: String(data.status || "waiting_payment").trim(),
-          gateway: String(data.gateway || "").trim(),
-          amount: Number(data.amount || totalAmount),
-          createdAt: sameTransaction ? Number(cached?.createdAt || Date.now()) : Date.now(),
-          orderNumber:
-            sameTransaction && String(cached?.orderNumber || "").trim()
-              ? String(cached?.orderNumber || "").trim()
-              : deriveOrderNumber(`${data.idTransaction || sessionId}`),
-        };
-
         setPix(nextPix);
         setPixStatus(normalizePixStatus(String(nextPix.status || "")));
-        persistPixState(nextPix);
       } catch (requestError) {
         const message =
           requestError instanceof Error
