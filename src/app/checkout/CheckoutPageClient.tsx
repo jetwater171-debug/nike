@@ -44,6 +44,8 @@ type CheckoutStepsProps = {
 };
 
 const CART_STORAGE_KEY = "nikepromo.cartState";
+const ORIGINAL_PRICE_VALUE = 749.99;
+const DEFAULT_OFFER_PRICE_VALUE = 139.19;
 const NORMAL_SHIPPING = {
   id: "normal",
   name: "Normal",
@@ -467,6 +469,17 @@ export default function CheckoutPageClient() {
         : NORMAL_SHIPPING,
     [selectedShippingId],
   );
+  const productPriceValue = useMemo(
+    () => Number(cart.priceValue || DEFAULT_OFFER_PRICE_VALUE),
+    [cart.priceValue],
+  );
+  const campaignSavingsValue = useMemo(
+    () =>
+      Number(
+        Math.max(ORIGINAL_PRICE_VALUE - productPriceValue, 0).toFixed(2),
+      ),
+    [productPriceValue],
+  );
 
   const addressReady = Boolean(shipping.street && shipping.cep);
   const fullAddressLine = [
@@ -651,6 +664,30 @@ export default function CheckoutPageClient() {
             Identificacao
           </h1>
 
+          <div className="mt-6 rounded-[1.8rem] border border-[#cde8d7] bg-[#f2fbf5] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <span className="inline-flex min-h-8 items-center rounded-full bg-[#daf2e3] px-3 text-[0.82rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
+                Cupom aplicado
+              </span>
+              <span className="text-[0.95rem] font-semibold text-[#0f6a3f]">
+                Economia de {formatCurrency(campaignSavingsValue)}
+              </span>
+            </div>
+
+            <p className="mt-4 text-[1rem] leading-6 text-[#185233]">
+              Voce esta usando o desconto que ganhou na campanha da camisa.
+            </p>
+
+            <div className="mt-4 flex items-end gap-3">
+              <span className="text-[1.05rem] font-medium text-black/42 line-through">
+                {formatCurrency(ORIGINAL_PRICE_VALUE)}
+              </span>
+              <span className="text-[2rem] font-semibold leading-none text-[#0f6a3f]">
+                {formatCurrency(productPriceValue)}
+              </span>
+            </div>
+          </div>
+
           <div className="mt-8 space-y-6">
             <div>
               <p className="text-[0.96rem] text-black/56">Nome</p>
@@ -818,6 +855,15 @@ export default function CheckoutPageClient() {
                 );
               })}
             </div>
+          </div>
+
+          <div className="mt-5 rounded-[1.6rem] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
+            <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
+              Oferta ativa
+            </p>
+            <p className="mt-2 text-[1rem] leading-6">
+              Voce continua economizando {formatCurrency(campaignSavingsValue)} com o valor reservado da campanha.
+            </p>
           </div>
 
           <button
