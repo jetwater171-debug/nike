@@ -16,11 +16,13 @@ import NikeCheckoutHeader from "../components/NikeCheckoutHeader";
 import { trackLeadEvent } from "@/lib/site-tracking";
 
 type CartShipping = {
+  id?: string;
   cep?: string;
   address?: string;
   eta?: string;
   name?: string;
   price?: number;
+  couponApplied?: boolean;
 };
 
 type CartState = {
@@ -40,6 +42,22 @@ type CartState = {
 
 const CART_STORAGE_KEY = "nikepromo.cartState";
 const OFFER_PRICE_VALUE = 139.19;
+const NORMAL_SHIPPING = {
+  id: "normal",
+  name: "Normal",
+  eta: "5 dias uteis",
+  price: 0,
+  label: "Frete gratis",
+  note: "Cupom de frete gratis aplicado automaticamente",
+};
+const EXPRESS_SHIPPING = {
+  id: "nike-expresso",
+  name: "Nike Expresso",
+  eta: "2 dias uteis",
+  price: 18.71,
+  label: "R$ 18,71",
+  note: "Entrega mais rapida para a sua campanha",
+};
 
 const defaultCartState: CartState = {
   title: "Camisa Brasil Jordan II 2026/27 Jogador Masculina",
@@ -167,6 +185,9 @@ export default function CartPageClient() {
   const [cep, setCep] = useState("");
   const [coupon, setCoupon] = useState("");
   const [couponMessage, setCouponMessage] = useState("");
+  const [selectedShippingId, setSelectedShippingId] = useState(
+    defaultCartState.shipping?.id || NORMAL_SHIPPING.id,
+  );
   const [shippingState, setShippingState] = useState<{
     status: "idle" | "loading" | "success" | "error";
     message: string;
@@ -179,16 +200,37 @@ export default function CartPageClient() {
 
   useEffect(() => {
     const stored = readStoredCartState();
+    const normalizedShippingId =
+      stored.shipping?.id === EXPRESS_SHIPPING.id
+        ? EXPRESS_SHIPPING.id
+        : NORMAL_SHIPPING.id;
+    const normalizedShipping =
+      normalizedShippingId === EXPRESS_SHIPPING.id
+        ? EXPRESS_SHIPPING
+        : NORMAL_SHIPPING;
+
     setCart(stored);
     setCep(stored.shipping?.cep || "");
+    setSelectedShippingId(normalizedShippingId);
     setHasHydrated(true);
 
     if (stored.shipping?.address) {
       setShippingState({
         status: "success",
-        message: stored.shipping?.eta || "3 dias uteis",
+        message: normalizedShipping.eta,
         address: stored.shipping.address,
       });
+
+      setCart((current) => ({
+        ...current,
+        shipping: {
+          ...current.shipping,
+          ...normalizedShipping,
+          address: stored.shipping?.address || "",
+          cep: stored.shipping?.cep || "",
+          couponApplied: normalizedShippingId === NORMAL_SHIPPING.id,
+        },
+      }));
     }
 
     void trackLeadEvent({
@@ -216,7 +258,20 @@ export default function CartPageClient() {
     [cart.priceValue, cart.quantity],
   );
 
-  const totalLabel = useMemo(() => formatCurrency(subtotal), [subtotal]);
+  const shippingOption = useMemo(
+    () =>
+      selectedShippingId === EXPRESS_SHIPPING.id
+        ? EXPRESS_SHIPPING
+        : NORMAL_SHIPPING,
+    [selectedShippingId],
+  );
+
+  const total = useMemo(
+    () => Number((subtotal + shippingOption.price).toFixed(2)),
+    [shippingOption.price, subtotal],
+  );
+
+  const totalLabel = useMemo(() => formatCurrency(total), [total]);
 
   const handleQuantityChange = (direction: "decrease" | "increase") => {
     setCart((current) => {
@@ -282,20 +337,23 @@ export default function CartPageClient() {
 
       setShippingState({
         status: "success",
-        message: "3 dias uteis",
+        message: NORMAL_SHIPPING.eta,
         address,
       });
 
       const nextCart = {
         ...cart,
         shipping: {
+          id: NORMAL_SHIPPING.id,
           cep: formatCep(sanitizedCep),
           address,
-          eta: "3 dias uteis",
-          name: "Normal",
-          price: 0,
+          eta: NORMAL_SHIPPING.eta,
+          name: NORMAL_SHIPPING.name,
+          price: NORMAL_SHIPPING.price,
+          couponApplied: true,
         },
       };
+      setSelectedShippingId(NORMAL_SHIPPING.id);
       setCart(nextCart);
 
       await trackLeadEvent({
@@ -310,13 +368,14 @@ export default function CartPageClient() {
           state: data.uf || "",
         },
         shipping: {
-          id: "normal",
-          name: "Normal",
-          price: 0,
+          id: NORMAL_SHIPPING.id,
+          name: NORMAL_SHIPPING.name,
+          price: NORMAL_SHIPPING.price,
         },
         extra: {
-          eta: "3 dias uteis",
+          eta: NORMAL_SHIPPING.eta,
           size: cart.size,
+          couponApplied: "sim",
         },
       });
     } catch {
@@ -346,16 +405,49 @@ export default function CartPageClient() {
     });
   };
 
+  const handleSelectShipping = async (
+    option: typeof NORMAL_SHIPPING | typeof EXPRESS_SHIPPING,
+  ) => {
+    setSelectedShippingId(option.id);
+
+    setCart((current) => ({
+      ...current,
+      shipping: {
+        ...current.shipping,
+        id: option.id,
+        name: option.name,
+        price: option.price,
+        eta: option.eta,
+        couponApplied: option.id === NORMAL_SHIPPING.id,
+      },
+    }));
+
+    await trackLeadEvent({
+      event: "cart_shipping_selected",
+      stage: "carrinho",
+      page: "carrinho",
+      shipping: {
+        id: option.id,
+        name: option.name,
+        price: option.price,
+      },
+      extra: {
+        eta: option.eta,
+        couponApplied: option.id === NORMAL_SHIPPING.id ? "sim" : "nao",
+      },
+    });
+  };
+
   const handleContinue = async () => {
     await trackLeadEvent({
       event: "checkout_view",
       stage: "carrinho",
       page: "carrinho",
-      amount: subtotal,
+      amount: total,
       shipping: {
-        id: cart.shipping?.name ? "normal" : "",
-        name: cart.shipping?.name || "",
-        price: cart.shipping?.price || 0,
+        id: shippingState.status === "success" ? shippingOption.id : "",
+        name: shippingState.status === "success" ? shippingOption.name : "",
+        price: shippingState.status === "success" ? shippingOption.price : 0,
       },
       extra: {
         size: cart.size,
@@ -478,7 +570,10 @@ export default function CartPageClient() {
                 {totalLabel}
               </p>
               <p className="mt-2 text-[1rem] font-medium text-[#1b6d38]">
-                Frete gratis da campanha
+                {shippingState.status === "success" &&
+                shippingOption.id === EXPRESS_SHIPPING.id
+                  ? "Nike Expresso selecionado"
+                  : "Frete gratis da campanha"}
               </p>
             </div>
           </div>
@@ -516,18 +611,49 @@ export default function CartPageClient() {
               <p className="text-[1rem] font-medium leading-6 text-black">
                 {shippingState.address}
               </p>
-              <div className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 rounded-2xl bg-[#f5f5f5] px-4 py-4">
-                <div className="flex items-center gap-2 text-[1.15rem] font-medium text-black">
-                  <Truck className="h-5 w-5" strokeWidth={1.9} />
-                  <span>Normal</span>
-                </div>
-                <p className="text-[1.2rem] font-semibold text-[#0f6a3f]">
-                  Frete gratis
-                </p>
-                <p className="pl-7 text-[0.98rem] text-black/62">
-                  {shippingState.message}
-                </p>
+              <div className="rounded-2xl bg-[#eef8f1] px-4 py-3 text-[0.95rem] leading-6 text-[#0f6a3f]">
+                Seu cupom de frete gratis ja esta aplicado nesta entrega.
               </div>
+
+              {[NORMAL_SHIPPING, EXPRESS_SHIPPING].map((option) => {
+                const selected = selectedShippingId === option.id;
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => void handleSelectShipping(option)}
+                    className={`grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 rounded-2xl border px-4 py-4 text-left transition-colors ${
+                      selected
+                        ? "border-black bg-[#f5f5f5]"
+                        : "border-black/10 bg-white hover:bg-[#f8f8f8]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-[1.15rem] font-medium text-black">
+                      <Truck className="h-5 w-5" strokeWidth={1.9} />
+                      <span>{option.name}</span>
+                    </div>
+                    <p
+                      className={`text-[1.2rem] font-semibold ${
+                        option.price === 0 ? "text-[#0f6a3f]" : "text-black"
+                      }`}
+                    >
+                      {option.label}
+                    </p>
+                    <div className="pl-7">
+                      <p className="text-[0.98rem] text-black/62">{option.eta}</p>
+                      <p className="mt-0.5 text-[0.88rem] text-black/52">
+                        {option.note}
+                      </p>
+                    </div>
+                    {selected && (
+                      <span className="inline-flex items-center justify-end text-[0.82rem] font-medium text-black/62">
+                        Selecionado
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -583,12 +709,16 @@ export default function CartPageClient() {
           <div className="mt-6 space-y-3 text-[1.1rem]">
             <div className="flex items-center justify-between gap-4">
               <span className="text-black/74">Valor dos produtos</span>
-              <span>{totalLabel}</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-black/74">Frete</span>
               <span>
-                {shippingState.status === "success" ? "Frete gratis" : "A calcular"}
+                {shippingState.status === "success"
+                  ? shippingOption.price === 0
+                    ? "Frete gratis"
+                    : formatCurrency(shippingOption.price)
+                  : "A calcular"}
               </span>
             </div>
           </div>
