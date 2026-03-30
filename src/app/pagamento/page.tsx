@@ -4,7 +4,7 @@ import NikeCheckoutHeader from "../components/NikeCheckoutHeader";
 export default function PagamentoPage() {
   return (
     <main className="min-h-screen bg-white text-black">
-      <NikeCheckoutHeader backHref="/carrinho" />
+      <NikeCheckoutHeader backHref="/checkout" />
 
       <div className="mx-auto flex min-h-screen w-full max-w-[38rem] items-center px-4 pb-10 pt-20">
         <section className="w-full rounded-[2rem] border border-black/10 bg-[#f6f6f6] px-6 py-8">

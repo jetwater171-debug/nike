@@ -455,7 +455,7 @@ export default function CartPageClient() {
       },
     });
 
-    router.push("/pagamento");
+    router.push("/checkout");
   };
 
   const handleRemoveProduct = async () => {

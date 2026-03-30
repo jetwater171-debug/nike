@@ -8,6 +8,7 @@ const PAGE_BY_PATH: Record<string, string> = {
   "/": "home",
   "/dados": "dados",
   "/carrinho": "carrinho",
+  "/checkout": "checkout",
   "/pagamento": "checkout",
 };
 
