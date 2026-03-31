@@ -208,6 +208,19 @@ function AddressModal({
         throw new Error("cep_not_found");
       }
 
+      await trackLeadEvent({
+        event: "checkout_address_lookup_success",
+        stage: "checkout",
+        page: "checkout",
+        address: {
+          cep: formatCep(sanitizedCep),
+          street: data.logradouro || "",
+          neighborhood: data.bairro || "",
+          city: data.localidade || "",
+          state: data.uf || "",
+        },
+      });
+
       setStreet(data.logradouro || "");
       setAddressHint(
         [data.bairro, data.localidade && data.uf ? `${data.localidade}/${data.uf}` : data.localidade || data.uf]
@@ -217,6 +230,14 @@ function AddressModal({
       setLookupState("success");
       setMessage("Endereco encontrado. Agora preencha numero e complemento.");
     } catch {
+      await trackLeadEvent({
+        event: "checkout_address_lookup_error",
+        stage: "checkout",
+        page: "checkout",
+        address: {
+          cep: formatCep(sanitizedCep),
+        },
+      });
       setLookupState("error");
       setMessage("Nao foi possivel encontrar esse CEP agora.");
     }
@@ -376,11 +397,19 @@ export default function CheckoutPageClient() {
     setNumber(normalizedShipping.number || "");
     setComplement(normalizedShipping.complement || "");
 
+    const quantity = Math.max(Number(storedCart.quantity || 1), 1);
+    const totalAmount = Number(
+      (
+        Number(storedCart.priceValue || DEFAULT_OFFER_PRICE_VALUE) * quantity +
+        Number(normalizedShipping.price || 0)
+      ).toFixed(2),
+    );
+
     void trackLeadEvent({
       event: "checkout_identification_view",
       stage: "checkout",
       page: "checkout",
-      amount: Number(storedCart.priceValue || 0) || undefined,
+      amount: totalAmount || undefined,
       address: {
         cep: normalizedShipping.cep || "",
         street: normalizedShipping.street || "",
@@ -392,6 +421,10 @@ export default function CheckoutPageClient() {
         id: normalizedShipping.id || "",
         name: normalizedShipping.name || "",
         price: normalizedShipping.price || 0,
+      },
+      extra: {
+        quantity,
+        size: storedCart.size || "",
       },
     });
   }, []);
@@ -425,6 +458,10 @@ export default function CheckoutPageClient() {
       ),
     [productPriceValue],
   );
+  const quantity = useMemo(
+    () => Math.max(Number(cart.quantity || 1), 1),
+    [cart.quantity],
+  );
 
   const addressReady = Boolean(shipping.street && shipping.cep);
   const fullAddressLine = [
@@ -437,6 +474,26 @@ export default function CheckoutPageClient() {
   const locationLine = [shipping.neighborhood, shipping.city, shipping.state]
     .filter(Boolean)
     .join(", ");
+
+  const openAddressModal = async (source: string) => {
+    setIsAddressModalOpen(true);
+    await trackLeadEvent({
+      event: "checkout_address_modal_opened",
+      stage: "checkout",
+      page: "checkout",
+      address: {
+        cep: shipping.cep || "",
+        street: shipping.street || "",
+        neighborhood: shipping.neighborhood || "",
+        city: shipping.city || "",
+        state: shipping.state || "",
+      },
+      extra: {
+        source,
+        hasAddress: addressReady ? "sim" : "nao",
+      },
+    });
+  };
 
   const handleSaveAddress = async (nextShipping: CheckoutShipping) => {
     const option =
@@ -481,7 +538,7 @@ export default function CheckoutPageClient() {
 
   const handleInlineAddressSave = async () => {
     if (!addressReady || !number.trim()) {
-      setIsAddressModalOpen(true);
+      await openAddressModal("missing_number");
       return;
     }
 
@@ -549,7 +606,7 @@ export default function CheckoutPageClient() {
     const finalComplement = shipping.complement || complement;
 
     if (!addressReady || !String(finalNumber || "").trim()) {
-      setIsAddressModalOpen(true);
+      await openAddressModal("continue_without_address");
       return;
     }
 
@@ -569,7 +626,7 @@ export default function CheckoutPageClient() {
       event: "checkout_continue",
       stage: "checkout",
       page: "checkout",
-      amount: Number(cart.priceValue || 0) + shippingOption.price,
+      amount: Number((productPriceValue * quantity + shippingOption.price).toFixed(2)),
       personal: {
         name: lead.name || "",
         cpf: lead.cpf || "",
@@ -586,6 +643,8 @@ export default function CheckoutPageClient() {
       extra: {
         number: nextShipping.number || "",
         complement: nextShipping.complement || "",
+        quantity,
+        size: cart.size || "",
       },
       shipping: {
         id: nextShipping.id || "",
@@ -686,7 +745,7 @@ export default function CheckoutPageClient() {
                   )}
                   <button
                     type="button"
-                    onClick={() => setIsAddressModalOpen(true)}
+                    onClick={() => void openAddressModal("edit_existing")}
                     className="mt-3 inline-flex text-[0.98rem] font-medium underline underline-offset-4"
                   >
                     Editar endereco
@@ -732,7 +791,7 @@ export default function CheckoutPageClient() {
           ) : (
             <button
               type="button"
-              onClick={() => setIsAddressModalOpen(true)}
+              onClick={() => void openAddressModal("create_new")}
               className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full border border-black/20 px-6 text-[1rem] font-medium text-black"
             >
               Cadastrar endereco

@@ -617,6 +617,18 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     setActiveModal(null);
   };
 
+  const handleProgressContinue = async () => {
+    await trackLeadEvent({
+      event: "promo_progress_continue",
+      stage: "promo",
+      page: "promo",
+      extra: {
+        rewardsFound: 1,
+      },
+    });
+    closeActiveModal();
+  };
+
   const startGame = () => {
     clearProgressModalTimeout();
     setGrid(createHiddenGrid());
@@ -662,6 +674,9 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     nextGrid[index] = prize;
     setGrid(nextGrid);
     setClicks(newClicks);
+    const nextRewardsFound = nextGrid.filter(
+      (cell) => cell === "shipping" || cell === "coupon",
+    ).length;
 
     if (prize === "shipping") {
       void playGameSound("shipping");
@@ -677,6 +692,11 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
           reward: {
             id: "shipping",
             name: "Frete gratis",
+          },
+          extra: {
+            attempt: newClicks,
+            cellIndex: index + 1,
+            rewardsFound: nextRewardsFound,
           },
         });
         progressModalTimeoutRef.current = null;
@@ -713,12 +733,27 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
             id: "coupon",
             name: "Desconto liberado",
           },
+          extra: {
+            attempt: newClicks,
+            cellIndex: index + 1,
+            rewardsFound: 2,
+          },
         });
         progressModalTimeoutRef.current = null;
       }, 1600);
       return;
     }
 
+    void trackLeadEvent({
+      event: "promo_empty_pick",
+      stage: "promo",
+      page: "promo",
+      extra: {
+        attempt: newClicks,
+        cellIndex: index + 1,
+        rewardsFound: nextRewardsFound,
+      },
+    });
     void playGameSound("empty");
   };
 
@@ -802,7 +837,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
               <button
                 type="button"
-                onClick={closeActiveModal}
+                onClick={() => void handleProgressContinue()}
                 className="promo-modal-cta mt-6 inline-flex min-h-12 w-full touch-manipulation select-none items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Continuar rodada

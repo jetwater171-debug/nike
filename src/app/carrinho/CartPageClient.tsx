@@ -238,16 +238,32 @@ export default function CartPageClient() {
   const totalLabel = useMemo(() => formatCurrency(total), [total]);
 
   const handleQuantityChange = (direction: "decrease" | "increase") => {
-    setCart((current) => {
-      const nextQuantity =
-        direction === "increase"
-          ? Math.min(current.quantity + 1, 5)
-          : Math.max(current.quantity - 1, 1);
+    const nextQuantity =
+      direction === "increase"
+        ? Math.min(cart.quantity + 1, 5)
+        : Math.max(cart.quantity - 1, 1);
 
+    if (nextQuantity === cart.quantity) {
+      return;
+    }
+
+    setCart((current) => {
       return {
         ...current,
         quantity: nextQuantity,
       };
+    });
+
+    void trackLeadEvent({
+      event: "cart_quantity_changed",
+      stage: "carrinho",
+      page: "carrinho",
+      amount: Number((cart.priceValue * nextQuantity).toFixed(2)),
+      extra: {
+        direction,
+        quantity: nextQuantity,
+        size: cart.size,
+      },
     });
   };
 
@@ -343,6 +359,14 @@ export default function CartPageClient() {
         },
       });
     } catch {
+      await trackLeadEvent({
+        event: "cart_shipping_lookup_error",
+        stage: "carrinho",
+        page: "carrinho",
+        address: {
+          cep: formatCep(sanitizedCep),
+        },
+      });
       setShippingState({
         status: "error",
         message: "Nao foi possivel consultar esse CEP agora. Tente novamente.",
@@ -457,7 +481,14 @@ export default function CartPageClient() {
             <button
               type="button"
               aria-label="Fechar aviso"
-              onClick={() => setNoticeVisible(false)}
+              onClick={() => {
+                setNoticeVisible(false);
+                void trackLeadEvent({
+                  event: "cart_notice_dismissed",
+                  stage: "carrinho",
+                  page: "carrinho",
+                });
+              }}
               className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-black/[0.05]"
             >
               <X className="h-5 w-5" strokeWidth={1.8} />

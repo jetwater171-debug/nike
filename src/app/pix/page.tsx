@@ -501,6 +501,16 @@ export default function PixPage() {
 
   const handleShowQr = () => {
     setActiveAccordion("qr");
+    void trackLeadEvent({
+      event: "pix_qr_opened",
+      stage: "pix",
+      page: "pix",
+      amount: totalPriceValue,
+      pix: {
+        txid: pix?.idTransaction || "",
+        gateway: pix?.gateway || "",
+      },
+    });
     window.setTimeout(() => {
       qrSectionRef.current?.scrollIntoView({
         behavior: "smooth",

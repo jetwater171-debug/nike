@@ -1,5 +1,5 @@
-import Link from "next/link";
 import HeroScrollVideo from "./components/HeroScrollVideo";
+import LandingUnlockButton from "./components/LandingUnlockButton";
 import NikeLiquidHeader from "./components/NikeLiquidHeader";
 
 export default function Home() {
@@ -48,12 +48,7 @@ export default function Home() {
             </div>
 
             <div className="liquid-cta-wrap relative z-20 mt-6 w-full">
-              <Link
-                href="/mines"
-                className="liquid-cta font-hero inline-flex min-h-[4.2rem] w-full items-center justify-center rounded-full px-7 text-[1.72rem] tracking-[0.04em] text-white hover:-translate-y-0.5 sm:min-h-[4.7rem] sm:text-[1.96rem]"
-              >
-                <span className="liquid-cta-label relative z-10">Desbloquear a oferta</span>
-              </Link>
+              <LandingUnlockButton className="liquid-cta font-hero inline-flex min-h-[4.2rem] w-full items-center justify-center rounded-full px-7 text-[1.72rem] tracking-[0.04em] text-white hover:-translate-y-0.5 sm:min-h-[4.7rem] sm:text-[1.96rem]" />
             </div>
 
             <p className="relative z-20 mt-4 text-[0.74rem] uppercase tracking-[0.24em] text-white/[0.4] sm:text-[0.78rem]">
