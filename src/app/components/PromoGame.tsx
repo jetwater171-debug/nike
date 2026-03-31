@@ -151,21 +151,21 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
         frequency: 248,
         startAt: now,
         duration: 0.11,
-        volume: 0.012,
+        volume: 0.02,
         type: "triangle",
       });
       playTone(context, {
         frequency: 196,
         startAt: now + 0.08,
         duration: 0.16,
-        volume: 0.01,
+        volume: 0.016,
         type: "sine",
       });
       playTone(context, {
         frequency: 156,
         startAt: now + 0.19,
         duration: 0.22,
-        volume: 0.008,
+        volume: 0.013,
         type: "sine",
       });
       return;
@@ -537,21 +537,24 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
         <div className="liquid-panel relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] p-5 shadow-2xl backdrop-blur-xl sm:p-8">
           <div className="pointer-events-none absolute left-1/2 top-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(255,255,255,0.03)_0%,transparent_70%)]" />
 
-          <div className="relative z-10 mb-5 flex justify-center text-center sm:mb-6">
+          <div className="relative z-10 mb-5 flex flex-col items-center justify-center text-center sm:mb-6">
             <div className="inline-flex items-center rounded-full border border-white/[0.1] bg-white/[0.05] px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white/[0.72]">
               {rewardsFound}/2 premios encontrados
             </div>
+            <p className="mt-4 max-w-sm text-[0.85rem] leading-[1.6] text-white/[0.68] sm:max-w-md sm:text-[0.9rem] sm:leading-[1.7]">
+              Algumas casas escondem prêmios, umas estão vazias e tem <strong className="font-semibold text-white/90">4 bombas</strong> espalhadas. Você deve acertar 2 prêmios sem clicar em nenhuma das bombas!
+            </p>
           </div>
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
               <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.2)] backdrop-blur-[0.5px]" />
               <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(3,3,3,0.005)_24%,rgba(3,3,3,0.08)_66%,rgba(3,3,3,0.18)_100%)]" />
-              <div className="promo-pop relative z-10 flex max-w-md flex-col items-center rounded-[1.7rem] border border-white/[0.08] bg-black/[0.58] px-5 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-7 sm:py-7">
+              <div className="promo-pop relative z-10 flex min-h-[16rem] w-full max-w-[25rem] flex-col items-center justify-center rounded-[1.7rem] border border-white/[0.08] bg-black/[0.64] px-6 py-7 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:min-h-[18.5rem] sm:max-w-[29rem] sm:px-9 sm:py-9">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
                 </p>
-                <h3 className="font-hero mt-4 text-[1.7rem] text-white sm:text-[2.3rem]">
+                <h3 className="font-hero mt-4 text-[2.05rem] text-white sm:text-[2.9rem]">
                   Liberar rodada
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-white/[0.66]">
