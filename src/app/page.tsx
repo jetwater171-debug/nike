@@ -21,7 +21,7 @@ export default function Home() {
 
             <h1 className="font-hero mt-3 leading-[0.88] text-white">
               <span className="block whitespace-nowrap text-[clamp(2.15rem,8.5vw,4.5rem)]">
-                Promocao exclusiva
+                Promoção exclusiva
               </span>
               <span className="mt-0.5 block whitespace-nowrap text-[clamp(2.15rem,8.2vw,4.5rem)] text-white/[0.64]">
                 camisa do Brasil
@@ -30,7 +30,7 @@ export default function Home() {
 
             <p className="mx-auto mt-4 max-w-[30rem] text-[0.9rem] leading-6 text-white/[0.72] sm:text-[0.98rem] sm:leading-7">
               Desbloqueie ate 80% OFF na nova camisa da Selecao Brasileira em
-              uma promocao relampago feita para liberar sua melhor oferta.
+              uma promoção relampago feita para liberar sua melhor oferta.
             </p>
           </div>
 
