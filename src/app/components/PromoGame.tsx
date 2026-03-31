@@ -547,7 +547,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
               <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.2)] backdrop-blur-[0.5px]" />
               <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(3,3,3,0.005)_24%,rgba(3,3,3,0.08)_66%,rgba(3,3,3,0.18)_100%)]" />
-              <div className="promo-pop relative z-10 flex min-h-[16rem] w-full max-w-[25rem] flex-col items-center justify-center rounded-[1.7rem] border border-white/[0.08] bg-black/[0.64] px-6 py-7 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:min-h-[18.5rem] sm:max-w-[29rem] sm:px-9 sm:py-9">
+              <div className="promo-pop relative z-10 flex h-full w-full flex-col items-center justify-center rounded-[inherit] border border-white/[0.08] bg-black/[0.64] px-6 py-7 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-9 sm:py-9">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
                 </p>
