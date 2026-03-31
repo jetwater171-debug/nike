@@ -33,10 +33,10 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-1 flex w-full max-w-[25rem] flex-col items-center sm:mt-2 sm:max-w-[29rem]">
-            <HeroScrollVideo className="-mt-4 sm:-mt-6 lg:-mt-8 sm:max-w-[25rem] lg:max-w-[27.5rem]" />
+          <div className="mt-0 flex w-full max-w-[26rem] flex-col items-center sm:mt-1 sm:max-w-[30rem]">
+            <HeroScrollVideo className="-mt-2 sm:-mt-3 lg:-mt-4 sm:max-w-[25.5rem] lg:max-w-[28rem]" />
 
-            <div className="-mt-8 text-center sm:-mt-10">
+            <div className="-mt-12 text-center sm:-mt-14">
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-white/[0.56] sm:text-[0.8rem]">
                 De <span className="line-through">R$ 749,99</span>
               </p>
