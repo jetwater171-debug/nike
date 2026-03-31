@@ -545,9 +545,9 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
-              <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.2)] backdrop-blur-[0.5px]" />
-              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(3,3,3,0.005)_24%,rgba(3,3,3,0.08)_66%,rgba(3,3,3,0.18)_100%)]" />
-              <div className="promo-pop relative z-10 flex h-full w-full flex-col items-center justify-center rounded-[inherit] border border-white/[0.08] bg-black/[0.64] px-6 py-7 text-center shadow-[0_20px_60px_rgba(0,0,0,0.34)] backdrop-blur-md sm:px-9 sm:py-9">
+              <div className="absolute inset-0 rounded-[inherit] bg-black/[0.26] backdrop-blur-[1.5px]" />
+              <div className="absolute inset-0 rounded-[inherit] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(7,7,7,0.16)_32%,rgba(5,5,5,0.28)_100%)]" />
+              <div className="promo-pop relative z-10 flex h-full w-full flex-col items-center justify-center rounded-[2.15rem] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(18,18,18,0.8),rgba(9,9,9,0.74))] px-6 py-7 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_22px_60px_rgba(0,0,0,0.36)] backdrop-blur-xl sm:rounded-[2.35rem] sm:px-9 sm:py-9">
                 <p className="text-[0.64rem] uppercase tracking-[0.28em] text-white/[0.42]">
                   Rodada travada
                 </p>
