@@ -6,6 +6,7 @@ import { initTrackingForPage } from "@/lib/site-tracking";
 
 const PAGE_BY_PATH: Record<string, string> = {
   "/": "home",
+  "/mines": "promo",
   "/dados": "dados",
   "/carrinho": "carrinho",
   "/checkout": "checkout",

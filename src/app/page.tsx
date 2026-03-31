@@ -1,111 +1,64 @@
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import HeroScrollVideo from "./components/HeroScrollVideo";
 import NikeLiquidHeader from "./components/NikeLiquidHeader";
 
-const PromoGame = dynamic(() => import("./components/PromoGame"), {
-  ssr: false,
-  loading: () => <PromoGameSkeleton />,
-});
-
-const productUrl =
-  "https://www.nike.com.br/camisa-brasil-jordan-ii-2026-27-jogador-masculina-097619.html";
-
-const mobileSignals = ["Aero-FIT", "Design autentico", "P ao GGG"];
-
-function PromoGameSkeleton() {
-  return (
-    <section
-      aria-hidden="true"
-      className="section-shell relative mx-auto w-full max-w-4xl scroll-mt-24 px-4 py-16 sm:px-8 lg:px-12"
-    >
-      <div className="liquid-panel mx-auto max-w-lg overflow-hidden p-6 sm:p-10">
-        <div className="mx-auto h-10 w-48 rounded-full bg-white/[0.08]" />
-        <div className="mx-auto mt-4 h-4 w-full max-w-sm rounded-full bg-white/[0.06]" />
-        <div className="mx-auto mt-2 h-4 w-5/6 rounded-full bg-white/[0.05]" />
-
-        <div className="mx-auto mt-10 grid w-full max-w-[280px] grid-cols-4 gap-3 sm:max-w-[340px] sm:gap-4">
-          {Array.from({ length: 16 }).map((_, index) => (
-            <div
-              key={index}
-              className="aspect-square rounded-2xl border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] sm:rounded-[1.25rem]"
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden pb-28 text-white selection:bg-white selection:text-black md:pb-0">
+    <main className="relative min-h-screen overflow-hidden bg-black text-white selection:bg-white selection:text-black">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0)_46%,rgba(0,0,0,0.22)_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,rgba(0,0,0,0)_24%,rgba(0,0,0,0.18)_100%)]" />
       </div>
 
       <NikeLiquidHeader />
 
-      <section className="relative mx-auto flex min-h-screen w-full max-w-7xl items-center px-4 pb-16 pt-24 sm:px-8 lg:px-12">
-        <div className="w-full space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-4">
-            <div className="liquid-panel p-5 sm:p-8 sm:pr-5 lg:pr-6">
-              <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left">
-                <h1 className="font-hero w-full max-w-none text-[3.05rem] leading-[0.88] text-white sm:text-[4.25rem] lg:max-w-[11ch] lg:text-[5.7rem]">
-                  Promocao Mines
-                  <span className="mt-1 block text-[0.84em] text-white/[0.62] sm:mt-2 sm:text-[1em]">
-                    de cupons Nike
-                  </span>
-                </h1>
+      <section className="relative mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-4 pb-12 pt-24 sm:px-8 sm:pb-16 lg:px-12">
+        <div className="flex w-full max-w-[46rem] flex-col items-center text-center">
+          <div className="liquid-panel w-full max-w-[42rem] px-5 py-7 sm:px-8 sm:py-9">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-white/[0.48] sm:text-[0.76rem]">
+              Campanha promocional Nike
+            </p>
 
-                <p className="mt-4 max-w-[30rem] text-[0.94rem] leading-7 text-white/[0.72] sm:mt-5 sm:text-base sm:leading-8">
-                  Essa promocao exclusiva da Nike te coloca em um mini jogo
-                  onde voce pode encontrar cupons com descontasso na nova
-                  camisa da Selecao Brasileira para a Copa de 2026. Desca a
-                  pagina, entre na rodada e tente acertar 2 cupons.
-                </p>
+            <h1 className="font-hero mt-4 text-[2.95rem] leading-[0.88] text-white sm:text-[4.7rem] lg:text-[5.7rem]">
+              Promocao exclusiva
+              <span className="mt-1 block text-white/[0.64]">
+                camisa do Brasil
+              </span>
+            </h1>
 
-                <Link
-                  href="#promo"
-                  className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.06] px-5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white/[0.88] transition-colors duration-300 hover:border-white/25 hover:bg-white/10 sm:mt-7 sm:min-h-12 sm:px-7 sm:text-sm sm:tracking-[0.18em]"
-                >
-                  Rolar para iniciar
-                </Link>
-              </div>
-            </div>
-
-            <HeroScrollVideo className="lg:-mr-2" />
+            <p className="mx-auto mt-5 max-w-[34rem] text-[0.98rem] leading-7 text-white/[0.72] sm:text-[1.08rem] sm:leading-8">
+              Desbloqueie ate 80% OFF na nova camisa da Selecao Brasileira em
+              uma promocao relampago criada para liberar sua melhor oferta em
+              poucos toques.
+            </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 px-1 md:hidden">
-            {mobileSignals.map((signal) => (
-              <div
-                key={signal}
-                className="rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3 text-center text-[0.62rem] uppercase tracking-[0.24em] text-white/[0.62]"
-              >
-                {signal}
-              </div>
-            ))}
+          <div className="mt-4 flex w-full max-w-[24rem] flex-col items-center sm:mt-6 sm:max-w-[28rem]">
+            <HeroScrollVideo className="sm:max-w-[24rem] lg:max-w-[26rem]" />
+
+            <div className="-mt-3 text-center sm:-mt-4">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.8rem]">
+                De <span className="line-through">R$ 749,99</span>
+              </p>
+              <p className="font-hero mt-2 text-[2.35rem] leading-[0.9] text-white sm:text-[3.2rem]">
+                podendo chegar a
+                <span className="mt-1 block text-emerald-400">R$ 139,19</span>
+              </p>
+            </div>
+
+            <Link
+              href="/mines"
+              className="mt-6 inline-flex min-h-[3.9rem] w-full items-center justify-center rounded-full border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.07))] px-7 text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_24px_60px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.1))] hover:shadow-[0_28px_70px_rgba(0,0,0,0.58)] sm:min-h-[4.3rem] sm:text-[0.92rem]"
+            >
+              Desbloquear desconto
+            </Link>
+
+            <p className="mt-4 text-[0.74rem] uppercase tracking-[0.24em] text-white/[0.4] sm:text-[0.78rem]">
+              Oferta por tempo limitado
+            </p>
           </div>
         </div>
       </section>
-
-      <PromoGame claimHref="/dados" />
-
-      <footer className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 text-sm text-white/40 sm:px-8 lg:px-12">
-        <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p>Camisa Brasil Jordan II 2026/27 Jogador Masculina em campanha promocional.</p>
-          <Link
-            href={productUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="uppercase tracking-[0.24em] text-white/[0.58] transition-colors hover:text-white"
-          >
-            Fonte oficial Nike
-          </Link>
-        </div>
-      </footer>
-
     </main>
   );
 }
