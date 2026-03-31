@@ -14,7 +14,7 @@ export default function Home() {
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-4 pb-12 pt-24 sm:px-8 sm:pb-16 lg:px-12">
         <div className="flex w-full max-w-[46rem] flex-col items-center text-center">
-          <div className="liquid-panel w-full max-w-[42rem] px-5 py-7 sm:px-8 sm:py-9">
+          <div className="liquid-panel relative z-20 w-full max-w-[42rem] px-5 py-7 sm:px-8 sm:py-9">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-white/[0.48] sm:text-[0.76rem]">
               Campanha promocional Nike
             </p>
@@ -33,10 +33,10 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-0 flex w-full max-w-[26rem] flex-col items-center sm:mt-1 sm:max-w-[30rem]">
-            <HeroScrollVideo className="-mt-1 sm:-mt-2 lg:-mt-2 sm:max-w-[25.5rem] lg:max-w-[28rem]" />
+          <div className="relative -mt-2 flex w-full max-w-[26rem] flex-col items-center sm:-mt-3 sm:max-w-[30rem]">
+            <HeroScrollVideo className="relative z-0 sm:max-w-[25.5rem] lg:max-w-[28rem]" />
 
-            <div className="-mt-12 text-center sm:-mt-14">
+            <div className="relative z-20 -mt-8 text-center sm:-mt-10">
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-white/[0.56] sm:text-[0.8rem]">
                 De <span className="line-through">R$ 749,99</span>
               </p>
@@ -48,12 +48,12 @@ export default function Home() {
 
             <Link
               href="/mines"
-              className="mt-6 inline-flex min-h-[3.9rem] w-full items-center justify-center rounded-full border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.07))] px-7 text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_24px_60px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.1))] hover:shadow-[0_28px_70px_rgba(0,0,0,0.58)] sm:min-h-[4.3rem] sm:text-[0.92rem]"
+              className="relative z-20 mt-6 inline-flex min-h-[3.9rem] w-full items-center justify-center rounded-full border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.07))] px-7 text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_24px_60px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.1))] hover:shadow-[0_28px_70px_rgba(0,0,0,0.58)] sm:min-h-[4.3rem] sm:text-[0.92rem]"
             >
               Desbloquear desconto
             </Link>
 
-            <p className="mt-4 text-[0.74rem] uppercase tracking-[0.24em] text-white/[0.4] sm:text-[0.78rem]">
+            <p className="relative z-20 mt-4 text-[0.74rem] uppercase tracking-[0.24em] text-white/[0.4] sm:text-[0.78rem]">
               Oferta por tempo limitado
             </p>
           </div>
