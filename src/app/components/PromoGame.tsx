@@ -537,13 +537,10 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
         <div className="liquid-panel relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] p-5 shadow-2xl backdrop-blur-xl sm:p-8">
           <div className="pointer-events-none absolute left-1/2 top-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(255,255,255,0.03)_0%,transparent_70%)]" />
 
-          <div className="relative z-10 mb-5 flex flex-col items-center justify-center text-center sm:mb-6">
+          <div className="relative z-10 mb-5 flex justify-center text-center sm:mb-6">
             <div className="inline-flex items-center rounded-full border border-white/[0.1] bg-white/[0.05] px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white/[0.72]">
               {rewardsFound}/2 premios encontrados
             </div>
-            <p className="mt-4 max-w-sm text-[0.85rem] leading-[1.6] text-white/[0.68] sm:max-w-md sm:text-[0.9rem] sm:leading-[1.7]">
-              Algumas casas escondem prêmios, umas estão vazias e tem <strong className="font-semibold text-white/90">4 bombas</strong> espalhadas. Você deve acertar 2 prêmios sem clicar em nenhuma das bombas!
-            </p>
           </div>
 
           {!gameStarted && (

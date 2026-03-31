@@ -25,8 +25,8 @@ export default function MinesPage() {
             </span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-[31rem] text-[0.9rem] leading-6 text-white/[0.72] sm:text-[0.98rem] sm:leading-7">
-            Teste sua sorte na nova promoção da Nike! Seu objetivo é acertar 2 premios sem clicar em nenhuma das 4 bombas. Boa sorte!
+          <p className="mx-auto mt-4 max-w-[31rem] text-[0.93rem] leading-6 text-white/[0.72] sm:text-[1.02rem] sm:leading-7">
+            Algumas casas escondem prêmios, umas estão vazias e tem <strong className="font-semibold text-white/90">4 bombas</strong> espalhadas. Você deve acertar 2 prêmios sem clicar em nenhuma das bombas!
           </p>
         </div>
 
