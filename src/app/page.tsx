@@ -21,7 +21,7 @@ export default function Home() {
 
             <h1 className="font-hero mt-3 leading-[0.88] text-white">
               <span className="block whitespace-nowrap text-[clamp(2.15rem,8.5vw,4.5rem)]">
-                Promoção exclusiva
+                Promocao exclusiva
               </span>
               <span className="mt-0.5 block whitespace-nowrap text-[clamp(2.15rem,8.2vw,4.5rem)] text-white/[0.64]">
                 camisa do Brasil
@@ -30,7 +30,7 @@ export default function Home() {
 
             <p className="mx-auto mt-4 max-w-[30rem] text-[0.9rem] leading-6 text-white/[0.72] sm:text-[0.98rem] sm:leading-7">
               Desbloqueie ate 80% OFF na nova camisa da Selecao Brasileira em
-              uma promoção relampago feita para liberar sua melhor oferta.
+              uma promocao relampago feita para liberar sua melhor oferta.
             </p>
           </div>
 
@@ -49,9 +49,9 @@ export default function Home() {
 
             <Link
               href="/mines"
-              className="relative z-20 mt-6 inline-flex min-h-[3.9rem] w-full items-center justify-center rounded-full border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.07))] px-7 text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_24px_60px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.1))] hover:shadow-[0_28px_70px_rgba(0,0,0,0.58)] sm:min-h-[4.3rem] sm:text-[0.92rem]"
+              className="relative z-20 mt-6 inline-flex min-h-[3.9rem] w-full items-center justify-center rounded-full border border-white/24 bg-[linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08))] px-7 text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_26px_70px_rgba(0,0,0,0.46),inset_0_1px_0_rgba(255,255,255,0.14),0_0_34px_rgba(52,211,153,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/34 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.26),rgba(255,255,255,0.12))] hover:shadow-[0_32px_84px_rgba(0,0,0,0.56),inset_0_1px_0_rgba(255,255,255,0.18),0_0_42px_rgba(52,211,153,0.18)] sm:min-h-[4.3rem] sm:text-[0.92rem]"
             >
-              Desbloquear desconto
+              Desbloquear a oferta
             </Link>
 
             <p className="relative z-20 mt-4 text-[0.74rem] uppercase tracking-[0.24em] text-white/[0.4] sm:text-[0.78rem]">
