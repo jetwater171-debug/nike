@@ -37,7 +37,7 @@ export default function Home() {
             <HeroScrollVideo className="-mt-4 sm:-mt-6 lg:-mt-8 sm:max-w-[25rem] lg:max-w-[27.5rem]" />
 
             <div className="-mt-8 text-center sm:-mt-10">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-white/[0.42] sm:text-[0.8rem]">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-white/[0.56] sm:text-[0.8rem]">
                 De <span className="line-through">R$ 749,99</span>
               </p>
               <p className="font-hero mt-2 text-[2.35rem] leading-[0.9] text-white sm:text-[3.2rem]">
