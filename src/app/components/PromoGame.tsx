@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Truck, Ticket } from "lucide-react";
@@ -9,8 +8,210 @@ import { trackLeadEvent, trackPageView } from "@/lib/site-tracking";
 
 type CellState = "hidden" | "empty" | "shipping" | "coupon" | "bomb";
 type ModalState = "progress" | "success" | null;
+type ConfettiVariant = "shipping" | "coupon";
 type PromoGameProps = {
   claimHref: string;
+};
+
+type PromoConfettiPiece = {
+  left: string;
+  width: number;
+  height: number;
+  delayMs: number;
+  durationMs: number;
+  drift: string;
+  rotate: string;
+  scale: number;
+};
+
+type PromoConfettiStyle = React.CSSProperties & {
+  "--promo-confetti-delay": string;
+  "--promo-confetti-duration": string;
+  "--promo-confetti-drift": string;
+  "--promo-confetti-rotate": string;
+  "--promo-confetti-scale": string;
+};
+
+const PROMO_CONFETTI_PIECES: PromoConfettiPiece[] = [
+  {
+    left: "4%",
+    width: 10,
+    height: 24,
+    delayMs: 0,
+    durationMs: 1240,
+    drift: "-28px",
+    rotate: "-18deg",
+    scale: 0.88,
+  },
+  {
+    left: "10%",
+    width: 12,
+    height: 18,
+    delayMs: 70,
+    durationMs: 1420,
+    drift: "30px",
+    rotate: "22deg",
+    scale: 1.04,
+  },
+  {
+    left: "15%",
+    width: 8,
+    height: 22,
+    delayMs: 110,
+    durationMs: 1360,
+    drift: "-18px",
+    rotate: "-32deg",
+    scale: 0.96,
+  },
+  {
+    left: "21%",
+    width: 14,
+    height: 14,
+    delayMs: 20,
+    durationMs: 1180,
+    drift: "14px",
+    rotate: "34deg",
+    scale: 1.08,
+  },
+  {
+    left: "27%",
+    width: 11,
+    height: 26,
+    delayMs: 90,
+    durationMs: 1480,
+    drift: "-34px",
+    rotate: "-20deg",
+    scale: 0.92,
+  },
+  {
+    left: "33%",
+    width: 9,
+    height: 18,
+    delayMs: 160,
+    durationMs: 1280,
+    drift: "22px",
+    rotate: "30deg",
+    scale: 1.02,
+  },
+  {
+    left: "40%",
+    width: 14,
+    height: 24,
+    delayMs: 30,
+    durationMs: 1440,
+    drift: "-12px",
+    rotate: "-24deg",
+    scale: 1.1,
+  },
+  {
+    left: "46%",
+    width: 8,
+    height: 16,
+    delayMs: 120,
+    durationMs: 1160,
+    drift: "12px",
+    rotate: "18deg",
+    scale: 0.9,
+  },
+  {
+    left: "51%",
+    width: 12,
+    height: 28,
+    delayMs: 40,
+    durationMs: 1500,
+    drift: "-8px",
+    rotate: "-14deg",
+    scale: 1.14,
+  },
+  {
+    left: "58%",
+    width: 9,
+    height: 20,
+    delayMs: 145,
+    durationMs: 1300,
+    drift: "26px",
+    rotate: "28deg",
+    scale: 0.98,
+  },
+  {
+    left: "64%",
+    width: 13,
+    height: 16,
+    delayMs: 60,
+    durationMs: 1200,
+    drift: "-22px",
+    rotate: "-28deg",
+    scale: 1.06,
+  },
+  {
+    left: "70%",
+    width: 10,
+    height: 24,
+    delayMs: 95,
+    durationMs: 1460,
+    drift: "18px",
+    rotate: "24deg",
+    scale: 0.94,
+  },
+  {
+    left: "76%",
+    width: 12,
+    height: 18,
+    delayMs: 15,
+    durationMs: 1260,
+    drift: "-30px",
+    rotate: "-34deg",
+    scale: 0.96,
+  },
+  {
+    left: "82%",
+    width: 8,
+    height: 22,
+    delayMs: 105,
+    durationMs: 1380,
+    drift: "28px",
+    rotate: "16deg",
+    scale: 1.08,
+  },
+  {
+    left: "89%",
+    width: 11,
+    height: 16,
+    delayMs: 65,
+    durationMs: 1340,
+    drift: "-20px",
+    rotate: "-18deg",
+    scale: 0.9,
+  },
+  {
+    left: "94%",
+    width: 9,
+    height: 20,
+    delayMs: 150,
+    durationMs: 1220,
+    drift: "16px",
+    rotate: "36deg",
+    scale: 1.04,
+  },
+];
+
+const PROMO_CONFETTI_COLORS: Record<ConfettiVariant, string[]> = {
+  shipping: [
+    "#f8fafc",
+    "#7dd3fc",
+    "#38bdf8",
+    "#93c5fd",
+    "#c4b5fd",
+    "#67e8f9",
+  ],
+  coupon: [
+    "#f8fafc",
+    "#facc15",
+    "#4ade80",
+    "#86efac",
+    "#34d399",
+    "#fde68a",
+  ],
 };
 
 function NikeSwoosh({ className }: { className?: string }) {
@@ -41,6 +242,33 @@ function PromoModalPortal({ children }: { children: React.ReactNode }) {
   return createPortal(children, document.body);
 }
 
+function PromoConfetti({ variant }: { variant: ConfettiVariant }) {
+  const colors = PROMO_CONFETTI_COLORS[variant];
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+    >
+      {PROMO_CONFETTI_PIECES.map((piece, index) => {
+        const style: PromoConfettiStyle = {
+          left: piece.left,
+          width: `${piece.width}px`,
+          height: `${piece.height}px`,
+          backgroundColor: colors[index % colors.length],
+          "--promo-confetti-delay": `${piece.delayMs}ms`,
+          "--promo-confetti-duration": `${piece.durationMs}ms`,
+          "--promo-confetti-drift": piece.drift,
+          "--promo-confetti-rotate": piece.rotate,
+          "--promo-confetti-scale": `${piece.scale}`,
+        };
+
+        return <span key={`${variant}-${index}`} className="promo-confetti" style={style} />;
+      })}
+    </div>
+  );
+}
+
 export default function PromoGame({ claimHref }: PromoGameProps) {
   const router = useRouter();
   const [grid, setGrid] = useState<CellState[]>(createHiddenGrid);
@@ -53,6 +281,18 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
   const progressModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const scrollLockRef = useRef<{
+    scrollY: number;
+    bodyPosition: string;
+    bodyTop: string;
+    bodyLeft: string;
+    bodyRight: string;
+    bodyWidth: string;
+    bodyOverflow: string;
+    bodyScrollBehavior: string;
+    htmlOverflow: string;
+    htmlScrollBehavior: string;
+  } | null>(null);
 
   const getAudioContext = async () => {
     if (typeof window === "undefined") {
@@ -118,6 +358,50 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     oscillator.stop(startAt + duration + 0.04);
   };
 
+  const playNoiseBurst = (
+    context: AudioContext,
+    {
+      startAt,
+      duration,
+      volume,
+      centerFrequency,
+    }: {
+      startAt: number;
+      duration: number;
+      volume: number;
+      centerFrequency: number;
+    },
+  ) => {
+    const frameCount = Math.max(1, Math.floor(context.sampleRate * duration));
+    const buffer = context.createBuffer(1, frameCount, context.sampleRate);
+    const channel = buffer.getChannelData(0);
+
+    for (let index = 0; index < frameCount; index += 1) {
+      channel[index] = (Math.random() * 2 - 1) * (1 - index / frameCount);
+    }
+
+    const source = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const gainNode = context.createGain();
+
+    source.buffer = buffer;
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(centerFrequency, startAt);
+    filter.Q.setValueAtTime(1.1, startAt);
+
+    gainNode.gain.setValueAtTime(volume, startAt);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.0001,
+      startAt + duration,
+    );
+
+    source.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(context.destination);
+    source.start(startAt);
+    source.stop(startAt + duration + 0.03);
+  };
+
   const playGameSound = async (
     kind: "start" | "empty" | "shipping" | "coupon",
   ) => {
@@ -172,49 +456,82 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     }
 
     if (kind === "shipping") {
-      playTone(context, {
-        frequency: 520,
+      playNoiseBurst(context, {
         startAt: now,
-        duration: 0.11,
-        volume: 0.015,
+        duration: 0.18,
+        volume: 0.006,
+        centerFrequency: 1200,
+      });
+      playTone(context, {
+        frequency: 462,
+        startAt: now,
+        duration: 0.14,
+        volume: 0.014,
         type: "triangle",
       });
       playTone(context, {
-        frequency: 700,
-        startAt: now + 0.08,
-        duration: 0.14,
+        frequency: 620,
+        startAt: now + 0.07,
+        duration: 0.18,
         volume: 0.018,
         type: "sine",
       });
       playTone(context, {
-        frequency: 860,
+        frequency: 740,
         startAt: now + 0.16,
         duration: 0.2,
-        volume: 0.016,
+        volume: 0.014,
+        type: "sine",
+      });
+      playTone(context, {
+        frequency: 934,
+        startAt: now + 0.24,
+        duration: 0.26,
+        volume: 0.012,
         type: "sine",
       });
       return;
     }
 
-    playTone(context, {
-      frequency: 480,
+    playNoiseBurst(context, {
       startAt: now,
-      duration: 0.12,
-      volume: 0.018,
+      duration: 0.22,
+      volume: 0.008,
+      centerFrequency: 1800,
+    });
+    playTone(context, {
+      frequency: 310,
+      startAt: now,
+      duration: 0.18,
+      volume: 0.012,
       type: "triangle",
     });
     playTone(context, {
-      frequency: 660,
-      startAt: now + 0.08,
-      duration: 0.16,
-      volume: 0.02,
+      frequency: 620,
+      startAt: now + 0.02,
+      duration: 0.18,
+      volume: 0.017,
+      type: "triangle",
+    });
+    playTone(context, {
+      frequency: 784,
+      startAt: now + 0.1,
+      duration: 0.22,
+      volume: 0.016,
       type: "sine",
     });
     playTone(context, {
-      frequency: 920,
-      startAt: now + 0.16,
-      duration: 0.24,
-      volume: 0.018,
+      frequency: 932,
+      startAt: now + 0.18,
+      duration: 0.26,
+      volume: 0.015,
+      type: "sine",
+    });
+    playTone(context, {
+      frequency: 1244,
+      startAt: now + 0.28,
+      duration: 0.34,
+      volume: 0.012,
       type: "sine",
     });
   };
@@ -235,30 +552,68 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
       return;
     }
 
-    const scrollY = window.scrollY;
-    const previousBodyPosition = document.body.style.position;
-    const previousBodyTop = document.body.style.top;
-    const previousBodyWidth = document.body.style.width;
-    const previousBodyOverflow = document.body.style.overflow;
-    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const lockState = {
+      scrollY: window.scrollY,
+      bodyPosition: document.body.style.position,
+      bodyTop: document.body.style.top,
+      bodyLeft: document.body.style.left,
+      bodyRight: document.body.style.right,
+      bodyWidth: document.body.style.width,
+      bodyOverflow: document.body.style.overflow,
+      bodyScrollBehavior: document.body.style.scrollBehavior,
+      htmlOverflow: document.documentElement.style.overflow,
+      htmlScrollBehavior: document.documentElement.style.scrollBehavior,
+    };
+    scrollLockRef.current = lockState;
 
     document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
+    document.body.style.top = `-${lockState.scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
     document.body.style.width = "100%";
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
 
     return () => {
-      document.body.style.position = previousBodyPosition;
-      document.body.style.top = previousBodyTop;
-      document.body.style.width = previousBodyWidth;
-      document.body.style.overflow = previousBodyOverflow;
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      window.scrollTo(0, scrollY);
+      const lockState = scrollLockRef.current;
+
+      if (!lockState) {
+        return;
+      }
+
+      document.documentElement.style.scrollBehavior = "auto";
+      document.body.style.scrollBehavior = "auto";
+      document.body.style.position = lockState.bodyPosition;
+      document.body.style.top = lockState.bodyTop;
+      document.body.style.left = lockState.bodyLeft;
+      document.body.style.right = lockState.bodyRight;
+      document.body.style.width = lockState.bodyWidth;
+      document.body.style.overflow = lockState.bodyOverflow;
+      document.documentElement.style.overflow = lockState.htmlOverflow;
+      window.scrollTo({ top: lockState.scrollY, left: 0, behavior: "auto" });
+
+      requestAnimationFrame(() => {
+        document.documentElement.style.scrollBehavior =
+          lockState.htmlScrollBehavior;
+        document.body.style.scrollBehavior = lockState.bodyScrollBehavior;
+        scrollLockRef.current = null;
+      });
     };
   }, [activeModal]);
 
+  const blurActiveElement = () => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
+  };
+
   const closeActiveModal = () => {
+    blurActiveElement();
     setActiveModal(null);
   };
 
@@ -368,6 +723,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
   };
 
   const handleClaimClick = async () => {
+    blurActiveElement();
     await trackLeadEvent({
       event: "promo_claim_click",
       stage: "promo",
@@ -392,6 +748,8 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     activeModal === "progress" ? (
       <PromoModalPortal>
         <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
+          <PromoConfetti variant="shipping" />
+
           <div
             className="promo-fade pointer-events-auto absolute inset-0 bg-black/78 backdrop-blur-md"
             onClick={closeActiveModal}
@@ -400,25 +758,33 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
           <div
             role="dialog"
             aria-modal="true"
-            className="promo-pop liquid-panel pointer-events-auto relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.68)] sm:p-7"
+            className="promo-pop promo-pop--shipping liquid-panel pointer-events-auto relative z-10 w-full max-w-sm overflow-hidden rounded-[2rem] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.68)] sm:p-7"
             onClick={(event) => event.stopPropagation()}
           >
             <div
               aria-hidden="true"
-              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(96,165,250,0.28),transparent_70%)] blur-3xl"
+              className="absolute inset-x-10 top-0 h-32 bg-[radial-gradient(circle,rgba(96,165,250,0.35),transparent_70%)] blur-3xl"
             />
             <div
               aria-hidden="true"
               className="absolute inset-y-0 left-[-35%] w-1/2 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/[0.14] to-transparent"
             />
+            <div
+              aria-hidden="true"
+              className="promo-modal-beam absolute inset-x-8 top-[-18%] h-28 rounded-full bg-[radial-gradient(circle,rgba(125,211,252,0.28),transparent_72%)] blur-3xl"
+            />
 
             <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10 shadow-[0_0_30px_rgba(96,165,250,0.16)]">
-                <Truck className="h-7 w-7 text-blue-300" />
+              <div className="promo-modal-icon promo-modal-icon--shipping mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-blue-400/30 bg-blue-400/10 shadow-[0_0_30px_rgba(96,165,250,0.16)]">
+                <span
+                  aria-hidden="true"
+                  className="promo-modal-ring promo-modal-ring--shipping absolute inset-[-8px] rounded-full border border-blue-300/20"
+                />
+                <Truck className="relative z-10 h-7 w-7 text-blue-300" />
               </div>
 
-              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-blue-200/70">
-                Cupom liberado
+              <p className="mt-5 text-[0.64rem] uppercase tracking-[0.28em] text-blue-200/78">
+                Primeiro premio liberado
               </p>
               <h3 className="mt-3 font-hero text-[1.7rem] text-white sm:text-[2.2rem]">
                 Frete gratis
@@ -437,7 +803,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
               <button
                 type="button"
                 onClick={closeActiveModal}
-                className="mt-6 inline-flex min-h-12 w-full touch-manipulation select-none items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+                className="promo-modal-cta mt-6 inline-flex min-h-12 w-full touch-manipulation select-none items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Continuar rodada
               </button>
@@ -451,17 +817,19 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     activeModal === "success" ? (
       <PromoModalPortal>
         <div className="pointer-events-none fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
+          <PromoConfetti variant="coupon" />
+
           <div className="promo-fade pointer-events-auto absolute inset-0 bg-black/82 backdrop-blur-md" />
 
           <div
             role="dialog"
             aria-modal="true"
-            className="promo-pop liquid-panel pointer-events-auto relative z-10 w-full max-w-[21.75rem] overflow-hidden rounded-[1.7rem] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.74)] sm:max-w-sm sm:p-6"
+            className="promo-pop promo-pop--coupon liquid-panel pointer-events-auto relative z-10 w-full max-w-[21.75rem] overflow-hidden rounded-[1.7rem] p-5 shadow-[0_30px_100px_rgba(0,0,0,0.74)] sm:max-w-sm sm:p-6"
             onClick={(event) => event.stopPropagation()}
           >
             <div
               aria-hidden="true"
-              className="absolute inset-x-8 top-0 h-24 bg-[radial-gradient(circle,rgba(255,255,255,0.16),transparent_72%)] blur-3xl"
+              className="absolute inset-x-8 top-0 h-24 bg-[radial-gradient(circle,rgba(255,255,255,0.22),transparent_72%)] blur-3xl"
             />
             <div
               aria-hidden="true"
@@ -471,10 +839,18 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
               aria-hidden="true"
               className="absolute inset-y-0 left-[-18%] w-[45%] skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent"
             />
+            <div
+              aria-hidden="true"
+              className="promo-modal-beam absolute inset-x-10 top-[-18%] h-28 rounded-full bg-[radial-gradient(circle,rgba(250,204,21,0.22),transparent_72%)] blur-3xl"
+            />
 
             <div className="relative z-10 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_24px_rgba(16,185,129,0.14)]">
-                <Ticket className="h-6 w-6 text-emerald-300" />
+              <div className="promo-modal-icon promo-modal-icon--coupon mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 shadow-[0_0_24px_rgba(16,185,129,0.14)]">
+                <span
+                  aria-hidden="true"
+                  className="promo-modal-ring promo-modal-ring--coupon absolute inset-[-8px] rounded-full border border-emerald-300/18"
+                />
+                <Ticket className="relative z-10 h-6 w-6 text-emerald-300" />
               </div>
 
               <p className="mt-4 text-[0.6rem] uppercase tracking-[0.26em] text-emerald-200/70">
@@ -536,7 +912,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
               <button
                 type="button"
                 onClick={handleClaimClick}
-                className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-5 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
+                className="promo-modal-cta mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-5 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
                 Resgatar camisa agora
               </button>
@@ -658,8 +1034,12 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                     )}
 
                     {cell === "shipping" && (
-                      <div className="promo-enter flex flex-col items-center justify-center">
-                        <Truck className="h-6 w-6 sm:h-8 sm:w-8" />
+                      <div className="promo-enter promo-hit-cell promo-hit-cell--shipping relative flex flex-col items-center justify-center">
+                        <span
+                          aria-hidden="true"
+                          className="promo-hit-ripple promo-hit-ripple--shipping absolute inset-0 rounded-2xl sm:rounded-[1.25rem]"
+                        />
+                        <Truck className="promo-hit-icon relative z-10 h-6 w-6 sm:h-8 sm:w-8" />
                         <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-blue-200/80 sm:text-[0.5rem]">
                           Frete
                         </span>
@@ -667,8 +1047,12 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                     )}
 
                     {cell === "coupon" && (
-                      <div className="promo-enter flex flex-col items-center justify-center">
-                        <Ticket className="h-7 w-7 sm:h-9 sm:w-9" />
+                      <div className="promo-enter promo-hit-cell promo-hit-cell--coupon relative flex flex-col items-center justify-center">
+                        <span
+                          aria-hidden="true"
+                          className="promo-hit-ripple promo-hit-ripple--coupon absolute inset-0 rounded-2xl sm:rounded-[1.25rem]"
+                        />
+                        <Ticket className="promo-hit-icon relative z-10 h-7 w-7 sm:h-9 sm:w-9" />
                         <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-emerald-200/80 sm:text-[0.5rem]">
                           Cupom
                         </span>
@@ -698,11 +1082,58 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
             .promo-cell-inner { transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1); }
             .promo-enter { animation: promoPopIn 420ms cubic-bezier(0.16, 1, 0.3, 1) both; }
             .promo-fade { animation: promoFadeIn 260ms ease-out both; }
-            .promo-pop { animation: promoDialogIn 460ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+            .promo-pop { transform-origin: center 14%; animation: promoDialogIn 560ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+            .promo-pop--shipping { animation-name: promoDialogInBlue; }
+            .promo-pop--coupon { animation-name: promoDialogInGreen; }
+            .promo-modal-beam { animation: promoBeam 2.8s ease-in-out infinite; }
+            .promo-modal-icon { position: relative; isolation: isolate; animation: promoBadgeLift 2.4s ease-in-out infinite; }
+            .promo-modal-icon--shipping::before,
+            .promo-modal-icon--coupon::before {
+              content: "";
+              position: absolute;
+              inset: -22%;
+              border-radius: 999px;
+              z-index: -1;
+              filter: blur(18px);
+            }
+            .promo-modal-icon--shipping::before {
+              background: radial-gradient(circle, rgba(125,211,252,0.34), transparent 66%);
+            }
+            .promo-modal-icon--coupon::before {
+              background: radial-gradient(circle, rgba(74,222,128,0.28), rgba(250,204,21,0.12) 48%, transparent 70%);
+            }
+            .promo-modal-ring { animation: promoRingPulse 2.2s ease-out infinite; }
+            .promo-modal-cta { position: relative; overflow: hidden; box-shadow: 0 16px 44px rgba(255,255,255,0.14); }
+            .promo-modal-cta::after {
+              content: "";
+              position: absolute;
+              inset: -36% auto -36% -18%;
+              width: 34%;
+              transform: skewX(-24deg);
+              background: linear-gradient(90deg, transparent, rgba(255,255,255,0.52), transparent);
+              opacity: 0.72;
+              animation: promoCtaSweep 2.5s ease-in-out infinite;
+              pointer-events: none;
+            }
+            .promo-hit-cell { isolation: isolate; }
+            .promo-hit-cell--shipping { text-shadow: 0 0 22px rgba(125,211,252,0.2); }
+            .promo-hit-cell--coupon { text-shadow: 0 0 22px rgba(74,222,128,0.22); }
+            .promo-hit-icon { animation: promoPrizeBounce 700ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+            .promo-hit-ripple { animation: promoPrizeRipple 780ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+            .promo-hit-ripple--shipping { background: radial-gradient(circle, rgba(125,211,252,0.3), transparent 64%); }
+            .promo-hit-ripple--coupon { background: radial-gradient(circle, rgba(74,222,128,0.34), transparent 64%); }
             .promo-empty-glow { animation: promoPulse 3.2s ease-in-out infinite; }
             .promo-empty-sheen { animation: promoSweep 2.6s ease-in-out infinite; }
             .promo-empty-float { animation: promoFloat 3s ease-in-out infinite; }
             .promo-empty-label { animation: promoLabel 2.8s ease-in-out infinite; }
+            .promo-confetti {
+              position: absolute;
+              top: -8%;
+              border-radius: 999px;
+              box-shadow: 0 0 18px rgba(255,255,255,0.18);
+              opacity: 0;
+              animation: promoConfettiDrop var(--promo-confetti-duration) cubic-bezier(0.2, 0.9, 0.25, 1) var(--promo-confetti-delay) both;
+            }
             @keyframes promoPopIn {
               from { opacity: 0; transform: translateY(8px) scale(0.94); }
               to { opacity: 1; transform: translateY(0) scale(1); }
@@ -714,6 +1145,44 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
             @keyframes promoDialogIn {
               from { opacity: 0; transform: translateY(24px) scale(0.92); }
               to { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes promoDialogInBlue {
+              0% { opacity: 0; transform: translateY(28px) scale(0.88) rotateX(-12deg); filter: blur(14px); }
+              58% { opacity: 1; transform: translateY(-4px) scale(1.02) rotateX(0deg); filter: blur(0); }
+              100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+            }
+            @keyframes promoDialogInGreen {
+              0% { opacity: 0; transform: translateY(32px) scale(0.86) rotateX(-14deg); filter: blur(16px); }
+              52% { opacity: 1; transform: translateY(-6px) scale(1.03) rotateX(0deg); filter: blur(0); }
+              100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+            }
+            @keyframes promoBeam {
+              0%, 100% { opacity: 0.58; transform: scale(0.92); }
+              50% { opacity: 0.95; transform: scale(1.08); }
+            }
+            @keyframes promoBadgeLift {
+              0%, 100% { transform: translateY(0) scale(1); }
+              50% { transform: translateY(-4px) scale(1.04); }
+            }
+            @keyframes promoRingPulse {
+              0% { opacity: 0.4; transform: scale(0.78); }
+              70% { opacity: 0; transform: scale(1.28); }
+              100% { opacity: 0; transform: scale(1.32); }
+            }
+            @keyframes promoCtaSweep {
+              0%, 100% { transform: translateX(0) skewX(-24deg); opacity: 0; }
+              22% { opacity: 0; }
+              48% { transform: translateX(260%) skewX(-24deg); opacity: 0.76; }
+              60% { opacity: 0; }
+            }
+            @keyframes promoPrizeBounce {
+              0% { transform: translateY(16px) scale(0.52) rotate(-12deg); opacity: 0; }
+              55% { transform: translateY(-4px) scale(1.12) rotate(4deg); opacity: 1; }
+              100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            }
+            @keyframes promoPrizeRipple {
+              0% { opacity: 0.46; transform: scale(0.45); }
+              100% { opacity: 0; transform: scale(1.38); }
             }
             @keyframes promoPulse {
               0%, 100% { opacity: 0.45; transform: scale(0.92); }
@@ -731,15 +1200,35 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
               0%, 100% { opacity: 0.52; }
               50% { opacity: 0.92; }
             }
+            @keyframes promoConfettiDrop {
+              0% {
+                opacity: 0;
+                transform: translate3d(0, -36px, 0) rotate(0deg) scale(0.38);
+              }
+              12% {
+                opacity: 1;
+              }
+              100% {
+                opacity: 0;
+                transform: translate3d(var(--promo-confetti-drift), 320px, 0) rotate(var(--promo-confetti-rotate)) scale(var(--promo-confetti-scale));
+              }
+            }
             @media (prefers-reduced-motion: reduce) {
               .promo-cell-inner,
               .promo-enter,
               .promo-fade,
               .promo-pop,
+              .promo-modal-beam,
+              .promo-modal-icon,
+              .promo-modal-ring,
+              .promo-modal-cta::after,
+              .promo-hit-icon,
+              .promo-hit-ripple,
               .promo-empty-glow,
               .promo-empty-sheen,
               .promo-empty-float,
-              .promo-empty-label {
+              .promo-empty-label,
+              .promo-confetti {
                 animation: none !important;
                 transition: none !important;
               }
