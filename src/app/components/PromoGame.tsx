@@ -194,6 +194,10 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     activeModal === null &&
     !isResolvingTurn;
 
+  const rewardsFound = grid.filter(
+    (cell) => cell === "shipping" || cell === "coupon",
+  ).length;
+
   const progressModal =
     activeModal === "progress" ? (
       <PromoModalPortal>
@@ -361,6 +365,16 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
         <div className="liquid-panel relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] p-5 shadow-2xl backdrop-blur-xl sm:p-8">
           <div className="pointer-events-none absolute left-1/2 top-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(255,255,255,0.03)_0%,transparent_70%)]" />
 
+          <div className="relative z-10 mb-5 flex flex-col items-center gap-3 text-center sm:mb-6">
+            <div className="inline-flex items-center rounded-full border border-white/[0.1] bg-white/[0.05] px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white/[0.72]">
+              {rewardsFound}/2 premios encontrados
+            </div>
+            <p className="max-w-[32rem] text-sm leading-6 text-white/[0.68] sm:text-[0.95rem]">
+              Algumas casas escondem premios e outras nao tem premiacao.
+              Encontre 2 premios para liberar sua oferta.
+            </p>
+          </div>
+
           {!gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6">
               <div className="absolute inset-0 rounded-[inherit] bg-[rgba(3,3,3,0.2)] backdrop-blur-[0.5px]" />
@@ -373,7 +387,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                   Liberar rodada
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-white/[0.66]">
-                  Acerte 2 premios para seguir.
+                  Abra o tabuleiro e encontre 2 premios para seguir.
                 </p>
 
                 <button
@@ -381,7 +395,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                   onClick={startGame}
                   className="mt-6 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
                 >
-                  Iniciar agora
+                  Abrir rodada
                 </button>
               </div>
             </div>
