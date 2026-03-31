@@ -7,7 +7,7 @@ import { Truck, Ticket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { trackLeadEvent, trackPageView } from "@/lib/site-tracking";
 
-type CellState = "hidden" | "empty" | "shipping" | "coupon";
+type CellState = "hidden" | "empty" | "shipping" | "coupon" | "bomb";
 type ModalState = "progress" | "success" | null;
 type PromoGameProps = {
   claimHref: string;
@@ -332,17 +332,35 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     if (prize === "coupon") {
       void playGameSound("coupon");
       setGameOver(true);
-      setActiveModal("success");
-      void trackLeadEvent({
-        event: "promo_discount_reward",
-        stage: "promo",
-        page: "promo",
-        amount: 139.19,
-        reward: {
-          id: "coupon",
-          name: "Desconto liberado",
-        },
+      
+      const hiddenIndices = nextGrid
+        .map((c, idx) => (c === "hidden" ? idx : -1))
+        .filter((i) => i !== -1);
+        
+      const shuffled = hiddenIndices.sort(() => 0.5 - Math.random());
+      const bombIndices = shuffled.slice(0, 4);
+      
+      bombIndices.forEach((idx) => {
+        nextGrid[idx] = "bomb";
       });
+      
+      setGrid([...nextGrid]);
+
+      clearProgressModalTimeout();
+      progressModalTimeoutRef.current = setTimeout(() => {
+        setActiveModal("success");
+        void trackLeadEvent({
+          event: "promo_discount_reward",
+          stage: "promo",
+          page: "promo",
+          amount: 139.19,
+          reward: {
+            id: "coupon",
+            name: "Desconto liberado",
+          },
+        });
+        progressModalTimeoutRef.current = null;
+      }, 1600);
       return;
     }
 
@@ -614,6 +632,8 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                         ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
                         : cell === "coupon"
                         ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+                        : cell === "bomb"
+                        ? "border-red-500/40 bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.18),rgba(239,68,68,0.05)_50%,transparent_100%)] text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]"
                         : ""
                     }`}
                     style={{ transform: "rotateY(180deg)" }}
@@ -651,6 +671,19 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                         <Ticket className="h-7 w-7 sm:h-9 sm:w-9" />
                         <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-emerald-200/80 sm:text-[0.5rem]">
                           Cupom
+                        </span>
+                      </div>
+                    )}
+
+                    {cell === "bomb" && (
+                      <div className="promo-enter flex flex-col items-center justify-center">
+                        <img 
+                          src="/assets/bomba.webp" 
+                          alt="Bomba" 
+                          className="h-8 w-8 object-contain drop-shadow-[0_0_12px_rgba(239,68,68,0.6)] sm:h-10 sm:w-10" 
+                        />
+                        <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-red-300/80 sm:text-[0.5rem]">
+                          Bomba
                         </span>
                       </div>
                     )}
