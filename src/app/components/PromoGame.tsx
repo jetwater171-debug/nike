@@ -148,24 +148,24 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
     if (kind === "empty") {
       playTone(context, {
-        frequency: 248,
+        frequency: 320,
         startAt: now,
-        duration: 0.11,
-        volume: 0.02,
+        duration: 0.08,
+        volume: 0.028,
         type: "triangle",
       });
       playTone(context, {
-        frequency: 196,
-        startAt: now + 0.08,
-        duration: 0.16,
-        volume: 0.016,
+        frequency: 246,
+        startAt: now + 0.06,
+        duration: 0.14,
+        volume: 0.024,
         type: "sine",
       });
       playTone(context, {
-        frequency: 156,
-        startAt: now + 0.19,
-        duration: 0.22,
-        volume: 0.013,
+        frequency: 185,
+        startAt: now + 0.16,
+        duration: 0.2,
+        volume: 0.02,
         type: "sine",
       });
       return;
@@ -676,15 +676,12 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                     )}
 
                     {cell === "bomb" && (
-                      <div className="promo-enter flex flex-col items-center justify-center">
+                      <div className="promo-enter flex h-full w-full flex-col items-center justify-center">
                         <img 
                           src="/assets/bomba.webp" 
                           alt="Bomba" 
-                          className="h-8 w-8 object-contain drop-shadow-[0_0_12px_rgba(239,68,68,0.6)] sm:h-10 sm:w-10" 
+                          className="h-[65%] w-[65%] object-contain drop-shadow-[0_0_16px_rgba(239,68,68,0.7)]" 
                         />
-                        <span className="mt-2 text-[0.44rem] uppercase tracking-[0.18em] text-red-300/80 sm:text-[0.5rem]">
-                          Bomba
-                        </span>
                       </div>
                     )}
                   </div>
