@@ -47,12 +47,14 @@ export default function Home() {
               </p>
             </div>
 
-            <Link
-              href="/mines"
-              className="relative z-20 mt-6 inline-flex min-h-[3.9rem] w-full items-center justify-center rounded-full border border-white/24 bg-[linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08))] px-7 text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_26px_70px_rgba(0,0,0,0.46),inset_0_1px_0_rgba(255,255,255,0.14),0_0_34px_rgba(52,211,153,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/34 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.26),rgba(255,255,255,0.12))] hover:shadow-[0_32px_84px_rgba(0,0,0,0.56),inset_0_1px_0_rgba(255,255,255,0.18),0_0_42px_rgba(52,211,153,0.18)] sm:min-h-[4.3rem] sm:text-[0.92rem]"
-            >
-              Desbloquear a oferta
-            </Link>
+            <div className="liquid-cta-wrap relative z-20 mt-6 w-full">
+              <Link
+                href="/mines"
+                className="liquid-cta font-hero inline-flex min-h-[4rem] w-full items-center justify-center rounded-full px-7 text-[1.05rem] tracking-[0.08em] text-white transition-transform duration-300 hover:-translate-y-0.5 sm:min-h-[4.4rem] sm:text-[1.18rem]"
+              >
+                <span className="relative z-10">Desbloquear a oferta</span>
+              </Link>
+            </div>
 
             <p className="relative z-20 mt-4 text-[0.74rem] uppercase tracking-[0.24em] text-white/[0.4] sm:text-[0.78rem]">
               Oferta por tempo limitado
