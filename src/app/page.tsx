@@ -50,7 +50,7 @@ export default function Home() {
             <div className="liquid-cta-wrap relative z-20 mt-6 w-full">
               <Link
                 href="/mines"
-                className="liquid-cta font-hero inline-flex min-h-[4.2rem] w-full items-center justify-center rounded-full px-7 text-[1.22rem] tracking-[0.05em] text-white hover:-translate-y-0.5 sm:min-h-[4.7rem] sm:text-[1.42rem]"
+                className="liquid-cta font-hero inline-flex min-h-[4.2rem] w-full items-center justify-center rounded-full px-7 text-[1.36rem] tracking-[0.05em] text-white hover:-translate-y-0.5 sm:min-h-[4.7rem] sm:text-[1.58rem]"
               >
                 <span className="liquid-cta-label relative z-10">Desbloquear a oferta</span>
               </Link>
