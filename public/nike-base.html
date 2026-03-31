@@ -824,7 +824,10 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     'button[title="Abrir menu de compartilhamento social"]',
     '.SnippetReviewPdp-styled__Wrapper-sc-59ea756b-0',
     '#product-review-accordion',
-    '.codex-offer-card'
+    '.codex-offer-card',
+    '.mXWeG',
+    '.dqyKHY',
+    '.bWpQmT'
   ];
   const styleId = 'codex-nike-prune-style';
   const shippingResultId = 'codex-shipping-result';
@@ -1182,26 +1185,6 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     });
   }
 
-  function removeGiftbackMessage() {
-    document.querySelectorAll('div, section, p, span').forEach((node) => {
-      const text = String(node.textContent || '').replace(/\s+/g, ' ').trim();
-      if (!/Giftback/i.test(text) || !/App Nike/i.test(text)) {
-        return;
-      }
-
-      let target = node;
-      while (target.parentElement) {
-        const parentText = String(target.parentElement.textContent || '').replace(/\s+/g, ' ').trim();
-        if (!/Giftback/i.test(parentText) || parentText.length > 180) {
-          break;
-        }
-        target = target.parentElement;
-      }
-
-      removeNode(target);
-    });
-  }
-
   function preserveSizes() {
     document.querySelectorAll('[data-testid="product-sizes"]').forEach((node) => {
       const heading = node.previousElementSibling;
@@ -1517,7 +1500,6 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     document.querySelectorAll('#product-review-accordion').forEach((node) => {
       removeNode(node.closest('section') || node);
     });
-    removeGiftbackMessage();
 
     preserveSizes();
     enableSizeP();
