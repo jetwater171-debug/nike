@@ -49,9 +49,168 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
   const [gameOver, setGameOver] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalState>(null);
   const [isResolvingTurn, setIsResolvingTurn] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const progressModalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+
+  const getAudioContext = async () => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const AudioContextCtor =
+      window.AudioContext ??
+      (window as Window & { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+
+    if (!AudioContextCtor) {
+      return null;
+    }
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContextCtor();
+    }
+
+    if (audioContextRef.current.state === "suspended") {
+      try {
+        await audioContextRef.current.resume();
+      } catch {
+        return null;
+      }
+    }
+
+    return audioContextRef.current;
+  };
+
+  const playTone = (
+    context: AudioContext,
+    {
+      frequency,
+      startAt,
+      duration,
+      volume,
+      type = "sine",
+    }: {
+      frequency: number;
+      startAt: number;
+      duration: number;
+      volume: number;
+      type?: OscillatorType;
+    },
+  ) => {
+    const oscillator = context.createOscillator();
+    const gainNode = context.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, startAt);
+
+    gainNode.gain.setValueAtTime(0.0001, startAt);
+    gainNode.gain.exponentialRampToValueAtTime(volume, startAt + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.0001,
+      startAt + duration,
+    );
+
+    oscillator.connect(gainNode);
+    gainNode.connect(context.destination);
+    oscillator.start(startAt);
+    oscillator.stop(startAt + duration + 0.04);
+  };
+
+  const playGameSound = async (
+    kind: "start" | "empty" | "shipping" | "coupon",
+  ) => {
+    const context = await getAudioContext();
+    if (!context) {
+      return;
+    }
+
+    const now = context.currentTime + 0.01;
+
+    if (kind === "start") {
+      playTone(context, {
+        frequency: 340,
+        startAt: now,
+        duration: 0.12,
+        volume: 0.02,
+        type: "triangle",
+      });
+      playTone(context, {
+        frequency: 440,
+        startAt: now + 0.08,
+        duration: 0.18,
+        volume: 0.018,
+        type: "sine",
+      });
+      return;
+    }
+
+    if (kind === "empty") {
+      playTone(context, {
+        frequency: 300,
+        startAt: now,
+        duration: 0.07,
+        volume: 0.012,
+        type: "triangle",
+      });
+      playTone(context, {
+        frequency: 245,
+        startAt: now + 0.05,
+        duration: 0.09,
+        volume: 0.01,
+        type: "sine",
+      });
+      return;
+    }
+
+    if (kind === "shipping") {
+      playTone(context, {
+        frequency: 520,
+        startAt: now,
+        duration: 0.11,
+        volume: 0.015,
+        type: "triangle",
+      });
+      playTone(context, {
+        frequency: 700,
+        startAt: now + 0.08,
+        duration: 0.14,
+        volume: 0.018,
+        type: "sine",
+      });
+      playTone(context, {
+        frequency: 860,
+        startAt: now + 0.16,
+        duration: 0.2,
+        volume: 0.016,
+        type: "sine",
+      });
+      return;
+    }
+
+    playTone(context, {
+      frequency: 480,
+      startAt: now,
+      duration: 0.12,
+      volume: 0.018,
+      type: "triangle",
+    });
+    playTone(context, {
+      frequency: 660,
+      startAt: now + 0.08,
+      duration: 0.16,
+      volume: 0.02,
+      type: "sine",
+    });
+    playTone(context, {
+      frequency: 920,
+      startAt: now + 0.16,
+      duration: 0.24,
+      volume: 0.018,
+      type: "sine",
+    });
+  };
 
   const clearProgressModalTimeout = () => {
     if (progressModalTimeoutRef.current) {
@@ -104,6 +263,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     setGameOver(false);
     setActiveModal(null);
     setIsResolvingTurn(false);
+    void playGameSound("start");
     void trackPageView("promo");
     void trackLeadEvent({
       event: "promo_started",
@@ -142,6 +302,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     setClicks(newClicks);
 
     if (prize === "shipping") {
+      void playGameSound("shipping");
       setIsResolvingTurn(true);
       clearProgressModalTimeout();
       progressModalTimeoutRef.current = setTimeout(() => {
@@ -162,6 +323,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
     }
 
     if (prize === "coupon") {
+      void playGameSound("coupon");
       setGameOver(true);
       setActiveModal("success");
       void trackLeadEvent({
@@ -174,7 +336,10 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
           name: "Desconto liberado",
         },
       });
+      return;
     }
+
+    void playGameSound("empty");
   };
 
   const handleClaimClick = async () => {
