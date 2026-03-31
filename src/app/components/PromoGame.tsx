@@ -245,7 +245,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                 onClick={closeActiveModal}
                 className="mt-6 inline-flex min-h-12 w-full touch-manipulation select-none items-center justify-center rounded-full bg-white px-5 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
               >
-                Continuar
+                Continuar rodada
               </button>
             </div>
           </div>
@@ -357,18 +357,43 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
       id="promo"
       className="section-shell relative mx-auto w-full max-w-4xl scroll-mt-24 px-4 py-16 sm:px-8 lg:px-12"
     >
-      <div className="relative z-10 mx-auto max-w-xl">
-        <div className="mb-10 text-center">
-          <h2 className="font-hero mb-4 text-[2rem] text-white sm:text-[3.6rem]">
-            Promocao Mines Nike
+      <div className="relative z-10 mx-auto w-full max-w-[46rem]">
+        <div className="mb-8 text-center">
+          <h2 className="font-hero text-[2.1rem] text-white sm:text-[3.7rem]">
+            Abra a rodada
+            <span className="mt-1 block text-white/[0.64]">e libere sua oferta</span>
           </h2>
-          <p className="text-[0.98rem] font-light leading-relaxed text-white/70">
-            Essa e uma promocao da Nike para testar a sua sorte e concorrer a
-            descontassos na nova camisa da Selecao Brasileira. Ao longo da
-            rodada, algumas tentativas nao liberam nada e outras escondem
-            premios da campanha. Para sair com vantagem, voce precisa acertar 2
-            premios.
+          <p className="mx-auto mt-4 max-w-[36rem] text-[0.96rem] leading-7 text-white/[0.7] sm:text-[1rem] sm:leading-8">
+            Escolha as casas da rodada e acerte 2 premios para seguir com a
+            camisa na condicao promocional da campanha.
           </p>
+
+          <div className="mt-6 grid grid-cols-3 gap-2 text-left sm:gap-3">
+            <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.04] px-3 py-3 sm:px-4">
+              <p className="text-[0.56rem] uppercase tracking-[0.22em] text-white/[0.4]">
+                Oferta
+              </p>
+              <p className="mt-2 text-[0.95rem] font-semibold text-white sm:text-[1.05rem]">
+                Ate R$ 139,19
+              </p>
+            </div>
+            <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.04] px-3 py-3 sm:px-4">
+              <p className="text-[0.56rem] uppercase tracking-[0.22em] text-white/[0.4]">
+                Objetivo
+              </p>
+              <p className="mt-2 text-[0.95rem] font-semibold text-white sm:text-[1.05rem]">
+                Encontrar 2 premios
+              </p>
+            </div>
+            <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.04] px-3 py-3 sm:px-4">
+              <p className="text-[0.56rem] uppercase tracking-[0.22em] text-white/[0.4]">
+                Etapa
+              </p>
+              <p className="mt-2 text-[0.95rem] font-semibold text-white sm:text-[1.05rem]">
+                Menos de 1 minuto
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="liquid-panel relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-2xl backdrop-blur-xl sm:p-10">
@@ -383,12 +408,11 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                   Rodada travada
                 </p>
                 <h3 className="font-hero mt-4 text-[1.7rem] text-white sm:text-[2.3rem]">
-                  Assuma o risco
+                  Liberar rodada
                 </h3>
                 <p className="mt-4 text-sm leading-7 text-white/[0.66]">
-                  Toque no botao para liberar o tabuleiro e comecar a sua
-                  tentativa. A rodada mistura casas vazias e premios escondidos
-                  na campanha.
+                  Toque para abrir o tabuleiro, revelar os premios da sua
+                  campanha e continuar para o resgate se acertar 2 deles.
                 </p>
 
                 <button
@@ -396,7 +420,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                   onClick={startGame}
                   className="mt-6 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 text-[0.74rem] font-semibold uppercase tracking-[0.16em] text-black transition-transform duration-300 hover:scale-[1.01]"
                 >
-                  Assumir o risco
+                  Iniciar agora
                 </button>
               </div>
             </div>
