@@ -14,22 +14,23 @@ export default function Home() {
 
       <section className="relative mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-4 pb-12 pt-24 sm:px-8 sm:pb-16 lg:px-12">
         <div className="flex w-full max-w-[46rem] flex-col items-center text-center">
-          <div className="liquid-panel relative z-20 w-full max-w-[42rem] px-5 py-7 sm:px-8 sm:py-9">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-white/[0.48] sm:text-[0.76rem]">
+          <div className="liquid-panel relative z-20 w-full max-w-[39rem] px-4 py-5 sm:px-6 sm:py-6">
+            <p className="text-[0.58rem] font-semibold uppercase tracking-[0.28em] text-white/[0.44] sm:text-[0.68rem]">
               Campanha promocional Nike
             </p>
 
-            <h1 className="font-hero mt-4 text-[2.95rem] leading-[0.88] text-white sm:text-[4.7rem] lg:text-[5.7rem]">
-              Promocao exclusiva
-              <span className="mt-1 block text-white/[0.64]">
+            <h1 className="font-hero mt-3 leading-[0.88] text-white">
+              <span className="block whitespace-nowrap text-[clamp(2.15rem,8.5vw,4.5rem)]">
+                Promocao exclusiva
+              </span>
+              <span className="mt-0.5 block whitespace-nowrap text-[clamp(2.15rem,8.2vw,4.5rem)] text-white/[0.64]">
                 camisa do Brasil
               </span>
             </h1>
 
-            <p className="mx-auto mt-5 max-w-[34rem] text-[0.98rem] leading-7 text-white/[0.72] sm:text-[1.08rem] sm:leading-8">
+            <p className="mx-auto mt-4 max-w-[30rem] text-[0.9rem] leading-6 text-white/[0.72] sm:text-[0.98rem] sm:leading-7">
               Desbloqueie ate 80% OFF na nova camisa da Selecao Brasileira em
-              uma promocao relampago criada para liberar sua melhor oferta em
-              poucos toques.
+              uma promocao relampago feita para liberar sua melhor oferta.
             </p>
           </div>
 
