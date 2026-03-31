@@ -34,7 +34,7 @@ export default function Home() {
           </div>
 
           <div className="mt-0 flex w-full max-w-[26rem] flex-col items-center sm:mt-1 sm:max-w-[30rem]">
-            <HeroScrollVideo className="-mt-2 sm:-mt-3 lg:-mt-4 sm:max-w-[25.5rem] lg:max-w-[28rem]" />
+            <HeroScrollVideo className="-mt-1 sm:-mt-2 lg:-mt-2 sm:max-w-[25.5rem] lg:max-w-[28rem]" />
 
             <div className="-mt-12 text-center sm:-mt-14">
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-white/[0.56] sm:text-[0.8rem]">
