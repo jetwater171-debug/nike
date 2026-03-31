@@ -148,17 +148,24 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
     if (kind === "empty") {
       playTone(context, {
-        frequency: 300,
+        frequency: 280,
         startAt: now,
-        duration: 0.07,
-        volume: 0.012,
+        duration: 0.1,
+        volume: 0.013,
         type: "triangle",
       });
       playTone(context, {
-        frequency: 245,
-        startAt: now + 0.05,
-        duration: 0.09,
-        volume: 0.01,
+        frequency: 220,
+        startAt: now + 0.07,
+        duration: 0.14,
+        volume: 0.011,
+        type: "sine",
+      });
+      playTone(context, {
+        frequency: 174,
+        startAt: now + 0.16,
+        duration: 0.18,
+        volume: 0.009,
         type: "sine",
       });
       return;
@@ -548,7 +555,7 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
                   Liberar rodada
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-white/[0.66]">
-                  Abra o tabuleiro e encontre 2 premios para seguir.
+                  Seu objetivo é acertar 2 premios sem clicar em nenhuma das 4 bombas. Boa sorte!
                 </p>
 
                 <button

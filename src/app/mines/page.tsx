@@ -26,8 +26,7 @@ export default function MinesPage() {
           </h1>
 
           <p className="mx-auto mt-4 max-w-[31rem] text-[0.9rem] leading-6 text-white/[0.72] sm:text-[0.98rem] sm:leading-7">
-            Algumas casas escondem premios e outras nao tem premiacao.
-            Encontre 2 premios para seguir com a sua oferta.
+            Teste sua sorte na nova promoção da Nike! Seu objetivo é acertar 2 premios sem clicar em nenhuma das 4 bombas. Boa sorte!
           </p>
         </div>
 
