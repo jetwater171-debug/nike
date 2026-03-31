@@ -148,24 +148,24 @@ export default function PromoGame({ claimHref }: PromoGameProps) {
 
     if (kind === "empty") {
       playTone(context, {
-        frequency: 280,
+        frequency: 248,
         startAt: now,
-        duration: 0.1,
-        volume: 0.013,
+        duration: 0.11,
+        volume: 0.012,
         type: "triangle",
       });
       playTone(context, {
-        frequency: 220,
-        startAt: now + 0.07,
-        duration: 0.14,
-        volume: 0.011,
+        frequency: 196,
+        startAt: now + 0.08,
+        duration: 0.16,
+        volume: 0.01,
         type: "sine",
       });
       playTone(context, {
-        frequency: 174,
-        startAt: now + 0.16,
-        duration: 0.18,
-        volume: 0.009,
+        frequency: 156,
+        startAt: now + 0.19,
+        duration: 0.22,
+        volume: 0.008,
         type: "sine",
       });
       return;
