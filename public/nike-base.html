@@ -903,20 +903,82 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return readJsonStorage(CART_STORAGE_KEY, {});
   }
 
+  function parseCurrencyValue(value) {
+    const text = String(value || '').trim();
+    if (!text) {
+      return null;
+    }
+
+    const normalized = text
+      .replace(/[^\d,.-]/g, '')
+      .replace(/\.(?=\d{3}(?:\D|$))/g, '')
+      .replace(',', '.');
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? Number(parsed.toFixed(2)) : null;
+  }
+
+  function readCurrencyMatches(value) {
+    return String(value || '').match(/R\$\s*[\d.]+,\d{2}/g) || [];
+  }
+
+  function readCurrentPriceState(existingState) {
+    const existing = existingState && typeof existingState === 'object' ? existingState : {};
+    const mainPrice = document.querySelector('[data-testid="main-price"]');
+    const oldNode = mainPrice && mainPrice.querySelector('.codex-main-price__old');
+    const newNode = mainPrice && mainPrice.querySelector('.codex-main-price__new');
+
+    let originalPriceLabel = String(existing.originalPriceLabel || ORIGINAL_PRICE).trim() || ORIGINAL_PRICE;
+    let priceLabel = String(existing.priceLabel || OFFER_PRICE).trim() || OFFER_PRICE;
+    let priceValue = Number(existing.priceValue || OFFER_PRICE_VALUE);
+
+    if (oldNode && String(oldNode.textContent || '').trim()) {
+      originalPriceLabel = String(oldNode.textContent || '').trim();
+    }
+
+    if (newNode && String(newNode.textContent || '').trim()) {
+      priceLabel = String(newNode.textContent || '').trim();
+    } else if (mainPrice) {
+      const matches = readCurrencyMatches(mainPrice.textContent || '');
+      if (matches.length >= 2) {
+        originalPriceLabel = matches[0];
+        priceLabel = matches[matches.length - 1];
+      } else if (matches.length === 1) {
+        priceLabel = matches[0];
+      }
+    }
+
+    const parsedPrice = parseCurrencyValue(priceLabel);
+    if (parsedPrice !== null) {
+      priceValue = parsedPrice;
+      priceLabel = formatMoney(parsedPrice);
+    } else {
+      priceValue = OFFER_PRICE_VALUE;
+      priceLabel = OFFER_PRICE;
+    }
+
+    return {
+      priceValue,
+      priceLabel,
+      originalPriceLabel
+    };
+  }
+
   function buildCartState(overrides) {
     const existing = readStoredCartState();
     const shipping = existing && typeof existing.shipping === 'object' ? existing.shipping : {};
+    const priceState = readCurrentPriceState(existing);
 
     return {
+      ...(existing && typeof existing === 'object' ? existing : {}),
       title: PRODUCT_TITLE,
       color: PRODUCT_COLOR,
       size: readSelectedSize() || String(existing.size || '').trim(),
       sku: PRODUCT_SKU,
-      quantity: 1,
+      quantity: Math.min(Math.max(Number(existing.quantity || 1), 1), 5),
       image: PRODUCT_IMAGE,
-      priceValue: OFFER_PRICE_VALUE,
-      priceLabel: OFFER_PRICE,
-      originalPriceLabel: ORIGINAL_PRICE,
+      priceValue: priceState.priceValue,
+      priceLabel: priceState.priceLabel,
+      originalPriceLabel: priceState.originalPriceLabel,
       installmentLabel: 'ou ' + OFFER_INSTALLMENTS.count + 'x de ' + OFFER_INSTALLMENTS.value + ' sem juros',
       personalizationWanted: Boolean(existing.personalizationWanted),
       shipping,
@@ -1173,11 +1235,12 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   }
 
   function updateOfferPrice() {
+    const priceState = readCurrentPriceState(readStoredCartState());
     document.querySelectorAll('[data-testid="main-price"]').forEach((node) => {
       node.classList.add('codex-main-price');
       node.innerHTML =
-        '<span class="codex-main-price__old">' + escapeHtml(ORIGINAL_PRICE) + '</span>' +
-        '<span class="codex-main-price__new">' + escapeHtml(OFFER_PRICE) + '</span>';
+        '<span class="codex-main-price__old">' + escapeHtml(priceState.originalPriceLabel || ORIGINAL_PRICE) + '</span>' +
+        '<span class="codex-main-price__new">' + escapeHtml(priceState.priceLabel || OFFER_PRICE) + '</span>';
     });
 
     document.querySelectorAll('[data-testid="installment-info"]').forEach((node) => {
@@ -1336,14 +1399,6 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
       button.dataset.codexCartBound = '1';
       button.addEventListener('click', function (event) {
-        if (event) {
-          event.preventDefault();
-          event.stopPropagation();
-          if (typeof event.stopImmediatePropagation === 'function') {
-            event.stopImmediatePropagation();
-          }
-        }
-
         const cartState = buildCartState();
         if (!String(cartState.size || '').trim()) {
           window.alert('Escolha o tamanho da camiseta para continuar.');
@@ -1361,7 +1416,13 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
           window.location.href = CART_URL;
         };
 
-        window.setTimeout(redirectToCart, 140);
+        const redirectDelay = cartState.personalizationWanted ? 520 : 140;
+        window.setTimeout(function () {
+          setStoredCartState(buildCartState({
+            personalizationWanted: cartState.personalizationWanted
+          }));
+          redirectToCart();
+        }, redirectDelay);
 
         Promise.resolve(postLeadEvent('nike_add_to_cart', {
           extra: {
@@ -1372,8 +1433,15 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
             personalizationWanted: cartState.personalizationWanted ? 'sim' : 'nao'
           },
           shipping: cartState.shipping || {}
-        })).finally(redirectToCart);
-      }, true);
+        })).finally(function () {
+          window.setTimeout(function () {
+            setStoredCartState(buildCartState({
+              personalizationWanted: cartState.personalizationWanted
+            }));
+            redirectToCart();
+          }, cartState.personalizationWanted ? 180 : 0);
+        });
+      });
     });
   }
 
