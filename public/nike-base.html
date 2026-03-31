@@ -823,7 +823,8 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     '#social-share-section',
     'button[title="Abrir menu de compartilhamento social"]',
     '.SnippetReviewPdp-styled__Wrapper-sc-59ea756b-0',
-    '#product-review-accordion'
+    '#product-review-accordion',
+    '.codex-offer-card'
   ];
   const styleId = 'codex-nike-prune-style';
   const shippingResultId = 'codex-shipping-result';
@@ -1148,14 +1149,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       '.codex-shipping-card__eta{grid-column:1 / 2;font-size:14px;line-height:1.35;color:#5b5b5b;padding-left:32px;}' +
       '.codex-shipping-card__price{font-size:17px;font-weight:600;line-height:1.2;color:#0f6a3f;text-align:right;white-space:nowrap;}' +
       '.codex-shipping-card__icon{width:22px;height:22px;color:#111;flex:none;}' +
-      '.codex-offer-card{margin-top:14px;padding:14px 16px;border-radius:18px;border:1px solid #d6eadc;background:#eef8f1;color:#111;display:grid;gap:8px;}' +
-      '.codex-offer-card__top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}' +
-      '.codex-offer-card__pill{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;background:#dbf2e3;color:#0f6a3f;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;}' +
-      '.codex-offer-card__save{font-size:14px;font-weight:600;line-height:1.35;color:#0f6a3f;}' +
-      '.codex-offer-card__headline{font-size:14px;line-height:1.45;color:#185233;}' +
-      '.codex-offer-card__prices{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}' +
-      '.codex-offer-card__old{font-size:15px;line-height:1.2;color:#5f5f5f;text-decoration:line-through;}' +
-      '.codex-offer-card__new{font-size:28px;font-weight:700;line-height:1;color:#0f6a3f;}' +
+      '.codex-main-price{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}' +
+      '.codex-main-price__old{font-size:18px;line-height:1.2;color:#777;text-decoration:line-through;font-weight:400;}' +
+      '.codex-main-price__new{font-size:32px;line-height:1;color:#0f6a3f;font-weight:700;}' +
       '[data-testid="zipcode-button"][aria-busy="true"]{opacity:.72;pointer-events:none;}';
     document.head.appendChild(style);
   }
@@ -1173,41 +1169,36 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     }).format(Number(value || 0));
   }
 
-  function ensureOfferCard(node) {
-    const parent = node && node.parentElement ? node.parentElement : null;
-    if (!parent) {
-      return;
-    }
-
-    let card = parent.querySelector('.codex-offer-card');
-    if (!card) {
-      card = document.createElement('div');
-      card.className = 'codex-offer-card';
-      node.insertAdjacentElement('afterend', card);
-    }
-
-    card.innerHTML =
-      '<div class="codex-offer-card__top">' +
-        '<span class="codex-offer-card__pill">Cupom aplicado</span>' +
-        '<span class="codex-offer-card__save">Economia de ' + escapeHtml(formatMoney(SAVINGS_PRICE_VALUE)) + '</span>' +
-      '</div>' +
-      '<div class="codex-offer-card__headline">Voce esta usando o desconto que ganhou na campanha da camisa.</div>' +
-      '<div class="codex-offer-card__prices">' +
-        '<span class="codex-offer-card__old">' + escapeHtml(ORIGINAL_PRICE) + '</span>' +
-        '<span class="codex-offer-card__new">' + escapeHtml(OFFER_PRICE) + '</span>' +
-      '</div>';
-  }
-
   function updateOfferPrice() {
     document.querySelectorAll('[data-testid="main-price"]').forEach((node) => {
-      setText(node, OFFER_PRICE);
-      node.style.color = '#0f6a3f';
-      node.style.fontWeight = '700';
+      node.classList.add('codex-main-price');
+      node.innerHTML =
+        '<span class="codex-main-price__old">' + escapeHtml(ORIGINAL_PRICE) + '</span>' +
+        '<span class="codex-main-price__new">' + escapeHtml(OFFER_PRICE) + '</span>';
     });
 
     document.querySelectorAll('[data-testid="installment-info"]').forEach((node) => {
       node.innerHTML = 'ou <strong>' + OFFER_INSTALLMENTS.count + 'x</strong> de <strong>' + OFFER_INSTALLMENTS.value + '</strong> sem juros';
-      ensureOfferCard(node);
+    });
+  }
+
+  function removeGiftbackMessage() {
+    document.querySelectorAll('div, section, p, span').forEach((node) => {
+      const text = String(node.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!/Giftback/i.test(text) || !/App Nike/i.test(text)) {
+        return;
+      }
+
+      let target = node;
+      while (target.parentElement) {
+        const parentText = String(target.parentElement.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!/Giftback/i.test(parentText) || parentText.length > 180) {
+          break;
+        }
+        target = target.parentElement;
+      }
+
+      removeNode(target);
     });
   }
 
@@ -1526,6 +1517,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     document.querySelectorAll('#product-review-accordion').forEach((node) => {
       removeNode(node.closest('section') || node);
     });
+    removeGiftbackMessage();
 
     preserveSizes();
     enableSizeP();
