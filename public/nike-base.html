@@ -935,6 +935,23 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return String(value || '').replace(/\D/g, '').slice(0, 2);
   }
 
+  function normalizePersonalizationPosition(value) {
+    const normalized = normalizeWhitespace(value).toLowerCase();
+    if (!normalized) {
+      return '';
+    }
+
+    if (normalized.indexOf('costa') >= 0 || normalized.indexOf('back') >= 0) {
+      return 'Costas';
+    }
+
+    if (normalized.indexOf('frente') >= 0 || normalized.indexOf('front') >= 0) {
+      return 'Frente';
+    }
+
+    return normalizeWhitespace(value).slice(0, 20);
+  }
+
   function isVisibleElement(node) {
     if (!node || !(node instanceof Element)) {
       return false;
@@ -978,6 +995,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     let personalizationName = normalizePersonalizationName(current.personalizationName);
     let personalizationNumber = normalizePersonalizationNumber(current.personalizationNumber);
     let personalizationPlayer = normalizeWhitespace(current.personalizationPlayer).slice(0, 40);
+    let personalizationPosition = normalizePersonalizationPosition(
+      current.personalizationPosition || current.personalizationSide || current.customSide
+    );
     let personalizationExtraValue = parseCurrencyValue(current.personalizationExtraValue);
     const fallbackMode = normalizeWhitespace(current.personalizationMode).toLowerCase();
 
@@ -1008,6 +1028,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     }
 
     const personalizationWanted = personalizationExtraValue > 0;
+    if (personalizationWanted && !personalizationPosition) {
+      personalizationPosition = 'Costas';
+    }
     const personalizationSummary = buildPersonalizationSummary({
       personalizationWanted,
       personalizationName,
@@ -1020,6 +1043,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       personalizationName,
       personalizationNumber,
       personalizationPlayer,
+      personalizationPosition,
       personalizationMode,
       personalizationExtraValue,
       personalizationSummary
@@ -1398,6 +1422,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     let personalizationName = '';
     let personalizationNumber = '';
     let personalizationPlayer = '';
+    let personalizationPosition = '';
     let personalizationExtraValue = 0;
 
     if (payloadObject) {
@@ -1418,6 +1443,14 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         if (!personalizationPlayer && /(?:athlete|atleta|player|jogador)/i.test(path) && /[a-z]/i.test(stringValue)) {
           personalizationPlayer = stringValue.slice(0, 40);
           return;
+        }
+
+        if (!personalizationPosition && /(?:side|position|posicao|posição|costa|costas|frente|back|front)/i.test(path)) {
+          const parsedPosition = normalizePersonalizationPosition(stringValue);
+          if (parsedPosition) {
+            personalizationPosition = parsedPosition;
+            return;
+          }
         }
 
         if (!personalizationName && /(?:text|name|nome)/i.test(path) && /[a-z]/i.test(stringValue) && !/nome \+ numero/i.test(stringValue)) {
@@ -1467,12 +1500,139 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       }
     }
 
+    if (!personalizationPosition) {
+      const positionMatch = rawText.match(/"(?:customSide|side|position|posicao|posição)"\s*:\s*"([^"]{1,40})"/i);
+      if (positionMatch) {
+        personalizationPosition = normalizePersonalizationPosition(positionMatch[1]);
+      }
+    }
+
     return normalizePersonalizationState({
       personalizationName,
       personalizationNumber,
       personalizationPlayer,
+      personalizationPosition,
       personalizationExtraValue
     });
+  }
+
+  function applyPersonalizationEntry(targetState, entryType, entryValue, entrySide) {
+    if (!targetState || !entryType) {
+      return;
+    }
+
+    const normalizedType = normalizeWhitespace(entryType).toLowerCase();
+    const normalizedValue = normalizeWhitespace(
+      entryValue && typeof entryValue === 'object'
+        ? entryValue.label || entryValue.name || entryValue.nome || entryValue.value || entryValue.id || ''
+        : entryValue
+    );
+
+    if (entrySide && !targetState.personalizationPosition) {
+      const parsedSide = normalizePersonalizationPosition(entrySide);
+      if (parsedSide) {
+        targetState.personalizationPosition = parsedSide;
+      }
+    }
+
+    if (!normalizedType || !normalizedValue) {
+      return;
+    }
+
+    if (/(?:precustom|athlete|atleta|player|jogador)/i.test(normalizedType)) {
+      targetState.personalizationPlayer = normalizeWhitespace(normalizedValue).slice(0, 40);
+      targetState.personalizationExtraValue = PERSONALIZATION_FULL_PRICE_VALUE;
+      return;
+    }
+
+    if (/(?:text_number|number_leading_zero|number|numero)/i.test(normalizedType)) {
+      const parsedNumber = normalizePersonalizationNumber(normalizedValue);
+      if (parsedNumber) {
+        targetState.personalizationNumber = parsedNumber;
+        targetState.personalizationExtraValue = Math.max(targetState.personalizationExtraValue || 0, PERSONALIZATION_SINGLE_PRICE_VALUE);
+      }
+      return;
+    }
+
+    if (/(?:^text$|name|nome)/i.test(normalizedType)) {
+      const parsedName = normalizePersonalizationName(normalizedValue);
+      if (parsedName) {
+        targetState.personalizationName = parsedName;
+        targetState.personalizationExtraValue = Math.max(targetState.personalizationExtraValue || 0, PERSONALIZATION_SINGLE_PRICE_VALUE);
+      }
+    }
+  }
+
+  function extractPersonalizationFromMessagePayload(payload) {
+    const draft = {
+      personalizationName: '',
+      personalizationNumber: '',
+      personalizationPlayer: '',
+      personalizationPosition: '',
+      personalizationExtraValue: 0
+    };
+
+    const visit = function (node) {
+      if (!node) {
+        return;
+      }
+
+      if (Array.isArray(node)) {
+        let pendingSide = '';
+        let pendingType = '';
+
+        node.forEach(function (item) {
+          if (!item || typeof item !== 'object') {
+            visit(item);
+            return;
+          }
+
+          const pairName = normalizeWhitespace(item.name).toLowerCase();
+          if (pairName === 'customside') {
+            pendingSide = item.value;
+            return;
+          }
+
+          if (pairName === 'customtype') {
+            pendingType = item.value;
+            return;
+          }
+
+          if (pairName === 'customvalue') {
+            applyPersonalizationEntry(draft, pendingType, item.value, pendingSide);
+            return;
+          }
+
+          visit(item);
+        });
+
+        return;
+      }
+
+      if (typeof node !== 'object') {
+        return;
+      }
+
+      if (node.customType || node.customValue || node.customSide) {
+        applyPersonalizationEntry(
+          draft,
+          node.customType || node.type,
+          node.customValue || node.value,
+          node.customSide || node.side || node.position
+        );
+      }
+
+      Object.keys(node).forEach(function (key) {
+        const value = node[key];
+        if (value && typeof value === 'object') {
+          visit(value);
+        }
+      });
+    };
+
+    visit(payload);
+
+    return normalizePersonalizationState(draft);
   }
 
   function buildFakeCartSuccessResponse(cartState) {
@@ -1492,13 +1652,12 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     };
   }
 
-  function completePersonalizationCartBridge(body) {
+  function completePersonalizationCartBridgeFromState(extractedState) {
     if (window.__codexPersonalizationRedirecting) {
       return;
     }
 
     window.__codexPersonalizationRedirecting = true;
-    const extractedState = extractPersonalizationFromPayload(body);
     const mergedState = syncStoredPersonalizationState(null, extractedState);
     const cartState = buildCartState(mergedState);
 
@@ -1522,6 +1681,42 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         window.location.href = CART_URL;
       }, 40);
     });
+  }
+
+  function completePersonalizationCartBridge(body) {
+    completePersonalizationCartBridgeFromState(extractPersonalizationFromPayload(body));
+  }
+
+  function bindPersonalizationMessageBridge() {
+    if (window.__codexPersonalizationMessageBridgeBound) {
+      return;
+    }
+
+    window.__codexPersonalizationMessageBridgeBound = true;
+
+    window.addEventListener('message', function (event) {
+      const origin = String(event.origin || '');
+      const payload = event && event.data && typeof event.data === 'object' ? event.data : null;
+
+      if (!payload || origin.indexOf('personaliza.nike.com.br') < 0) {
+        return;
+      }
+
+      const operation = normalizeWhitespace(payload.operation).toLowerCase();
+      if (operation !== 'addcustomizedproduct') {
+        return;
+      }
+
+      if (typeof event.stopImmediatePropagation === 'function') {
+        event.stopImmediatePropagation();
+      }
+      event.stopPropagation();
+
+      markPersonalizationBridgeActive();
+      completePersonalizationCartBridgeFromState(
+        extractPersonalizationFromMessagePayload(payload.parameters || payload)
+      );
+    }, true);
   }
 
   function bindPersonalizationCartBridge() {
@@ -1667,6 +1862,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       personalizationName: personalizationState.personalizationName,
       personalizationNumber: personalizationState.personalizationNumber,
       personalizationPlayer: personalizationState.personalizationPlayer,
+      personalizationPosition: personalizationState.personalizationPosition,
       personalizationMode: personalizationState.personalizationMode,
       personalizationExtraValue: personalizationState.personalizationExtraValue,
       personalizationSummary: personalizationState.personalizationSummary,
@@ -2349,6 +2545,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     bindCepLookup();
     bindSizeTracking();
     bindPersonalizationTracking();
+    bindPersonalizationMessageBridge();
     bindPersonalizationCartBridge();
     bindCartRedirect();
   }

@@ -39,6 +39,7 @@ export type CartState = {
   personalizationName?: string;
   personalizationNumber?: string;
   personalizationPlayer?: string;
+  personalizationPosition?: string;
   personalizationMode?: string;
   personalizationExtraValue?: number;
   personalizationSummary?: string;
@@ -271,6 +272,7 @@ export async function createPixForCurrentSession(
         personalizationName: cart.personalizationName || "",
         personalizationNumber: cart.personalizationNumber || "",
         personalizationPlayer: cart.personalizationPlayer || "",
+        personalizationPosition: cart.personalizationPosition || "",
         personalizationMode: cart.personalizationMode || "",
         personalizationSummary: cart.personalizationSummary || "",
         personalizationExtraValue: Number(cart.personalizationExtraValue || 0) || 0,

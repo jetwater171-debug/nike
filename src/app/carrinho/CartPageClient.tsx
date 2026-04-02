@@ -41,6 +41,7 @@ type CartState = {
   personalizationName?: string;
   personalizationNumber?: string;
   personalizationPlayer?: string;
+  personalizationPosition?: string;
   personalizationMode?: string;
   personalizationExtraValue?: number;
   personalizationSummary?: string;
@@ -203,6 +204,7 @@ export default function CartPageClient() {
         quantity: stored.quantity,
         personalizationWanted: stored.personalizationWanted ? "sim" : "nao",
         personalizationSummary: stored.personalizationSummary || "",
+        personalizationPosition: stored.personalizationPosition || "",
         personalizationExtraValue:
           Number(stored.personalizationExtraValue || 0) || 0,
       },
@@ -540,15 +542,31 @@ export default function CartPageClient() {
                 <p>Tamanho: {cart.size}</p>
                 <p>Estilo: {cart.sku}</p>
                 {cart.personalizationWanted && (
-                  <p>
-                    Personalizacao:{" "}
-                    {personalizationSummary || "selecionada"}
-                  </p>
+                  <>
+                    <p className="pt-1 font-medium">Personalizacao</p>
+                    <p>Posicao: {cart.personalizationPosition || "Costas"}</p>
+                    {cart.personalizationPlayer ? (
+                      <p>Jogador: {cart.personalizationPlayer}</p>
+                    ) : (
+                      <>
+                        {cart.personalizationName ? (
+                          <p>Nome: {cart.personalizationName}</p>
+                        ) : null}
+                        {cart.personalizationNumber ? (
+                          <p>Numero: {cart.personalizationNumber}</p>
+                        ) : null}
+                        {!cart.personalizationName &&
+                        !cart.personalizationNumber ? (
+                          <p>
+                            Personalizacao:{" "}
+                            {personalizationSummary || "selecionada"}
+                          </p>
+                        ) : null}
+                      </>
+                    )}
+                  </>
                 )}
               </div>
-              <p className="mt-4 text-[0.98rem] font-medium text-[#cc1818]">
-                Cupom aplicado na campanha. Sua oferta continua reservada.
-              </p>
             </div>
 
             <button

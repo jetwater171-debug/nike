@@ -44,6 +44,7 @@ type CartState = {
   personalizationName?: string;
   personalizationNumber?: string;
   personalizationPlayer?: string;
+  personalizationPosition?: string;
   personalizationMode?: string;
   personalizationExtraValue?: number;
   personalizationSummary?: string;
