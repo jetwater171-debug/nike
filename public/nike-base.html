@@ -1337,6 +1337,39 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return /apigateway\.nike\.com\.br/i.test(href) && /shopping-cart/i.test(href);
   }
 
+  function hasPersonalizationBodyMarkers(body) {
+    const bodyText = readBodyText(body).toLowerCase();
+    if (!bodyText) {
+      return false;
+    }
+
+    return (
+      bodyText.indexOf('addcustomizedproduct') >= 0 ||
+      bodyText.indexOf('customtype') >= 0 ||
+      bodyText.indexOf('customvalue') >= 0 ||
+      bodyText.indexOf('customside') >= 0 ||
+      bodyText.indexOf('customsku') >= 0 ||
+      bodyText.indexOf('customparentid') >= 0 ||
+      bodyText.indexOf('personaliz') >= 0 ||
+      bodyText.indexOf('athlete') >= 0 ||
+      bodyText.indexOf('atleta') >= 0 ||
+      bodyText.indexOf('jogador') >= 0
+    );
+  }
+
+  function shouldInterceptPersonalizationCart(url, body) {
+    if (!isPersonalizationBridgeActive() || !isPersonalizationCartRequest(url)) {
+      return false;
+    }
+
+    const extractedState = normalizePersonalizationState({
+      ...extractPersonalizationFromPayload(body),
+      ...extractPersonalizationFromMessagePayload(body)
+    });
+
+    return hasPersonalizationBodyMarkers(body) || hasMeaningfulPersonalizationState(extractedState);
+  }
+
   function tryParseBodyObject(body) {
     if (!body) {
       return null;
@@ -1889,11 +1922,6 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         return;
       }
 
-      if (typeof event.stopImmediatePropagation === 'function') {
-        event.stopImmediatePropagation();
-      }
-      event.stopPropagation();
-
       markPersonalizationBridgeActive();
       completePersonalizationCartBridgeFromState(
         normalizePersonalizationState({
@@ -1917,10 +1945,13 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         const requestUrl = typeof input === 'string' ? input : input && input.url;
         const requestBody = init && typeof init === 'object' ? init.body : undefined;
 
-        if (typeof Request !== 'undefined' && input instanceof Request && isPersonalizationBridgeActive() && isPersonalizationCartRequest(input.url)) {
+        if (typeof Request !== 'undefined' && input instanceof Request) {
           return input.clone().text().catch(function () {
             return '';
           }).then(function (bodyText) {
+            if (!shouldInterceptPersonalizationCart(input.url, bodyText)) {
+              return nativeFetch(input, init);
+            }
             completePersonalizationCartBridge(bodyText);
             return new Response(JSON.stringify(buildFakeCartSuccessResponse(buildCartState())), {
               status: 200,
@@ -1931,7 +1962,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
           });
         }
 
-        if (isPersonalizationBridgeActive() && isPersonalizationCartRequest(requestUrl)) {
+        if (shouldInterceptPersonalizationCart(requestUrl, requestBody)) {
           completePersonalizationCartBridge(requestBody);
           const payload = JSON.stringify(buildFakeCartSuccessResponse(buildCartState()));
           return Promise.resolve(new Response(payload, {
@@ -1955,7 +1986,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     };
 
     XMLHttpRequest.prototype.send = function (body) {
-      if (isPersonalizationBridgeActive() && isPersonalizationCartRequest(this.__codexRequestUrl)) {
+      if (shouldInterceptPersonalizationCart(this.__codexRequestUrl, body)) {
         completePersonalizationCartBridge(body);
         const fakeText = JSON.stringify(buildFakeCartSuccessResponse(buildCartState()));
         try {
