@@ -806,6 +806,8 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   const ORIGINAL_PRICE_VALUE = 749.99;
   const SAVINGS_PRICE = 'R$ 610,80';
   const SAVINGS_PRICE_VALUE = Number((ORIGINAL_PRICE_VALUE - OFFER_PRICE_VALUE).toFixed(2));
+  const PERSONALIZATION_SINGLE_PRICE_VALUE = 49.99;
+  const PERSONALIZATION_FULL_PRICE_VALUE = 99.98;
   const OFFER_INSTALLMENTS = {
     count: 12,
     value: 'R$ 11,60'
@@ -921,15 +923,306 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return String(value || '').match(/R\$\s*[\d.]+,\d{2}/g) || [];
   }
 
-  function readCurrentPriceState(existingState) {
+  function normalizeWhitespace(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function normalizePersonalizationName(value) {
+    return normalizeWhitespace(value).slice(0, 10);
+  }
+
+  function normalizePersonalizationNumber(value) {
+    return String(value || '').replace(/\D/g, '').slice(0, 2);
+  }
+
+  function isVisibleElement(node) {
+    if (!node || !(node instanceof Element)) {
+      return false;
+    }
+
+    const style = window.getComputedStyle(node);
+    if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || 1) === 0) {
+      return false;
+    }
+
+    const rect = node.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  function buildPersonalizationSummary(state) {
+    if (!state || !state.personalizationWanted) {
+      return '';
+    }
+
+    if (state.personalizationPlayer) {
+      return state.personalizationPlayer;
+    }
+
+    if (state.personalizationName && state.personalizationNumber) {
+      return state.personalizationName + ' #' + state.personalizationNumber;
+    }
+
+    if (state.personalizationName) {
+      return state.personalizationName;
+    }
+
+    if (state.personalizationNumber) {
+      return '#' + state.personalizationNumber;
+    }
+
+    return 'Personalizacao selecionada';
+  }
+
+  function normalizePersonalizationState(source) {
+    const current = source && typeof source === 'object' ? source : {};
+    let personalizationName = normalizePersonalizationName(current.personalizationName);
+    let personalizationNumber = normalizePersonalizationNumber(current.personalizationNumber);
+    let personalizationPlayer = normalizeWhitespace(current.personalizationPlayer).slice(0, 40);
+    let personalizationExtraValue = parseCurrencyValue(current.personalizationExtraValue);
+    const fallbackMode = normalizeWhitespace(current.personalizationMode).toLowerCase();
+
+    if (!Number.isFinite(personalizationExtraValue)) {
+      personalizationExtraValue = 0;
+    }
+
+    let personalizationMode = 'none';
+    if (personalizationPlayer) {
+      personalizationMode = 'player';
+      personalizationExtraValue = PERSONALIZATION_FULL_PRICE_VALUE;
+    } else if (personalizationName && personalizationNumber) {
+      personalizationMode = 'name_number';
+      personalizationExtraValue = PERSONALIZATION_FULL_PRICE_VALUE;
+    } else if (personalizationName) {
+      personalizationMode = 'name';
+      personalizationExtraValue = PERSONALIZATION_SINGLE_PRICE_VALUE;
+    } else if (personalizationNumber) {
+      personalizationMode = 'number';
+      personalizationExtraValue = PERSONALIZATION_SINGLE_PRICE_VALUE;
+    } else if (personalizationExtraValue === PERSONALIZATION_FULL_PRICE_VALUE) {
+      personalizationMode = fallbackMode || 'full';
+      personalizationPlayer = personalizationPlayer || 'Jogador selecionado';
+    } else if (personalizationExtraValue === PERSONALIZATION_SINGLE_PRICE_VALUE) {
+      personalizationMode = fallbackMode || 'single';
+    } else {
+      personalizationExtraValue = 0;
+    }
+
+    const personalizationWanted = personalizationExtraValue > 0;
+    const personalizationSummary = buildPersonalizationSummary({
+      personalizationWanted,
+      personalizationName,
+      personalizationNumber,
+      personalizationPlayer
+    });
+
+    return {
+      personalizationWanted,
+      personalizationName,
+      personalizationNumber,
+      personalizationPlayer,
+      personalizationMode,
+      personalizationExtraValue,
+      personalizationSummary
+    };
+  }
+
+  function collectFieldContext(field) {
+    if (!field || !(field instanceof Element)) {
+      return '';
+    }
+
+    const parts = [
+      field.getAttribute('placeholder'),
+      field.getAttribute('aria-label'),
+      field.getAttribute('name'),
+      field.getAttribute('id'),
+      field.getAttribute('data-testid')
+    ];
+
+    const label = field.closest('label');
+    if (label) {
+      parts.push(label.textContent);
+    }
+
+    const parent = field.parentElement;
+    if (parent) {
+      parts.push(parent.textContent);
+      if (parent.previousElementSibling) {
+        parts.push(parent.previousElementSibling.textContent);
+      }
+      if (parent.nextElementSibling) {
+        parts.push(parent.nextElementSibling.textContent);
+      }
+    }
+
+    return normalizeWhitespace(parts.join(' ')).toLowerCase();
+  }
+
+  function isLikelyPersonalizationRoot(node) {
+    if (!isVisibleElement(node)) {
+      return false;
+    }
+
+    const text = normalizeWhitespace(node.innerText || node.textContent || '').toLowerCase();
+    if (!text) {
+      return false;
+    }
+
+    return (
+      (text.indexOf('personaliz') >= 0 || text.indexOf('nome nas costas') >= 0 || text.indexOf('nome + numero') >= 0) &&
+      (text.indexOf('numero') >= 0 || text.indexOf('atletas') >= 0 || text.indexOf('camisa costas') >= 0)
+    );
+  }
+
+  function findVisiblePersonalizationRoot(fromNode) {
+    let current = fromNode && fromNode instanceof Element ? fromNode : null;
+    while (current && current !== document.body) {
+      if (isLikelyPersonalizationRoot(current)) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+
+    const candidates = document.querySelectorAll('[aria-modal="true"],[role="dialog"],[data-testid*="modal"],[class*="modal"],[class*="drawer"]');
+    for (let index = 0; index < candidates.length; index += 1) {
+      if (isLikelyPersonalizationRoot(candidates[index])) {
+        return candidates[index];
+      }
+    }
+
+    return null;
+  }
+
+  function findSelectedPlayerText(root) {
+    if (!root) {
+      return '';
+    }
+
+    const ignore = [
+      'nome + numero',
+      'nome nas costas',
+      'numero',
+      'atletas',
+      'camisa costas',
+      'valor parcial',
+      'proximo',
+      'finalizar',
+      'cancelar',
+      'refazer',
+      'escolha uma ou mais opcoes',
+      'personalize do seu jeito'
+    ];
+
+    const candidates = root.querySelectorAll('[aria-selected="true"],[aria-pressed="true"],[aria-checked="true"],[data-selected="true"],[data-active="true"],[data-state="active"],.selected,.is-selected,.active');
+    for (let index = 0; index < candidates.length; index += 1) {
+      const node = candidates[index];
+      if (!isVisibleElement(node)) {
+        continue;
+      }
+
+      const text = normalizeWhitespace(node.innerText || node.textContent || '');
+      const lower = text.toLowerCase();
+      if (!text || text.length > 40 || /r\$\s*[\d.]+,\d{2}/i.test(text)) {
+        continue;
+      }
+      if (ignore.some((term) => lower.indexOf(term) >= 0)) {
+        continue;
+      }
+      if (lower.indexOf('nome') >= 0 || lower.indexOf('numero') >= 0) {
+        continue;
+      }
+      return text;
+    }
+
+    return '';
+  }
+
+  function readVisiblePersonalizationState(fromNode) {
+    const root = findVisiblePersonalizationRoot(fromNode);
+    if (!root) {
+      return null;
+    }
+
+    let personalizationName = '';
+    let personalizationNumber = '';
+    const fields = root.querySelectorAll('input, textarea');
+
+    for (let index = 0; index < fields.length; index += 1) {
+      const field = fields[index];
+      if (!isVisibleElement(field) || field.disabled) {
+        continue;
+      }
+
+      const rawValue = normalizeWhitespace(field.value);
+      const context = collectFieldContext(field);
+
+      if (!personalizationName && rawValue && context.indexOf('nome') >= 0) {
+        personalizationName = normalizePersonalizationName(rawValue);
+        continue;
+      }
+
+      if (!personalizationNumber && ((field.maxLength && Number(field.maxLength) <= 2) || context.indexOf('numero') >= 0)) {
+        personalizationNumber = normalizePersonalizationNumber(rawValue);
+        continue;
+      }
+
+      if (!personalizationName && rawValue && !/\d/.test(rawValue) && rawValue.length >= 2) {
+        personalizationName = normalizePersonalizationName(rawValue);
+        continue;
+      }
+
+      if (!personalizationNumber && /^\d{1,2}$/.test(rawValue)) {
+        personalizationNumber = normalizePersonalizationNumber(rawValue);
+      }
+    }
+
+    const rootText = normalizeWhitespace(root.innerText || root.textContent || '');
+    const prices = readCurrencyMatches(rootText).map(parseCurrencyValue).filter((value) => Number.isFinite(value));
+    let personalizationExtraValue = 0;
+    if (prices.indexOf(PERSONALIZATION_FULL_PRICE_VALUE) >= 0) {
+      personalizationExtraValue = PERSONALIZATION_FULL_PRICE_VALUE;
+    } else if (prices.indexOf(PERSONALIZATION_SINGLE_PRICE_VALUE) >= 0) {
+      personalizationExtraValue = PERSONALIZATION_SINGLE_PRICE_VALUE;
+    }
+
+    let personalizationPlayer = findSelectedPlayerText(root);
+    if (!personalizationPlayer && !personalizationName && !personalizationNumber && personalizationExtraValue === PERSONALIZATION_FULL_PRICE_VALUE) {
+      personalizationPlayer = 'Jogador selecionado';
+    }
+
+    return normalizePersonalizationState({
+      personalizationName,
+      personalizationNumber,
+      personalizationPlayer,
+      personalizationExtraValue
+    });
+  }
+
+  function syncStoredPersonalizationState(fromNode, overrides) {
+    const liveState = readVisiblePersonalizationState(fromNode);
+    const baseState = liveState || normalizePersonalizationState(readStoredCartState());
+    const mergedState = normalizePersonalizationState({
+      ...baseState,
+      ...(overrides && typeof overrides === 'object' ? overrides : {})
+    });
+
+    setStoredCartState(mergedState);
+    return mergedState;
+  }
+
+  function readCurrentPriceState(existingState, personalizationState) {
     const existing = existingState && typeof existingState === 'object' ? existingState : {};
+    const personalization = normalizePersonalizationState({
+      ...existing,
+      ...(personalizationState && typeof personalizationState === 'object' ? personalizationState : {})
+    });
     const mainPrice = document.querySelector('[data-testid="main-price"]');
     const oldNode = mainPrice && mainPrice.querySelector('.codex-main-price__old');
     const newNode = mainPrice && mainPrice.querySelector('.codex-main-price__new');
 
     let originalPriceLabel = String(existing.originalPriceLabel || ORIGINAL_PRICE).trim() || ORIGINAL_PRICE;
-    let priceLabel = OFFER_PRICE;
-    let priceValue = OFFER_PRICE_VALUE;
+    let priceValue = Number((OFFER_PRICE_VALUE + personalization.personalizationExtraValue).toFixed(2));
+    let priceLabel = formatMoney(priceValue);
 
     if (oldNode && String(oldNode.textContent || '').trim()) {
       originalPriceLabel = String(oldNode.textContent || '').trim();
@@ -937,7 +1230,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
     if (newNode && String(newNode.textContent || '').trim()) {
       const parsedDisplayedPrice = parseCurrencyValue(newNode.textContent || '');
-      if (parsedDisplayedPrice === OFFER_PRICE_VALUE) {
+      if (parsedDisplayedPrice === OFFER_PRICE_VALUE && personalization.personalizationExtraValue === 0) {
         priceLabel = OFFER_PRICE;
       }
     }
@@ -951,24 +1244,34 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
   function buildCartState(overrides) {
     const existing = readStoredCartState();
-    const shipping = existing && typeof existing.shipping === 'object' ? existing.shipping : {};
-    const priceState = readCurrentPriceState(existing);
+    const merged = {
+      ...(existing && typeof existing === 'object' ? existing : {}),
+      ...(overrides && typeof overrides === 'object' ? overrides : {})
+    };
+    const shipping = merged && typeof merged.shipping === 'object' ? merged.shipping : {};
+    const personalizationState = normalizePersonalizationState(merged);
+    const priceState = readCurrentPriceState(merged, personalizationState);
 
     return {
-      ...(existing && typeof existing === 'object' ? existing : {}),
+      ...merged,
       title: PRODUCT_TITLE,
       color: PRODUCT_COLOR,
-      size: readSelectedSize() || String(existing.size || '').trim(),
+      size: readSelectedSize() || String(merged.size || '').trim(),
       sku: PRODUCT_SKU,
-      quantity: Math.min(Math.max(Number(existing.quantity || 1), 1), 5),
+      quantity: Math.min(Math.max(Number(merged.quantity || 1), 1), 5),
       image: PRODUCT_IMAGE,
       priceValue: priceState.priceValue,
       priceLabel: priceState.priceLabel,
       originalPriceLabel: priceState.originalPriceLabel,
-      installmentLabel: 'ou ' + OFFER_INSTALLMENTS.count + 'x de ' + OFFER_INSTALLMENTS.value + ' sem juros',
-      personalizationWanted: Boolean(existing.personalizationWanted),
+      installmentLabel: 'ou ' + OFFER_INSTALLMENTS.count + 'x de ' + formatMoney(Number((priceState.priceValue / OFFER_INSTALLMENTS.count).toFixed(2))) + ' sem juros',
+      personalizationWanted: personalizationState.personalizationWanted,
+      personalizationName: personalizationState.personalizationName,
+      personalizationNumber: personalizationState.personalizationNumber,
+      personalizationPlayer: personalizationState.personalizationPlayer,
+      personalizationMode: personalizationState.personalizationMode,
+      personalizationExtraValue: personalizationState.personalizationExtraValue,
+      personalizationSummary: personalizationState.personalizationSummary,
       shipping,
-      ...(overrides && typeof overrides === 'object' ? overrides : {})
     };
   }
 
@@ -1221,12 +1524,11 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   }
 
   function updateOfferPrice() {
-    const priceState = readCurrentPriceState(readStoredCartState());
     document.querySelectorAll('[data-testid="main-price"]').forEach((node) => {
       node.classList.add('codex-main-price');
       node.innerHTML =
-        '<span class="codex-main-price__old">' + escapeHtml(priceState.originalPriceLabel || ORIGINAL_PRICE) + '</span>' +
-        '<span class="codex-main-price__new">' + escapeHtml(priceState.priceLabel || OFFER_PRICE) + '</span>';
+        '<span class="codex-main-price__old">' + escapeHtml(ORIGINAL_PRICE) + '</span>' +
+        '<span class="codex-main-price__new">' + escapeHtml(OFFER_PRICE) + '</span>';
     });
 
     document.querySelectorAll('[data-testid="installment-info"]').forEach((node) => {
@@ -1377,16 +1679,16 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   }
 
   function bindPersonalizationTracking() {
-    document.querySelectorAll('[data-testid="personalize-button"]').forEach((button) => {
+    document.querySelectorAll('[data-testid="personalize-button"],[data-testid="custom-product-button"]').forEach((button) => {
       if (button.dataset.codexPersonalizeBound) {
         return;
       }
 
       button.dataset.codexPersonalizeBound = '1';
       button.addEventListener('click', function () {
-        setStoredCartState({
-          personalizationWanted: true
-        });
+        window.setTimeout(function () {
+          syncStoredPersonalizationState(button);
+        }, 120);
         postLeadEvent('nike_personalization_opened', {
           extra: {
             size: readSelectedSize(),
@@ -1395,6 +1697,55 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         });
       });
     });
+
+    if (document.documentElement.dataset.codexPersonalizationLiveBound) {
+      return;
+    }
+
+    document.documentElement.dataset.codexPersonalizationLiveBound = '1';
+
+    let syncTimer = 0;
+    const scheduleSync = function (target, delay) {
+      window.clearTimeout(syncTimer);
+      syncTimer = window.setTimeout(function () {
+        syncStoredPersonalizationState(target);
+      }, delay);
+    };
+
+    document.addEventListener('input', function (event) {
+      const target = event.target;
+      if (findVisiblePersonalizationRoot(target)) {
+        scheduleSync(target, 90);
+      }
+    }, true);
+
+    document.addEventListener('change', function (event) {
+      const target = event.target;
+      if (findVisiblePersonalizationRoot(target)) {
+        scheduleSync(target, 40);
+      }
+    }, true);
+
+    document.addEventListener('click', function (event) {
+      const target = event.target;
+      const root = findVisiblePersonalizationRoot(target);
+      if (!root) {
+        return;
+      }
+
+      const text = normalizeWhitespace(target && target.textContent).toLowerCase();
+      const shouldSyncFast =
+        text.indexOf('finalizar') >= 0 ||
+        text.indexOf('proximo') >= 0 ||
+        text.indexOf('continuar') >= 0 ||
+        text.indexOf('atleta') >= 0 ||
+        text.indexOf('jogador') >= 0;
+
+      scheduleSync(target, shouldSyncFast ? 40 : 140);
+      window.setTimeout(function () {
+        syncStoredPersonalizationState(target);
+      }, shouldSyncFast ? 220 : 320);
+    }, true);
   }
 
   function bindCartRedirect() {
@@ -1405,7 +1756,8 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
       button.dataset.codexCartBound = '1';
       button.addEventListener('click', function (event) {
-        const cartState = buildCartState();
+        const personalizationState = syncStoredPersonalizationState(event.target);
+        const cartState = buildCartState(personalizationState);
         if (!String(cartState.size || '').trim()) {
           window.alert('Escolha o tamanho da camiseta para continuar.');
           return;
@@ -1436,7 +1788,10 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
             quantity: cartState.quantity,
             sku: cartState.sku,
             destination: CART_URL,
-            personalizationWanted: cartState.personalizationWanted ? 'sim' : 'nao'
+            personalizationWanted: cartState.personalizationWanted ? 'sim' : 'nao',
+            personalizationMode: cartState.personalizationMode || '',
+            personalizationSummary: cartState.personalizationSummary || '',
+            personalizationExtraValue: cartState.personalizationExtraValue || 0
           },
           shipping: cartState.shipping || {}
         })).finally(function () {

@@ -35,6 +35,13 @@ export type CartState = {
   quantity?: number;
   image?: string;
   priceValue?: number;
+  personalizationWanted?: boolean;
+  personalizationName?: string;
+  personalizationNumber?: string;
+  personalizationPlayer?: string;
+  personalizationMode?: string;
+  personalizationExtraValue?: number;
+  personalizationSummary?: string;
   shipping?: CheckoutShipping;
 };
 
@@ -261,6 +268,12 @@ export async function createPixForCurrentSession(
         productSubtotal,
         shippingSubtotal: shippingFee,
         sku: cart.sku || "",
+        personalizationName: cart.personalizationName || "",
+        personalizationNumber: cart.personalizationNumber || "",
+        personalizationPlayer: cart.personalizationPlayer || "",
+        personalizationMode: cart.personalizationMode || "",
+        personalizationSummary: cart.personalizationSummary || "",
+        personalizationExtraValue: Number(cart.personalizationExtraValue || 0) || 0,
       },
       shipping: {
         id: shipping.id || "normal",

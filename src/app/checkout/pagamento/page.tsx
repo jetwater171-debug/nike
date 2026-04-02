@@ -40,6 +40,13 @@ type CartState = {
   quantity?: number;
   image?: string;
   priceValue?: number;
+  personalizationWanted?: boolean;
+  personalizationName?: string;
+  personalizationNumber?: string;
+  personalizationPlayer?: string;
+  personalizationMode?: string;
+  personalizationExtraValue?: number;
+  personalizationSummary?: string;
   shipping?: CheckoutShipping;
 };
 
@@ -183,6 +190,29 @@ export default function CheckoutPagamentoPage() {
     () => Number(shipping.price || 0),
     [shipping.price],
   );
+  const personalizationSummary = useMemo(() => {
+    if (cart.personalizationSummary) {
+      return cart.personalizationSummary;
+    }
+    if (cart.personalizationPlayer) {
+      return cart.personalizationPlayer;
+    }
+    if (cart.personalizationName && cart.personalizationNumber) {
+      return `${cart.personalizationName} #${cart.personalizationNumber}`;
+    }
+    if (cart.personalizationName) {
+      return cart.personalizationName;
+    }
+    if (cart.personalizationNumber) {
+      return `#${cart.personalizationNumber}`;
+    }
+    return "";
+  }, [
+    cart.personalizationName,
+    cart.personalizationNumber,
+    cart.personalizationPlayer,
+    cart.personalizationSummary,
+  ]);
   const totalPriceValue = useMemo(
     () => Number((productSubtotalValue + shippingPriceValue).toFixed(2)),
     [productSubtotalValue, shippingPriceValue],
@@ -331,6 +361,12 @@ export default function CheckoutPagamentoPage() {
                   <p>Quantidade: {quantity}</p>
                   <p>Tamanho: {cart.size || DEFAULT_CART.size}</p>
                   <p>Cor: {cart.color || DEFAULT_CART.color}</p>
+                  {cart.personalizationWanted && (
+                    <p>
+                      Personalizacao:{" "}
+                      {personalizationSummary || "selecionada"}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

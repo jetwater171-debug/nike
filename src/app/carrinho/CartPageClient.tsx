@@ -38,6 +38,12 @@ type CartState = {
   originalPriceLabel: string;
   installmentLabel: string;
   personalizationWanted?: boolean;
+  personalizationName?: string;
+  personalizationNumber?: string;
+  personalizationPlayer?: string;
+  personalizationMode?: string;
+  personalizationExtraValue?: number;
+  personalizationSummary?: string;
   shipping?: CartShipping;
 };
 
@@ -196,6 +202,9 @@ export default function CartPageClient() {
         size: stored.size,
         quantity: stored.quantity,
         personalizationWanted: stored.personalizationWanted ? "sim" : "nao",
+        personalizationSummary: stored.personalizationSummary || "",
+        personalizationExtraValue:
+          Number(stored.personalizationExtraValue || 0) || 0,
       },
     });
   }, []);
@@ -236,6 +245,29 @@ export default function CartPageClient() {
   );
 
   const totalLabel = useMemo(() => formatCurrency(total), [total]);
+  const personalizationSummary = useMemo(() => {
+    if (cart.personalizationSummary) {
+      return cart.personalizationSummary;
+    }
+    if (cart.personalizationPlayer) {
+      return cart.personalizationPlayer;
+    }
+    if (cart.personalizationName && cart.personalizationNumber) {
+      return `${cart.personalizationName} #${cart.personalizationNumber}`;
+    }
+    if (cart.personalizationName) {
+      return cart.personalizationName;
+    }
+    if (cart.personalizationNumber) {
+      return `#${cart.personalizationNumber}`;
+    }
+    return "";
+  }, [
+    cart.personalizationName,
+    cart.personalizationNumber,
+    cart.personalizationPlayer,
+    cart.personalizationSummary,
+  ]);
 
   const handleQuantityChange = (direction: "decrease" | "increase") => {
     const nextQuantity =
@@ -508,7 +540,10 @@ export default function CartPageClient() {
                 <p>Tamanho: {cart.size}</p>
                 <p>Estilo: {cart.sku}</p>
                 {cart.personalizationWanted && (
-                  <p>Personalizacao: selecionada</p>
+                  <p>
+                    Personalizacao:{" "}
+                    {personalizationSummary || "selecionada"}
+                  </p>
                 )}
               </div>
               <p className="mt-4 text-[0.98rem] font-medium text-[#cc1818]">
