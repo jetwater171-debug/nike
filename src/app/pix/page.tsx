@@ -168,9 +168,9 @@ function Accordion({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-4 py-5 text-left"
+        className="flex w-full items-center justify-between gap-4 py-4 text-left"
       >
-        <span className="text-[1.2rem] font-semibold leading-7">{title}</span>
+        <span className="text-[1rem] font-semibold leading-6">{title}</span>
         <ChevronDown
           className={`h-5 w-5 flex-none text-black/62 transition-transform duration-300 ${
             open ? "rotate-180" : ""
@@ -179,7 +179,7 @@ function Accordion({
         />
       </button>
 
-      {open && <div className="pb-5 text-[1rem] leading-7 text-black/68">{children}</div>}
+      {open && <div className="pb-4 text-[0.92rem] leading-6 text-black/68">{children}</div>}
     </div>
   );
 }
@@ -544,9 +544,12 @@ export default function PixPage() {
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white">
-        <div className="mx-auto flex h-[60px] w-full max-w-[38rem] items-center justify-between px-4">
+      <header className="border-b border-black/10 bg-white">
+        <div className="mx-auto flex h-[62px] w-full max-w-[1180px] items-center justify-between px-5 md:px-8">
+          <div aria-hidden="true" className="h-10 w-10" />
+
           <NikeSwoosh className="h-5 w-auto text-black" />
+
           <Link
             href="/checkout/pagamento"
             aria-label="Fechar"
@@ -557,41 +560,41 @@ export default function PixPage() {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-14 pt-[76px]">
-        <section className="border-b border-black/10 py-7">
-          <h1 className="max-w-[30rem] text-[2.15rem] font-medium leading-[1.12] tracking-[-0.03em]">
+      <div className="mx-auto w-full max-w-[42rem] px-4 pb-12 pt-0 sm:px-5">
+        <section className="border-b border-black/10 py-6">
+          <h1 className="max-w-[27rem] text-[1.82rem] font-medium leading-[1.1] tracking-[-0.03em] sm:text-[1.92rem]">
             Pague com Pix para garantir sua compra
           </h1>
 
-          <p className="mt-8 text-[1.03rem] text-black/62">
+          <p className="mt-6 text-[0.92rem] text-black/62">
             Numero do pedido:{" "}
             <span className="font-semibold text-black">
               {pix?.orderNumber || "000000000"}
             </span>
           </p>
 
-          <div className="mt-9 text-center">
-            <p className="text-[1.04rem] leading-7">O codigo Pix expira em:</p>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#ff5a18] px-4 py-2 text-[1.08rem] font-medium text-[#ff5a18]">
+          <div className="mt-7 text-center">
+            <p className="text-[0.94rem] leading-6">O codigo Pix expira em:</p>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#ff5a18] px-3.5 py-2 text-[0.98rem] font-medium text-[#ff5a18]">
               <Clock3 className="h-4 w-4" strokeWidth={2} />
               <span>
                 {remainingSeconds > 0 ? formatCountdown(remainingSeconds) : "expirado"}
               </span>
             </div>
-            <p className="mt-5 text-[1rem] leading-7 text-black/52">
+            <p className="mt-4 text-[0.9rem] leading-6 text-black/52">
               A confirmacao do pagamento sera por e-mail.
             </p>
           </div>
 
           {pixStatus === "paid" && (
-            <div className="mt-7 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-5 py-4 text-[#185233]">
+            <div className="mt-6 rounded-[12px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-3.5 text-[#185233]">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 flex-none text-[#0f6a3f]" strokeWidth={2.2} />
                 <div>
-                  <p className="text-[1rem] font-semibold text-[#0f6a3f]">
+                  <p className="text-[0.94rem] font-semibold text-[#0f6a3f]">
                     Pagamento confirmado
                   </p>
-                  <p className="mt-1 text-[0.98rem] leading-6">
+                  <p className="mt-1 text-[0.9rem] leading-6">
                     Seu Pix foi identificado. Agora sua compra segue para a proxima etapa.
                   </p>
                 </div>
@@ -600,24 +603,24 @@ export default function PixPage() {
           )}
 
           {(pixStatus === "refused" || pixStatus === "refunded") && (
-            <div className="mt-7 rounded-[14px] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
-              <p className="text-[1rem] font-semibold">
+            <div className="mt-6 rounded-[12px] border border-[#f0d0d0] bg-[#fff4f4] px-4 py-3.5 text-[#7d1f1f]">
+              <p className="text-[0.94rem] font-semibold">
                 Esse Pix nao esta mais ativo.
               </p>
-              <p className="mt-1 text-[0.98rem] leading-6">
+              <p className="mt-1 text-[0.9rem] leading-6">
                 Volte uma etapa e gere um novo pagamento para concluir a compra.
               </p>
             </div>
           )}
 
           {error && (
-            <div className="mt-7 rounded-[14px] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
-              <p className="text-[0.95rem] leading-6">{error}</p>
+            <div className="mt-6 rounded-[12px] border border-[#f0d0d0] bg-[#fff4f4] px-4 py-3.5 text-[#7d1f1f]">
+              <p className="text-[0.88rem] leading-6">{error}</p>
             </div>
           )}
 
-          <div className="mt-8 rounded-[12px] border border-black/10 bg-[#f3f3f3] p-3">
-            <div className="min-h-[5.5rem] break-all rounded-[10px] border border-black/8 bg-white px-4 py-3 text-[0.92rem] leading-6 text-black/62">
+          <div className="mt-7 rounded-[12px] border border-black/10 bg-[#f3f3f3] p-2.5">
+            <div className="min-h-[5rem] break-all rounded-[10px] border border-black/8 bg-white px-4 py-3 text-[0.86rem] leading-6 text-black/62">
               {isLoading && !pix?.paymentCode ? (
                 <div className="flex min-h-[4rem] items-center gap-3 text-black/46">
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
@@ -633,7 +636,7 @@ export default function PixPage() {
             type="button"
             onClick={() => void handleCopyPix()}
             disabled={!pix?.paymentCode}
-            className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-black px-6 text-[1.03rem] font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-black px-6 text-[0.95rem] font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
             {copyState === "copied" ? "Codigo Pix copiado" : "Copiar codigo Pix"}
             <Copy className="h-4 w-4" strokeWidth={2} />
@@ -642,13 +645,13 @@ export default function PixPage() {
           <button
             type="button"
             onClick={handleShowQr}
-            className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full border border-black px-6 text-[1.03rem] font-medium text-black"
+            className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-black px-6 text-[0.95rem] font-medium text-black"
           >
             Pagar com QR Code
             <QrCode className="h-4 w-4" strokeWidth={2} />
           </button>
 
-          <p className="mt-8 text-center text-[1.5rem] font-semibold leading-none">
+          <p className="mt-7 text-center text-[1.24rem] font-semibold leading-none">
             Total da compra: {formatCurrency(totalPriceValue)}
           </p>
         </section>
@@ -675,9 +678,9 @@ export default function PixPage() {
               setActiveAccordion((current) => (current === "qr" ? "copy" : "qr"))
             }
           >
-            <div className="rounded-[14px] border border-black/10 bg-[#f8f8f8] p-5">
+            <div className="rounded-[12px] border border-black/10 bg-[#f8f8f8] p-4">
               {qrSource ? (
-                <div className="mx-auto flex w-full max-w-[17rem] items-center justify-center rounded-[12px] bg-white p-4 shadow-[0_18px_44px_rgba(0,0,0,0.08)]">
+                <div className="mx-auto flex w-full max-w-[15rem] items-center justify-center rounded-[12px] bg-white p-4 shadow-[0_16px_36px_rgba(0,0,0,0.08)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={qrSource}
@@ -686,22 +689,22 @@ export default function PixPage() {
                   />
                 </div>
               ) : (
-                <div className="flex min-h-[18rem] items-center justify-center rounded-[12px] border border-dashed border-black/14 bg-white px-5 text-center text-[0.98rem] leading-7 text-black/48">
+                <div className="flex min-h-[16rem] items-center justify-center rounded-[12px] border border-dashed border-black/14 bg-white px-5 text-center text-[0.9rem] leading-6 text-black/48">
                   O QR Code ainda esta sendo preparado. Enquanto isso, voce ja pode pagar com o codigo copia e cola acima.
                 </div>
               )}
 
-              <p className="mt-4 text-center text-[0.96rem] leading-6 text-black/58">
+              <p className="mt-4 text-center text-[0.88rem] leading-6 text-black/58">
                 Escaneie com o banco ou app de pagamento e conclua o Pix com o mesmo valor da oferta reservada.
               </p>
             </div>
           </Accordion>
         </section>
 
-        <section className="border-b border-black/10 py-8">
-          <h2 className="text-[1.95rem] font-medium leading-none">Resumo da compra</h2>
+        <section className="border-b border-black/10 py-7">
+          <h2 className="text-[1.58rem] font-medium leading-none">Resumo da compra</h2>
 
-          <div className="mt-7 space-y-4 text-[1.02rem]">
+          <div className="mt-6 space-y-3.5 text-[0.94rem]">
             <div className="flex items-center justify-between gap-4">
               <span className="text-black/72">Valor dos produtos</span>
               <span>{formatCurrency(productSubtotalValue)}</span>
@@ -713,29 +716,29 @@ export default function PixPage() {
               </span>
             </div>
             <div className="flex items-center justify-between gap-4 pt-2">
-              <span className="text-[1.4rem] font-semibold leading-none">
+              <span className="text-[1.16rem] font-semibold leading-none">
                 Total da compra
               </span>
-              <span className="text-[1.4rem] font-semibold leading-none">
+              <span className="text-[1.16rem] font-semibold leading-none">
                 {formatCurrency(totalPriceValue)}
               </span>
             </div>
           </div>
 
-          <div className="mt-6 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
+          <div className="mt-5 rounded-[12px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-3.5 text-[#185233]">
             <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
               Cupom aplicado
             </p>
-            <p className="mt-2 text-[1rem] leading-6">
+            <p className="mt-2 text-[0.9rem] leading-6">
               Voce esta economizando {formatCurrency(totalSavingsValue)} com o valor da campanha.
             </p>
           </div>
         </section>
 
-        <section className="border-b border-black/10 py-8">
-          <h2 className="text-[1.95rem] font-medium leading-none">Endereco de entrega</h2>
+        <section className="border-b border-black/10 py-7">
+          <h2 className="text-[1.58rem] font-medium leading-none">Endereco de entrega</h2>
 
-          <div className="mt-6 text-[1rem] leading-8 text-black/72">
+          <div className="mt-5 text-[0.92rem] leading-7 text-black/72">
             <p className="font-medium text-black">{lead.name || "-"}</p>
             <p>
               {[shipping.street, shipping.number].filter(Boolean).join(", ") || "-"}
@@ -745,32 +748,32 @@ export default function PixPage() {
             <p>{[shipping.city, shipping.state].filter(Boolean).join(" - ") || "-"}</p>
             {shipping.cep && <p>CEP {shipping.cep}</p>}
             <p className="mt-3 font-medium text-[#0f6a3f]">{deliveryLabel}</p>
-            <p className="mt-2 max-w-[31rem] leading-7 text-black/54">
+            <p className="mt-2 max-w-[31rem] leading-6 text-black/54">
               O prazo de entrega sera contado a partir do primeiro dia util apos a confirmacao do pagamento.
             </p>
           </div>
         </section>
 
-        <section className="py-8">
-          <h2 className="text-[1.95rem] font-medium leading-none">Itens do carrinho</h2>
+        <section className="py-7">
+          <h2 className="text-[1.58rem] font-medium leading-none">Itens do carrinho</h2>
 
-          <div className="mt-6 flex items-start gap-4">
+          <div className="mt-5 flex items-start gap-4">
             <div className="overflow-hidden bg-[#f3f3f3]">
               <Image
                 src={cart.image || DEFAULT_CART.image || ""}
                 alt={cart.title || DEFAULT_CART.title || "Camisa Nike"}
-                width={92}
-                height={92}
-                className="h-[92px] w-[92px] object-cover"
+                width={84}
+                height={84}
+                className="h-[84px] w-[84px] object-cover"
               />
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="text-[1.12rem] font-semibold leading-6">
+              <p className="text-[0.96rem] font-semibold leading-6">
                 {cart.title || DEFAULT_CART.title}
               </p>
 
-              <div className="mt-3 space-y-1 text-[1rem] leading-6 text-black/72">
+              <div className="mt-2.5 space-y-0.5 text-[0.9rem] leading-6 text-black/72">
                 <p>Quantidade: {quantity}</p>
                 <p>Cor: {cart.color || DEFAULT_CART.color}</p>
                 <p>Tamanho: {cart.size || DEFAULT_CART.size}</p>
