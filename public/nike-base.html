@@ -928,32 +928,18 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     const newNode = mainPrice && mainPrice.querySelector('.codex-main-price__new');
 
     let originalPriceLabel = String(existing.originalPriceLabel || ORIGINAL_PRICE).trim() || ORIGINAL_PRICE;
-    let priceLabel = String(existing.priceLabel || OFFER_PRICE).trim() || OFFER_PRICE;
-    let priceValue = Number(existing.priceValue || OFFER_PRICE_VALUE);
+    let priceLabel = OFFER_PRICE;
+    let priceValue = OFFER_PRICE_VALUE;
 
     if (oldNode && String(oldNode.textContent || '').trim()) {
       originalPriceLabel = String(oldNode.textContent || '').trim();
     }
 
     if (newNode && String(newNode.textContent || '').trim()) {
-      priceLabel = String(newNode.textContent || '').trim();
-    } else if (mainPrice) {
-      const matches = readCurrencyMatches(mainPrice.textContent || '');
-      if (matches.length >= 2) {
-        originalPriceLabel = matches[0];
-        priceLabel = matches[matches.length - 1];
-      } else if (matches.length === 1) {
-        priceLabel = matches[0];
+      const parsedDisplayedPrice = parseCurrencyValue(newNode.textContent || '');
+      if (parsedDisplayedPrice === OFFER_PRICE_VALUE) {
+        priceLabel = OFFER_PRICE;
       }
-    }
-
-    const parsedPrice = parseCurrencyValue(priceLabel);
-    if (parsedPrice !== null) {
-      priceValue = parsedPrice;
-      priceLabel = formatMoney(parsedPrice);
-    } else {
-      priceValue = OFFER_PRICE_VALUE;
-      priceLabel = OFFER_PRICE;
     }
 
     return {
@@ -1245,6 +1231,26 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
     document.querySelectorAll('[data-testid="installment-info"]').forEach((node) => {
       node.innerHTML = 'ou <strong>' + OFFER_INSTALLMENTS.count + 'x</strong> de <strong>' + OFFER_INSTALLMENTS.value + '</strong> sem juros';
+    });
+  }
+
+  function updateStructuredOfferPrice() {
+    document.querySelectorAll('script[type="application/ld+json"]').forEach((node) => {
+      const raw = String(node.textContent || '').trim();
+      if (!raw) {
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed['@type'] === 'Product' && parsed.offers && typeof parsed.offers === 'object') {
+          parsed.offers.price = OFFER_PRICE_VALUE.toFixed(2);
+          parsed.offers.priceCurrency = 'BRL';
+          node.textContent = JSON.stringify(parsed);
+        }
+      } catch (_error) {
+        // Ignore non-JSON-LD blobs that are not valid JSON.
+      }
     });
   }
 
@@ -1572,6 +1578,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     preserveSizes();
     enableSizeP();
     updateOfferPrice();
+    updateStructuredOfferPrice();
     setStoredCartState(buildCartState());
     bindCepLookup();
     bindSizeTracking();
