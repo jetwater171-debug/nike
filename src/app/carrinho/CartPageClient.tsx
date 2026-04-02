@@ -4,8 +4,14 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  ArrowRight,
+  Check,
+  CreditCard,
   Info,
+  Lock,
+  MapPin,
   Minus,
+  Package,
   Plus,
   Tag,
   Trash2,
@@ -119,7 +125,8 @@ function readStoredCartState() {
         ...(parsed.shipping || {}),
       },
       quantity: Math.min(Math.max(Number(parsed.quantity || 1), 1), 5),
-      size: String(parsed.size || defaultCartState.size).trim() || defaultCartState.size,
+      size:
+        String(parsed.size || defaultCartState.size).trim() || defaultCartState.size,
     };
   } catch {
     return defaultCartState;
@@ -136,6 +143,46 @@ function persistCartState(next: CartState) {
   } catch {
     // Ignore storage limits.
   }
+}
+
+function DetailChip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[20px] border border-black/8 bg-[#f8f8f8] px-4 py-3">
+      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-black/42">
+        {label}
+      </p>
+      <p className="mt-2 text-[1rem] font-medium text-black">{value}</p>
+    </div>
+  );
+}
+
+function SummaryLine({
+  label,
+  value,
+  emphasize,
+  success,
+}: {
+  label: string;
+  value: string;
+  emphasize?: boolean;
+  success?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 text-[1rem]">
+      <span className="text-black/64">{label}</span>
+      <span
+        className={`text-right ${
+          emphasize
+            ? "font-semibold text-black"
+            : success
+              ? "font-medium text-[#14804a]"
+              : "text-black"
+        }`}
+      >
+        {value}
+      </span>
+    </div>
+  );
 }
 
 export default function CartPageClient() {
@@ -215,6 +262,7 @@ export default function CartPageClient() {
     if (!hasHydrated) {
       return;
     }
+
     persistCartState(cart);
   }, [cart, hasHydrated]);
 
@@ -235,6 +283,7 @@ export default function CartPageClient() {
     () => Number((subtotal + shippingOption.price).toFixed(2)),
     [shippingOption.price, subtotal],
   );
+
   const campaignSavingsValue = useMemo(
     () =>
       Number(
@@ -247,6 +296,24 @@ export default function CartPageClient() {
   );
 
   const totalLabel = useMemo(() => formatCurrency(total), [total]);
+  const subtotalLabel = useMemo(() => formatCurrency(subtotal), [subtotal]);
+  const unitPriceLabel = useMemo(
+    () => formatCurrency(Number(cart.priceValue || OFFER_PRICE_VALUE)),
+    [cart.priceValue],
+  );
+  const originalLineLabel = useMemo(
+    () => formatCurrency(Number((ORIGINAL_PRICE_VALUE * cart.quantity).toFixed(2))),
+    [cart.quantity],
+  );
+  const campaignSavingsLabel = useMemo(
+    () => formatCurrency(campaignSavingsValue),
+    [campaignSavingsValue],
+  );
+  const personalizationExtraLabel = useMemo(
+    () => formatCurrency(Number(cart.personalizationExtraValue || 0)),
+    [cart.personalizationExtraValue],
+  );
+
   const personalizationSummary = useMemo(() => {
     if (cart.personalizationSummary) {
       return cart.personalizationSummary;
@@ -271,6 +338,50 @@ export default function CartPageClient() {
     cart.personalizationSummary,
   ]);
 
+  const installmentCopy = useMemo(() => {
+    if (cart.installmentLabel) {
+      return cart.installmentLabel;
+    }
+
+    return `ou 12x de ${formatCurrency(
+      Number(((cart.priceValue || OFFER_PRICE_VALUE) / 12).toFixed(2)),
+    )} sem juros por unidade`;
+  }, [cart.installmentLabel, cart.priceValue]);
+
+  const itemCountLabel = cart.quantity === 1 ? "1 item" : `${cart.quantity} itens`;
+  const hasPersonalization = Boolean(
+    cart.personalizationWanted || personalizationSummary,
+  );
+  const hasShippingAddress = shippingState.status === "success";
+  const shippingLabel =
+    shippingState.status === "success"
+      ? shippingOption.price === 0
+        ? "Frete gratis"
+        : formatCurrency(shippingOption.price)
+      : "A calcular";
+  const shippingStatusCopy = hasShippingAddress
+    ? shippingOption.id === EXPRESS_SHIPPING.id
+      ? "Nike Expresso selecionado para esta compra."
+      : "Frete gratis da campanha aplicado automaticamente."
+    : "Voce pode calcular o frete agora ou revisar a entrega no proximo passo.";
+  const assuranceItems = [
+    {
+      icon: CreditCard,
+      title: "Pix mantido no fluxo atual",
+      text: "O pagamento continua no nosso checkout com o mesmo processo de geracao do QR Code.",
+    },
+    {
+      icon: Lock,
+      title: "Dados e tracking preservados",
+      text: "Eventos de carrinho, checkout e pagamento seguem ativos como no fluxo atual.",
+    },
+    {
+      icon: Package,
+      title: "Pedido ja carregado",
+      text: "Tamanho, quantidade, preco e personalizacao escolhida vao junto para a proxima etapa.",
+    },
+  ];
+
   const handleQuantityChange = (direction: "decrease" | "increase") => {
     const nextQuantity =
       direction === "increase"
@@ -281,12 +392,10 @@ export default function CartPageClient() {
       return;
     }
 
-    setCart((current) => {
-      return {
-        ...current,
-        quantity: nextQuantity,
-      };
-    });
+    setCart((current) => ({
+      ...current,
+      quantity: nextQuantity,
+    }));
 
     void trackLeadEvent({
       event: "cart_quantity_changed",
@@ -340,14 +449,20 @@ export default function CartPageClient() {
         throw new Error("cep_not_found");
       }
 
-      const line1 = [data.logradouro, data.complemento].filter(Boolean).join(", ");
+      const line1 = [data.logradouro, data.complemento]
+        .filter(Boolean)
+        .join(", ");
       const line2 = [
         data.bairro,
-        data.localidade && data.uf ? `${data.localidade}/${data.uf}` : data.localidade || data.uf,
+        data.localidade && data.uf
+          ? `${data.localidade}/${data.uf}`
+          : data.localidade || data.uf,
       ]
         .filter(Boolean)
-        .join(" • ");
-      const address = [line1, line2].filter(Boolean).join(" • ") || `CEP ${formatCep(sanitizedCep)}`;
+        .join(" - ");
+      const address =
+        [line1, line2].filter(Boolean).join(" - ") ||
+        `CEP ${formatCep(sanitizedCep)}`;
 
       setShippingState({
         status: "success",
@@ -367,6 +482,7 @@ export default function CartPageClient() {
           couponApplied: true,
         },
       };
+
       setSelectedShippingId(NORMAL_SHIPPING.id);
       setCart(nextCart);
 
@@ -412,7 +528,7 @@ export default function CartPageClient() {
   const handleApplyCoupon = async () => {
     const normalized = coupon.trim().toUpperCase();
     const message = normalized
-      ? `Cupom ${normalized} analisado. A oferta da campanha continua ativa no seu carrinho.`
+      ? `Cupom ${normalized} analisado. A oferta da campanha continua ativa no valor final do seu carrinho.`
       : "A oferta da campanha ja esta aplicada no valor final do seu carrinho.";
 
     setCouponMessage(message);
@@ -500,14 +616,65 @@ export default function CartPageClient() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-black">
-      <NikeCheckoutHeader backHref="/nike" />
+    <main className="min-h-screen bg-[#f5f5f5] text-black">
+      <NikeCheckoutHeader
+        backHref="/nike"
+        contentClassName="max-w-[74rem] px-4 sm:px-6 lg:px-8"
+      />
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-[76px]">
+      <div className="mx-auto w-full max-w-[74rem] px-4 pb-24 pt-[84px] sm:px-6 lg:px-8">
         <NikeCheckoutSteps activeStep={1} />
 
+        <section className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1fr)_23rem]">
+          <div>
+            <p className="text-[0.76rem] font-semibold uppercase tracking-[0.3em] text-black/42">
+              Sacola Nike
+            </p>
+            <h1 className="mt-3 text-[2.85rem] font-semibold leading-none sm:text-[3.6rem]">
+              Seu carrinho
+            </h1>
+            <p className="mt-4 max-w-[38rem] text-[1rem] leading-7 text-black/62">
+              Layout no estilo Nike usando o nosso fluxo real de carrinho,
+              checkout, PIX, tracking e personalizacao.
+            </p>
+          </div>
+
+          <div className="rounded-[28px] bg-black px-6 py-6 text-white shadow-[0_28px_80px_rgba(0,0,0,0.16)]">
+            <p className="text-[0.74rem] font-semibold uppercase tracking-[0.24em] text-white/56">
+              Oferta da campanha
+            </p>
+            <div className="mt-4 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-[2.5rem] font-semibold leading-none">
+                  {totalLabel}
+                </p>
+                <p className="mt-2 text-[0.98rem] text-white/72">
+                  mesmo valor no Pix e no cartao
+                </p>
+              </div>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[0.82rem] font-medium text-white/92">
+                {itemCountLabel}
+              </span>
+            </div>
+            <div className="mt-5 space-y-3 text-[0.95rem] leading-6 text-white/82">
+              <p className="flex items-start gap-2">
+                <Check className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2.4} />
+                <span>{shippingStatusCopy}</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <Check className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2.4} />
+                <span>
+                  {hasPersonalization
+                    ? `Personalizacao carregada: ${personalizationSummary || "selecionada"}.`
+                    : "O produto segue pronto para a etapa de identificacao."}
+                </span>
+              </p>
+            </div>
+          </div>
+        </section>
+
         {noticeVisible && (
-          <div className="mt-5 flex items-start justify-between gap-4 rounded-[14px] border border-black/8 bg-[#f7f7f7] px-4 py-4">
+          <div className="mt-6 flex items-start justify-between gap-4 rounded-[24px] border border-black/8 bg-white px-5 py-4 shadow-[0_18px_55px_rgba(17,17,17,0.05)]">
             <p className="text-[0.98rem] font-medium leading-6 text-black">
               Os produtos no carrinho nao estao reservados. Finalize seu pedido
               antes que o estoque acabe.
@@ -523,289 +690,420 @@ export default function CartPageClient() {
                   page: "carrinho",
                 });
               }}
-              className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-black/[0.05]"
+              className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-full text-black/72 transition-colors hover:bg-black/[0.04]"
             >
-              <X className="h-5 w-5" strokeWidth={1.8} />
+              <X className="h-5 w-5" strokeWidth={1.9} />
             </button>
           </div>
         )}
 
-        <section className="mt-6 border-b border-black/10 pb-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="max-w-[18rem] text-[1.12rem] font-medium leading-7">
-                {cart.title}
-              </h1>
-              <div className="mt-4 space-y-0.5 text-[1rem] leading-7 text-black">
-                <p>Quantidade: {cart.quantity}</p>
-                <p>Cor: {cart.color}</p>
-                <p>Tamanho: {cart.size}</p>
-                <p>Estilo: {cart.sku}</p>
-                {cart.personalizationWanted && (
-                  <>
-                    <p className="pt-1 font-medium">Personalizacao</p>
-                    <p>Posicao: {cart.personalizationPosition || "Costas"}</p>
-                    {cart.personalizationPlayer ? (
-                      <p>Jogador: {cart.personalizationPlayer}</p>
-                    ) : (
-                      <>
+        <div className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1fr)_23.5rem]">
+          <div className="space-y-6">
+            <section className="overflow-hidden rounded-[30px] border border-black/8 bg-white shadow-[0_24px_72px_rgba(17,17,17,0.06)]">
+              <div className="flex items-center justify-between gap-4 border-b border-black/8 px-5 py-4 sm:px-7">
+                <div>
+                  <p className="text-[1rem] font-semibold text-black">Produto</p>
+                  <p className="mt-1 text-[0.95rem] text-black/48">
+                    {itemCountLabel} no seu carrinho
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveProduct}
+                  className="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-[0.92rem] font-medium text-black transition-colors hover:bg-black/[0.04]"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={1.9} />
+                  Remover
+                </button>
+              </div>
+
+              <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[15.5rem_minmax(0,1fr)]">
+                <div className="overflow-hidden rounded-[24px] bg-[#f1f1f1]">
+                  <Image
+                    src={cart.image}
+                    alt={cart.title}
+                    width={720}
+                    height={900}
+                    priority
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                <div className="flex min-w-0 flex-col">
+                  <div>
+                    <p className="text-[0.74rem] font-semibold uppercase tracking-[0.26em] text-black/42">
+                      Selecao brasileira
+                    </p>
+                    <h2 className="mt-3 text-[1.5rem] font-semibold leading-tight text-black sm:text-[1.92rem]">
+                      {cart.title}
+                    </h2>
+
+                    <div className="mt-5 flex flex-wrap items-end gap-3">
+                      <span className="text-[2.1rem] font-semibold leading-none text-black">
+                        {subtotalLabel}
+                      </span>
+                      <span className="pb-1 text-[1.02rem] text-black/34 line-through">
+                        {originalLineLabel}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-[0.98rem] text-black/58">
+                      {installmentCopy}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <DetailChip label="Cor" value={cart.color} />
+                    <DetailChip label="Tamanho" value={cart.size} />
+                    <DetailChip label="SKU" value={cart.sku} />
+                    <DetailChip label="Preco por unidade" value={unitPriceLabel} />
+                  </div>
+
+                  {hasPersonalization && (
+                    <div className="mt-5 rounded-[24px] border border-black/8 bg-[#f8f8f8] p-4 sm:p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-black/42">
+                            Personalizacao
+                          </p>
+                          <p className="mt-2 text-[1.04rem] font-medium text-black">
+                            {personalizationSummary || "Selecionada"}
+                          </p>
+                        </div>
+                        {Number(cart.personalizationExtraValue || 0) > 0 ? (
+                          <span className="rounded-full bg-black px-3 py-1 text-[0.8rem] font-medium text-white">
+                            +{personalizationExtraLabel}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-4 grid gap-2 text-[0.96rem] leading-6 text-black/68">
+                        <p>
+                          Posicao: {cart.personalizationPosition || "Costas"}
+                        </p>
+                        {cart.personalizationPlayer ? (
+                          <p>Atleta: {cart.personalizationPlayer}</p>
+                        ) : null}
                         {cart.personalizationName ? (
                           <p>Nome: {cart.personalizationName}</p>
                         ) : null}
                         {cart.personalizationNumber ? (
                           <p>Numero: {cart.personalizationNumber}</p>
                         ) : null}
-                        {!cart.personalizationName &&
-                        !cart.personalizationNumber ? (
-                          <p>
-                            Personalizacao:{" "}
-                            {personalizationSummary || "selecionada"}
-                          </p>
+                        {cart.personalizationMode ? (
+                          <p>Modo: {cart.personalizationMode}</p>
                         ) : null}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              aria-label="Remover produto"
-              onClick={handleRemoveProduct}
-              className="inline-flex h-10 w-10 flex-none items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
-            >
-              <Trash2 className="h-5 w-5" strokeWidth={1.9} />
-            </button>
-          </div>
-
-          <div className="mt-6 overflow-hidden bg-[#f1f1f1]">
-            <Image
-              src={cart.image}
-              alt={cart.title}
-              width={780}
-              height={980}
-              priority
-              className="h-auto w-full object-cover"
-            />
-          </div>
-        </section>
-
-        <section className="border-b border-black/10 py-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="inline-flex overflow-hidden border border-black/12">
-              <button
-                type="button"
-                onClick={() => handleQuantityChange("decrease")}
-                className="inline-flex h-12 w-12 items-center justify-center bg-white text-black transition-colors hover:bg-black/[0.04]"
-              >
-                <Minus className="h-4 w-4" strokeWidth={2.2} />
-              </button>
-              <div className="inline-flex h-12 min-w-12 items-center justify-center border-x border-black/12 px-4 text-[1rem] font-medium">
-                {cart.quantity}
-              </div>
-              <button
-                type="button"
-                onClick={() => handleQuantityChange("increase")}
-                className="inline-flex h-12 w-12 items-center justify-center bg-white text-black transition-colors hover:bg-black/[0.04]"
-              >
-                <Plus className="h-4 w-4" strokeWidth={2.2} />
-              </button>
-            </div>
-
-            <div className="text-right">
-              <p className="text-[2rem] font-semibold leading-none">
-                {totalLabel}
-              </p>
-              <p className="mt-2 text-[0.98rem] font-medium text-[#1b6d38]">
-                {shippingState.status === "success" &&
-                shippingOption.id === EXPRESS_SHIPPING.id
-                  ? "Nike Expresso selecionado"
-                  : "Frete gratis da campanha"}
-              </p>
-              <p className="mt-1 text-[0.92rem] text-[#1b6d38]">
-                Voce economiza {formatCurrency(campaignSavingsValue)}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-b border-black/10 py-7">
-          <h2 className="text-[1.95rem] font-semibold leading-none">Prazo de entrega</h2>
-
-          <div className="mt-5 flex overflow-hidden rounded-[14px] border border-black/16">
-            <input
-              type="text"
-              value={cep}
-              onChange={(event) => setCep(formatCep(event.target.value))}
-              inputMode="numeric"
-              placeholder="00000-000"
-              className="h-14 min-w-0 flex-1 border-0 px-5 text-[1rem] text-black outline-none placeholder:text-black/40"
-            />
-            <button
-              type="button"
-              onClick={handleShippingLookup}
-              disabled={shippingState.status === "loading"}
-              className="m-1 inline-flex min-w-[8.75rem] items-center justify-center rounded-full border border-black/20 px-5 text-[1rem] font-medium text-black transition-colors hover:bg-black/[0.04] disabled:opacity-60"
-            >
-              {shippingState.status === "loading" ? "Calculando" : "Calcular"}
-            </button>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between gap-3 text-[0.95rem] text-black/55">
-            <span>Confira a nossa Politica de Frete e Entregas.</span>
-            <span>Nao sei o CEP</span>
-          </div>
-
-          {shippingState.status === "success" && (
-            <div className="mt-4 space-y-3">
-              <p className="text-[1rem] font-medium leading-6 text-black">
-                {shippingState.address}
-              </p>
-              <div className="rounded-[14px] bg-[#eef8f1] px-4 py-3 text-[0.95rem] leading-6 text-[#0f6a3f]">
-                Seu cupom de frete gratis ja esta aplicado nesta entrega.
-              </div>
-
-              {[NORMAL_SHIPPING, EXPRESS_SHIPPING].map((option) => {
-                const selected = selectedShippingId === option.id;
-
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => void handleSelectShipping(option)}
-                    className={`grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 rounded-[14px] border px-4 py-4 text-left transition-colors ${
-                      selected
-                        ? "border-black/18 bg-[#f3f3f3]"
-                        : "border-black/10 bg-white hover:bg-[#f8f8f8]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 text-[1.15rem] font-medium text-black">
-                      <Truck className="h-5 w-5" strokeWidth={1.9} />
-                      <span>{option.name}</span>
+                      </div>
                     </div>
-                    <p
-                      className={`text-[1.2rem] font-semibold ${
-                        option.price === 0 ? "text-[#0f6a3f]" : "text-black"
-                      }`}
-                    >
-                      {option.label}
-                    </p>
-                    <div className="pl-7">
-                      <p className="text-[0.98rem] text-black/62">{option.eta}</p>
-                      <p className="mt-0.5 text-[0.88rem] text-black/52">
-                        {option.note}
+                  )}
+
+                  <div className="mt-6 flex flex-col gap-5 border-t border-black/8 pt-5 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-black/42">
+                        Quantidade
+                      </p>
+                      <div className="mt-3 inline-flex overflow-hidden rounded-full border border-black/12 bg-white">
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange("decrease")}
+                          className="inline-flex h-12 w-12 items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
+                        >
+                          <Minus className="h-4 w-4" strokeWidth={2.2} />
+                        </button>
+                        <div className="inline-flex h-12 min-w-12 items-center justify-center border-x border-black/12 px-4 text-[1rem] font-medium text-black">
+                          {cart.quantity}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleQuantityChange("increase")}
+                          className="inline-flex h-12 w-12 items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
+                        >
+                          <Plus className="h-4 w-4" strokeWidth={2.2} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="max-w-[20rem]">
+                      <p className="text-[0.95rem] leading-6 text-black/58">
+                        O item continua com o preco promocional e segue para o
+                        nosso checkout com PIX, tracking e personalizacao
+                        preservados.
                       </p>
                     </div>
-                    {selected && (
-                      <span className="inline-flex items-center justify-end text-[0.82rem] font-medium text-black/62">
-                        Selecionado
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                  </div>
+                </div>
+              </div>
+            </section>
 
-          {shippingState.status === "error" && (
-            <p className="mt-4 rounded-[14px] border border-[#f0d1d1] bg-[#fff6f6] px-4 py-3 text-[0.95rem] text-[#9a1d1d]">
-              {shippingState.message}
-            </p>
-          )}
-        </section>
+            <section className="rounded-[30px] border border-black/8 bg-white px-5 py-5 shadow-[0_24px_72px_rgba(17,17,17,0.06)] sm:px-7 sm:py-7">
+              <div className="flex items-start gap-4">
+                <div className="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full bg-[#f4f4f4] text-black">
+                  <Truck className="h-5 w-5" strokeWidth={1.9} />
+                </div>
+                <div>
+                  <h2 className="text-[1.7rem] font-semibold leading-none text-black sm:text-[2rem]">
+                    Entrega
+                  </h2>
+                  <p className="mt-3 max-w-[34rem] text-[1rem] leading-7 text-black/60">
+                    Consulte o CEP para liberar o prazo e manter o frete da
+                    campanha no seu pedido.
+                  </p>
+                </div>
+              </div>
 
-        <section className="border-b border-black/10 py-7">
-          <h2 className="text-[1.95rem] font-semibold leading-none">
-            Cupom de desconto
-          </h2>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="text"
+                  value={cep}
+                  onChange={(event) => setCep(formatCep(event.target.value))}
+                  inputMode="numeric"
+                  placeholder="00000-000"
+                  className="h-14 min-w-0 flex-1 rounded-full border border-black/14 bg-white px-5 text-[1rem] text-black outline-none transition-colors placeholder:text-black/38 focus:border-black/28"
+                />
+                <button
+                  type="button"
+                  onClick={handleShippingLookup}
+                  disabled={shippingState.status === "loading"}
+                  className="inline-flex h-14 min-w-[10rem] items-center justify-center rounded-full border border-black bg-black px-6 text-[1rem] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                >
+                  {shippingState.status === "loading" ? "Calculando" : "Calcular"}
+                </button>
+              </div>
 
-          <div className="mt-5 flex overflow-hidden rounded-[14px] border border-black/16">
-            <input
-              type="text"
-              value={coupon}
-              onChange={(event) => setCoupon(event.target.value)}
-              placeholder="Digite seu cupom"
-              className="h-14 min-w-0 flex-1 border-0 px-5 text-[1rem] text-black outline-none placeholder:text-black/40"
-            />
-            <button
-              type="button"
-              onClick={handleApplyCoupon}
-              className="m-1 inline-flex min-w-[8.75rem] items-center justify-center rounded-full border border-black/20 px-5 text-[1rem] font-medium text-black transition-colors hover:bg-black/[0.04]"
-            >
-              Aplicar
-            </button>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-[0.94rem] text-black/48">
+                <span>Politica de frete e entregas.</span>
+                <span className="h-1 w-1 rounded-full bg-black/20" />
+                <span>Voce pode revisar o endereco no checkout.</span>
+              </div>
+
+              {shippingState.status === "success" && (
+                <div className="mt-5 space-y-4">
+                  <div className="rounded-[24px] border border-[#dcecdf] bg-[#eef8f1] px-4 py-4 text-[#106a40]">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="mt-0.5 h-5 w-5 flex-none" strokeWidth={2} />
+                      <div>
+                        <p className="text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-[#106a40]/72">
+                          Endereco encontrado
+                        </p>
+                        <p className="mt-2 text-[0.98rem] leading-6">
+                          {shippingState.address}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {[NORMAL_SHIPPING, EXPRESS_SHIPPING].map((option) => {
+                    const selected = selectedShippingId === option.id;
+
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => void handleSelectShipping(option)}
+                        className={`grid w-full gap-3 rounded-[24px] border px-4 py-4 text-left transition-colors sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${
+                          selected
+                            ? "border-black/18 bg-[#f6f6f6]"
+                            : "border-black/10 bg-white hover:bg-[#fafafa]"
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Truck className="h-5 w-5" strokeWidth={1.9} />
+                            <span className="text-[1.06rem] font-semibold text-black">
+                              {option.name}
+                            </span>
+                          </div>
+                          <p className="mt-2 pl-7 text-[0.95rem] leading-6 text-black/58">
+                            {option.eta} - {option.note}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3 sm:flex-col sm:items-end">
+                          <span
+                            className={`text-[1.15rem] font-semibold ${
+                              option.price === 0 ? "text-[#14804a]" : "text-black"
+                            }`}
+                          >
+                            {option.label}
+                          </span>
+                          {selected ? (
+                            <span className="inline-flex rounded-full bg-black px-3 py-1 text-[0.76rem] font-medium text-white">
+                              Selecionado
+                            </span>
+                          ) : null}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {shippingState.status === "error" && (
+                <p className="mt-5 rounded-[22px] border border-[#f0d1d1] bg-[#fff6f6] px-4 py-4 text-[0.96rem] leading-6 text-[#9a1d1d]">
+                  {shippingState.message}
+                </p>
+              )}
+            </section>
+
+            <section className="rounded-[30px] border border-black/8 bg-white px-5 py-5 shadow-[0_24px_72px_rgba(17,17,17,0.06)] sm:px-7 sm:py-7">
+              <div className="flex items-start gap-4">
+                <div className="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full bg-[#f4f4f4] text-black">
+                  <Tag className="h-5 w-5" strokeWidth={1.9} />
+                </div>
+                <div>
+                  <h2 className="text-[1.7rem] font-semibold leading-none text-black sm:text-[2rem]">
+                    Cupom
+                  </h2>
+                  <p className="mt-3 max-w-[34rem] text-[1rem] leading-7 text-black/60">
+                    A oferta ja esta aplicada. Se quiser testar um cupom, o
+                    carrinho continua respeitando o nosso valor final.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="text"
+                  value={coupon}
+                  onChange={(event) => setCoupon(event.target.value)}
+                  placeholder="Digite seu cupom"
+                  className="h-14 min-w-0 flex-1 rounded-full border border-black/14 bg-white px-5 text-[1rem] text-black outline-none transition-colors placeholder:text-black/38 focus:border-black/28"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  className="inline-flex h-14 min-w-[10rem] items-center justify-center rounded-full border border-black/12 bg-white px-6 text-[1rem] font-medium text-black transition-colors hover:bg-black/[0.04]"
+                >
+                  Aplicar
+                </button>
+              </div>
+
+              <div className="mt-4 rounded-[24px] bg-[#f6f6f6] px-4 py-4 text-[0.97rem] leading-6 text-black/68">
+                <div className="flex items-start gap-3">
+                  <Info className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2.1} />
+                  <p>
+                    Tem um vale-troca ou cartao presente? Voce podera usa-los na
+                    etapa de pagamento.
+                  </p>
+                </div>
+              </div>
+
+              {couponMessage && (
+                <p className="mt-4 rounded-[22px] border border-black/8 bg-[#fbfbfb] px-4 py-4 text-[0.96rem] leading-6 text-black/76">
+                  {couponMessage}
+                </p>
+              )}
+            </section>
           </div>
 
-          <div className="mt-4 flex items-start gap-3 text-[1rem] leading-6 text-black/72">
-            <div className="mt-0.5 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-black/15">
-              <Tag className="h-3.5 w-3.5" strokeWidth={2} />
-            </div>
-            <p>
-              Tem um vale-troca ou cartao presente? Voce podera usa-los na
-              etapa de pagamento.
-            </p>
-          </div>
+          <aside className="xl:sticky xl:top-[92px] xl:self-start">
+            <section className="rounded-[30px] border border-black/8 bg-white p-6 shadow-[0_24px_72px_rgba(17,17,17,0.06)]">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-black/42">
+                    Resumo
+                  </p>
+                  <h2 className="mt-2 text-[1.85rem] font-semibold leading-none text-black">
+                    Fechar pedido
+                  </h2>
+                </div>
+                <span className="rounded-full bg-[#f3f3f3] px-3 py-1 text-[0.82rem] font-medium text-black/72">
+                  {itemCountLabel}
+                </span>
+              </div>
 
-          {couponMessage && (
-            <p className="mt-4 rounded-[14px] bg-[#f5f5f5] px-4 py-3 text-[0.95rem] leading-6 text-black/78">
-              {couponMessage}
-            </p>
-          )}
-        </section>
+              <div className="mt-6 space-y-3 border-b border-black/8 pb-5">
+                <SummaryLine label="Valor dos produtos" value={subtotalLabel} />
+                {hasPersonalization ? (
+                  <SummaryLine
+                    label="Personalizacao"
+                    value={
+                      Number(cart.personalizationExtraValue || 0) > 0
+                        ? `Incluida (+${personalizationExtraLabel})`
+                        : "Incluida"
+                    }
+                  />
+                ) : null}
+                <SummaryLine
+                  label="Desconto da campanha"
+                  value={`-${campaignSavingsLabel}`}
+                  success
+                />
+                <SummaryLine
+                  label="Frete"
+                  value={shippingLabel}
+                  success={shippingLabel === "Frete gratis"}
+                />
+              </div>
 
-        <section className="py-7">
-          <h2 className="text-[1.95rem] font-semibold leading-none">Resumo</h2>
+              <div className="pt-5">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="pt-1 text-[1.08rem] text-black/64">
+                    Total da compra
+                  </span>
+                  <div className="text-right">
+                    <p className="text-[2rem] font-semibold leading-none text-black">
+                      {totalLabel}
+                    </p>
+                    <p className="mt-2 text-[0.96rem] text-black/48">
+                      {totalLabel} no cartao
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-          <div className="mt-6 space-y-3 text-[1.1rem]">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-black/74">Valor dos produtos</span>
-              <span>{formatCurrency(subtotal)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-black/74">Frete</span>
-              <span>
-                {shippingState.status === "success"
-                  ? shippingOption.price === 0
-                    ? "Frete gratis"
-                    : formatCurrency(shippingOption.price)
-                  : "A calcular"}
-              </span>
-            </div>
-          </div>
+              <div className="mt-5 space-y-3">
+                {assuranceItems.map((item) => {
+                  const Icon = item.icon;
 
-          <div className="mt-6 flex items-start justify-between gap-4">
-            <span className="text-[1.6rem] font-semibold leading-none">
-              Total da compra
-            </span>
-            <div className="text-right">
-              <p className="text-[1.85rem] font-semibold leading-none">
-                {totalLabel} no Pix
+                  return (
+                    <div
+                      key={item.title}
+                      className="rounded-[22px] border border-black/8 bg-[#fafafa] px-4 py-4"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-full bg-white text-black shadow-[0_8px_20px_rgba(17,17,17,0.06)]">
+                          <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                        </div>
+                        <div>
+                          <p className="text-[0.96rem] font-semibold text-black">
+                            {item.title}
+                          </p>
+                          <p className="mt-1 text-[0.92rem] leading-6 text-black/58">
+                            {item.text}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 rounded-[24px] bg-[#f6f6f6] px-4 py-4 text-[0.95rem] leading-6 text-black/68">
+                <div className="flex items-start gap-3">
+                  <Info className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2.1} />
+                  <p>
+                    O desconto da campanha ja esta aplicado neste carrinho.
+                    Agora e so seguir para a etapa de identificacao.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleContinue}
+                className="mt-6 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-black px-6 text-[1.02rem] font-medium text-white transition-opacity hover:opacity-90"
+              >
+                Continuar
+                <ArrowRight className="h-[18px] w-[18px]" strokeWidth={2.2} />
+              </button>
+
+              <p className="mt-4 text-[0.86rem] leading-6 text-black/46">
+                Ao continuar, o pedido segue para identificacao, pagamento via
+                PIX e rastreamento dos eventos sem alterar o fluxo atual.
               </p>
-              <p className="mt-2 text-[1rem] text-black/46">
-                {totalLabel} no cartao
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-7 rounded-[14px] bg-[#f6f6f6] px-4 py-3 text-[0.94rem] leading-6 text-black/68">
-            <div className="flex items-start gap-3">
-              <Info className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2.1} />
-              <p>
-                O desconto da campanha ja esta aplicado neste carrinho. Agora e
-                so seguir para a etapa de pagamento.
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleContinue}
-            className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1.02rem] font-medium text-white"
-          >
-            Continuar
-          </button>
-        </section>
+            </section>
+          </aside>
+        </div>
       </div>
     </main>
   );

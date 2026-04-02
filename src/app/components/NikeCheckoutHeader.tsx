@@ -18,14 +18,20 @@ function NikeSwoosh({ className }: { className?: string }) {
 
 type NikeCheckoutHeaderProps = {
   backHref: string;
+  contentClassName?: string;
 };
 
 export default function NikeCheckoutHeader({
   backHref,
+  contentClassName,
 }: NikeCheckoutHeaderProps) {
+  const resolvedContentClassName = contentClassName || "max-w-[38rem] px-4";
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white">
-      <div className="mx-auto flex h-[60px] w-full max-w-[38rem] items-center justify-between px-4">
+      <div
+        className={`mx-auto flex h-[60px] w-full items-center justify-between ${resolvedContentClassName}`}
+      >
         <Link
           href={backHref}
           aria-label="Voltar"
