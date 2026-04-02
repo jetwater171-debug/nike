@@ -52,7 +52,6 @@ type CartState = {
 };
 
 const CART_STORAGE_KEY = "nikepromo.cartState";
-const ORIGINAL_PRICE_VALUE = 749.99;
 const DEFAULT_PRICE_VALUE = 139.19;
 const DEFAULT_CART: CartState = {
   title: "Camisa Brasil Jordan II 2026/27 Jogador Masculina",
@@ -105,7 +104,9 @@ function readStoredCartState(): CartState {
 
 function parseAddressLine(address: string) {
   const parts = String(address || "")
-    .split("â€¢")
+    .replaceAll("\u00c3\u00a2\u00e2\u201a\u00ac\u00c2\u00a2", "•")
+    .replaceAll("\u00e2\u20ac\u00a2", "•")
+    .split("•")
     .map((part) => part.trim())
     .filter(Boolean);
 
@@ -126,7 +127,10 @@ function buildShippingFromCart(input?: CheckoutShipping): CheckoutShipping {
 
   return {
     ...base,
-    ...parsed,
+    street: base.street || parsed.street,
+    neighborhood: base.neighborhood || parsed.neighborhood,
+    city: base.city || parsed.city,
+    state: base.state || parsed.state,
   };
 }
 
@@ -218,28 +222,22 @@ export default function CheckoutPagamentoPage() {
     () => Number((productSubtotalValue + shippingPriceValue).toFixed(2)),
     [productSubtotalValue, shippingPriceValue],
   );
-  const campaignSavingsValue = useMemo(
-    () =>
-      Number(
-        Math.max(ORIGINAL_PRICE_VALUE * quantity - productSubtotalValue, 0).toFixed(2),
-      ),
-    [productSubtotalValue, quantity],
-  );
 
   const addressLine = [shipping.street, shipping.number]
     .filter(Boolean)
     .join(", ");
-  const complementLine = shipping.complement || "";
   const locationLine = [shipping.neighborhood, shipping.city, shipping.state]
     .filter(Boolean)
     .join(", ");
   const deliveryLabel =
     shipping.id === "nike-expresso"
-      ? "Entrega Nike Expresso em ate 2 dias uteis"
+      ? "Entrega em ate 2 dias uteis"
       : "Entrega em ate 5 dias uteis";
 
   const handleFinalize = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      return;
+    }
 
     try {
       setSubmitError("");
@@ -295,29 +293,37 @@ export default function CheckoutPagamentoPage() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/checkout" />
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-[76px]">
-        <NikeCheckoutSteps activeStep={3} />
+      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10">
+        <div className="-mx-4">
+          <NikeCheckoutSteps activeStep={3} />
+        </div>
 
         <section className="border-b border-black/10 py-8">
-          <h1 className="text-[2.15rem] font-medium leading-none">
-            Pagamento
-          </h1>
+          <h1 className="text-[1.85rem] font-medium leading-none">Pagamento</h1>
 
-          <div className="mt-7 rounded-[14px] border border-black/10 p-5">
-            <h2 className="text-[1.2rem] font-semibold">
+          <label className="mt-7 flex items-center gap-4 text-[0.98rem] font-semibold">
+            <input
+              type="checkbox"
+              className="h-[18px] w-[18px] appearance-none border border-black/60 bg-white"
+            />
+            <span>Usar um cartao presente</span>
+          </label>
+
+          <div className="mt-8 rounded-[10px] border border-black/10 p-4">
+            <h2 className="text-[0.96rem] font-semibold">
               Selecione um meio de pagamento
             </h2>
 
             <button
               type="button"
-              className="mt-5 flex w-full items-start gap-4 rounded-[14px] border border-black bg-[#f7f7f7] px-4 py-4 text-left"
+              className="mt-4 flex w-full items-start gap-4 rounded-[10px] border border-black/15 bg-white px-4 py-4 text-left"
             >
-              <span className="mt-1 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full border border-black">
-                <span className="h-3 w-3 rounded-full bg-black" />
+              <span className="mt-0.5 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-black">
+                <span className="h-2.5 w-2.5 rounded-full bg-black" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[1.08rem] font-semibold">Pix</p>
-                <p className="mt-1 text-[0.98rem] text-black/64">
+                <p className="text-[0.98rem] font-semibold">Pix</p>
+                <p className="mt-1 text-[0.88rem] leading-5 text-black/64">
                   Pagamento instantaneo para liberar sua oferta na hora
                 </p>
               </div>
@@ -326,18 +332,16 @@ export default function CheckoutPagamentoPage() {
         </section>
 
         <section className="py-8">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-[2rem] font-medium leading-none">
-              Revise o pedido
-            </h2>
-          </div>
+          <h2 className="text-[1.75rem] font-medium leading-none">
+            Revise o pedido
+          </h2>
 
           <div className="mt-8 border-b border-black/10 pb-8">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="text-[1.15rem] font-semibold">Produtos</h3>
+              <h3 className="text-[0.98rem] font-semibold">Produtos</h3>
               <Link
                 href="/carrinho"
-                className="text-[1rem] font-medium underline underline-offset-4"
+                className="text-[0.9rem] font-medium underline underline-offset-4"
               >
                 Editar
               </Link>
@@ -348,26 +352,23 @@ export default function CheckoutPagamentoPage() {
                 <Image
                   src={cart.image || DEFAULT_CART.image || ""}
                   alt={cart.title || DEFAULT_CART.title || "Camisa Nike"}
-                  width={92}
-                  height={92}
-                  className="h-[92px] w-[92px] object-cover"
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 object-cover"
                 />
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-[1.1rem] font-semibold leading-6">
+                <p className="text-[0.98rem] font-semibold leading-6">
                   {cart.title || DEFAULT_CART.title}
                 </p>
-                <div className="mt-3 space-y-1 text-[1rem] leading-6 text-black/68">
+                <div className="mt-2 space-y-0.5 text-[0.88rem] leading-6 text-black/68">
                   <p>Quantidade: {quantity}</p>
                   <p>Tamanho: {cart.size || DEFAULT_CART.size}</p>
                   <p>Cor: {cart.color || DEFAULT_CART.color}</p>
-                  {cart.personalizationWanted && (
-                    <p>
-                      Personalizacao:{" "}
-                      {personalizationSummary || "selecionada"}
-                    </p>
-                  )}
+                  {cart.personalizationWanted ? (
+                    <p>Personalizacao: {personalizationSummary || "selecionada"}</p>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -375,38 +376,34 @@ export default function CheckoutPagamentoPage() {
 
           <div className="border-b border-black/10 py-8">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="text-[1.15rem] font-semibold">Endereco</h3>
+              <h3 className="text-[0.98rem] font-semibold">Endereco</h3>
               <Link
                 href="/checkout"
-                className="text-[1rem] font-medium underline underline-offset-4"
+                className="text-[0.9rem] font-medium underline underline-offset-4"
               >
                 Editar
               </Link>
             </div>
 
-            <div className="mt-5 text-right text-[1rem] leading-7">
+            <div className="mt-5 text-right text-[0.9rem] leading-7">
               <p className="font-medium">{lead.name || "-"}</p>
               <p>{addressLine || "-"}</p>
-              {complementLine && <p>{complementLine}</p>}
-              {locationLine && <p>{locationLine}</p>}
-              {shipping.cep && <p>CEP {shipping.cep}</p>}
+              {shipping.complement ? <p>{shipping.complement}</p> : null}
+              {locationLine ? <p>{locationLine}</p> : null}
+              {shipping.cep ? <p>CEP {shipping.cep}</p> : null}
               <p className="mt-3 font-medium text-[#0f6a3f]">{deliveryLabel}</p>
             </div>
           </div>
 
           <div className="border-b border-black/10 py-8">
-            <div className="space-y-3 text-[1.05rem]">
+            <div className="space-y-3 text-[0.94rem]">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-black/74">Valor dos produtos</span>
                 <span>{formatCurrency(productSubtotalValue)}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-black/74">Frete</span>
-                <span
-                  className={
-                    shippingPriceValue === 0 ? "font-medium text-[#0f6a3f]" : ""
-                  }
-                >
+                <span className={shippingPriceValue === 0 ? "text-[#0f6a3f]" : ""}>
                   {shippingPriceValue === 0
                     ? "Gratis"
                     : formatCurrency(shippingPriceValue)}
@@ -415,37 +412,31 @@ export default function CheckoutPagamentoPage() {
             </div>
 
             <div className="mt-6 flex items-start justify-between gap-4">
-              <span className="text-[1.7rem] font-semibold leading-none">
+              <span className="text-[1.15rem] font-semibold leading-none">
                 Total da compra
               </span>
               <div className="text-right">
-                <p className="text-[1.95rem] font-semibold leading-none">
+                <p className="text-[1.15rem] font-semibold leading-none">
                   {formatCurrency(totalPriceValue)} no Pix
+                </p>
+                <p className="mt-1 text-[0.84rem] leading-5 text-black/52">
+                  {formatCurrency(totalPriceValue)} no cartao
                 </p>
               </div>
             </div>
-
-            <div className="mt-6 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
-              <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
-                Cupom aplicado
-              </p>
-              <p className="mt-2 text-[1rem] leading-6">
-                Voce esta economizando {formatCurrency(campaignSavingsValue)} com o desconto da campanha.
-              </p>
-            </div>
           </div>
 
-          {submitError && (
-            <div className="mt-8 rounded-[14px] border border-[#f0d0d0] bg-[#fff4f4] px-5 py-4 text-[#7d1f1f]">
-              <p className="text-[0.95rem] leading-6">{submitError}</p>
+          {submitError ? (
+            <div className="mt-6 rounded-[14px] border border-[#f0d0d0] bg-[#fff4f4] px-4 py-4 text-[#7d1f1f]">
+              <p className="text-[0.84rem] leading-6">{submitError}</p>
             </div>
-          )}
+          ) : null}
 
           <button
             type="button"
             onClick={() => void handleFinalize()}
             disabled={isSubmitting}
-            className="mt-8 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-8 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[0.94rem] font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSubmitting ? "Gerando Pix..." : "Finalizar compra"}
           </button>
