@@ -1210,6 +1210,61 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return mergedState;
   }
 
+  function findActionElement(target) {
+    if (!target || !(target instanceof Element)) {
+      return null;
+    }
+
+    return target.closest('button,a,[role="button"],[type="button"],[type="submit"]');
+  }
+
+  function readActionText(target) {
+    const action = findActionElement(target) || target;
+    if (!action || !(action instanceof Element)) {
+      return '';
+    }
+
+    return normalizeWhitespace(
+      action.getAttribute('aria-label') ||
+      action.textContent ||
+      action.getAttribute('value') ||
+      ''
+    ).toLowerCase();
+  }
+
+  function redirectPersonalizationToCart(sourceTarget) {
+    const personalizationState = syncStoredPersonalizationState(sourceTarget);
+    const cartState = buildCartState(personalizationState);
+
+    if (!String(cartState.size || '').trim()) {
+      window.alert('Escolha o tamanho da camiseta para continuar.');
+      return;
+    }
+
+    if (!cartState.personalizationWanted) {
+      window.alert('Escolha pelo menos uma opcao de personalizacao para continuar.');
+      return;
+    }
+
+    setStoredCartState(cartState);
+
+    Promise.resolve(postLeadEvent('nike_personalization_completed', {
+      extra: {
+        size: cartState.size,
+        quantity: cartState.quantity,
+        sku: cartState.sku,
+        destination: CART_URL,
+        personalizationWanted: 'sim',
+        personalizationMode: cartState.personalizationMode || '',
+        personalizationSummary: cartState.personalizationSummary || '',
+        personalizationExtraValue: cartState.personalizationExtraValue || 0
+      },
+      shipping: cartState.shipping || {}
+    })).finally(function () {
+      window.location.href = CART_URL;
+    });
+  }
+
   function readCurrentPriceState(existingState, personalizationState) {
     const existing = existingState && typeof existingState === 'object' ? existingState : {};
     const personalization = normalizePersonalizationState({
@@ -1733,9 +1788,20 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         return;
       }
 
-      const text = normalizeWhitespace(target && target.textContent).toLowerCase();
+      const text = readActionText(target);
+      if (text.indexOf('finalizar') >= 0) {
+        event.preventDefault();
+        if (typeof event.stopImmediatePropagation === 'function') {
+          event.stopImmediatePropagation();
+        }
+        event.stopPropagation();
+        window.setTimeout(function () {
+          redirectPersonalizationToCart(target);
+        }, 24);
+        return;
+      }
+
       const shouldSyncFast =
-        text.indexOf('finalizar') >= 0 ||
         text.indexOf('proximo') >= 0 ||
         text.indexOf('continuar') >= 0 ||
         text.indexOf('atleta') >= 0 ||
