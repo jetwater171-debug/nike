@@ -503,7 +503,7 @@ export default function CartPageClient() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/nike" />
 
-      <div className="mx-auto w-full max-w-[430px] pb-10 pt-[76px]">
+      <div className="mx-auto w-full max-w-[1180px] pb-10 pt-[76px]">
         <NikeCheckoutSteps activeStep={1} />
 
         <div className="px-[22px]">
