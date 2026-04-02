@@ -25,7 +25,7 @@ export default function NikeCheckoutHeader({
 }: NikeCheckoutHeaderProps) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white">
-      <div className="mx-auto flex h-[60px] w-full max-w-[38rem] items-center justify-between px-4">
+      <div className="mx-auto flex h-[62px] w-full max-w-[430px] items-center justify-between px-[22px]">
         <Link
           href={backHref}
           aria-label="Voltar"

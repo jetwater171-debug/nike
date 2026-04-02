@@ -503,12 +503,12 @@ export default function CartPageClient() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/nike" />
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-[76px]">
+      <div className="mx-auto w-full max-w-[430px] px-[22px] pb-10 pt-[76px]">
         <NikeCheckoutSteps activeStep={1} />
 
         {noticeVisible && (
-          <div className="mt-5 flex items-start justify-between gap-4 rounded-[14px] border border-black/8 bg-[#f7f7f7] px-4 py-4">
-            <p className="text-[0.98rem] font-medium leading-6 text-black">
+          <div className="mt-7 flex items-start justify-between gap-4 rounded-[16px] bg-[#f7f7f7] px-[14px] py-[13px]">
+            <p className="text-[1rem] font-medium leading-[1.55] text-black">
               Os produtos no carrinho nao estao reservados. Finalize seu pedido
               antes que o estoque acabe.
             </p>
@@ -523,20 +523,20 @@ export default function CartPageClient() {
                   page: "carrinho",
                 });
               }}
-              className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-black/[0.05]"
+              className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-black/[0.05]"
             >
               <X className="h-5 w-5" strokeWidth={1.8} />
             </button>
           </div>
         )}
 
-        <section className="mt-6 border-b border-black/10 pb-6">
+        <section className="mt-7 border-b border-black/10 pb-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="max-w-[18rem] text-[1.12rem] font-medium leading-7">
+              <h1 className="max-w-[19rem] text-[1.14rem] font-semibold leading-[1.45]">
                 {cart.title}
               </h1>
-              <div className="mt-4 space-y-0.5 text-[1rem] leading-7 text-black">
+              <div className="mt-3 space-y-0 text-[1rem] leading-[1.6] text-black">
                 <p>Quantidade: {cart.quantity}</p>
                 <p>Cor: {cart.color}</p>
                 <p>Tamanho: {cart.size}</p>
@@ -567,19 +567,24 @@ export default function CartPageClient() {
                   </>
                 )}
               </div>
+
+              <div className="mt-4 text-[0.98rem] leading-[1.55] text-[#de1b1b]">
+                <p>Este produto nao e elegivel para o desconto no Pix.</p>
+                <p className="underline underline-offset-2">Ver regras.</p>
+              </div>
             </div>
 
             <button
               type="button"
               aria-label="Remover produto"
               onClick={handleRemoveProduct}
-              className="inline-flex h-10 w-10 flex-none items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
+              className="mt-1 inline-flex h-10 w-10 flex-none items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
             >
               <Trash2 className="h-5 w-5" strokeWidth={1.9} />
             </button>
           </div>
 
-          <div className="mt-6 overflow-hidden bg-[#f1f1f1]">
+          <div className="mt-8 overflow-hidden bg-[#f1f1f1]">
             <Image
               src={cart.image}
               alt={cart.title}

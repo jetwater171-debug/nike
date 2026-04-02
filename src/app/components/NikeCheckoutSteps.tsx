@@ -24,15 +24,17 @@ export default function NikeCheckoutSteps({
   activeStep,
 }: NikeCheckoutStepsProps) {
   return (
-    <div className="overflow-hidden border border-black/10 bg-[#d7d7d7]">
-      <div className="flex h-11">
+    <div className="overflow-hidden bg-[#d7d7d7]">
+      <div className="flex h-[62px]">
         {STEPS.map((step, index) => {
           const isActive = step.number === activeStep;
+          const label =
+            step.label === "Identificacao" ? "Identificação" : step.label;
 
           return (
             <div
               key={step.label}
-              className={`relative flex flex-1 items-center justify-center gap-2 text-[0.92rem] font-medium ${
+              className={`relative flex flex-1 items-center justify-center gap-2 text-[0.98rem] font-medium ${
                 index > 0 ? "-ml-[18px] pl-[18px]" : ""
               } ${isActive ? "text-black" : "text-[#727272]"}`}
               style={{ zIndex: STEPS.length - index }}
@@ -46,13 +48,13 @@ export default function NikeCheckoutSteps({
                 }}
               />
               <span
-                className={`relative z-10 inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.68rem] font-semibold ${
+                className={`relative z-10 inline-flex h-6 w-6 items-center justify-center rounded-full text-[0.74rem] font-semibold ${
                   isActive ? "bg-black text-white" : "bg-[#808080] text-white"
                 }`}
               >
                 {step.number}
               </span>
-              <span className="relative z-10 whitespace-nowrap">{step.label}</span>
+              <span className="relative z-10 whitespace-nowrap">{label}</span>
             </div>
           );
         })}
