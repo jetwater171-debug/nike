@@ -1362,6 +1362,70 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return null;
   }
 
+  function readBodyEntries(body) {
+    const entries = [];
+    if (!body) {
+      return entries;
+    }
+
+    const pushEntry = function (key, value) {
+      entries.push({
+        name: key,
+        value: value
+      });
+    };
+
+    if (typeof body === 'string') {
+      try {
+        const params = new URLSearchParams(body);
+        params.forEach(function (value, key) {
+          pushEntry(key, value);
+        });
+      } catch (_error) {
+        // Ignore malformed search params.
+      }
+      return entries;
+    }
+
+    if (typeof FormData !== 'undefined' && body instanceof FormData) {
+      body.forEach(function (value, key) {
+        pushEntry(key, typeof value === 'string' ? value : '');
+      });
+      return entries;
+    }
+
+    if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) {
+      body.forEach(function (value, key) {
+        pushEntry(key, value);
+      });
+      return entries;
+    }
+
+    if (Array.isArray(body)) {
+      body.forEach(function (item) {
+        if (item && typeof item === 'object' && item.name) {
+          pushEntry(item.name, item.value);
+        }
+      });
+      return entries;
+    }
+
+    if (typeof body === 'object') {
+      Object.keys(body).forEach(function (key) {
+        const value = body[key];
+        if (Array.isArray(value)) {
+          value.forEach(function (nestedValue) {
+            pushEntry(key, nestedValue);
+          });
+          return;
+        }
+        pushEntry(key, value);
+      });
+    }
+
+    return entries;
+  }
+
   function readBodyText(body) {
     if (!body) {
       return '';
@@ -1684,7 +1748,14 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   }
 
   function completePersonalizationCartBridge(body) {
-    completePersonalizationCartBridgeFromState(extractPersonalizationFromPayload(body));
+    const payloadObject = tryParseBodyObject(body);
+    const entryPayload = readBodyEntries(body);
+    const extractedState = normalizePersonalizationState({
+      ...extractPersonalizationFromPayload(body),
+      ...(payloadObject ? extractPersonalizationFromMessagePayload(payloadObject) : {}),
+      ...(entryPayload.length ? extractPersonalizationFromMessagePayload(entryPayload) : {})
+    });
+    completePersonalizationCartBridgeFromState(extractedState);
   }
 
   function bindPersonalizationMessageBridge() {
@@ -2370,8 +2441,6 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
           return;
         }
 
-        setStoredCartState(cartState);
-
         let redirected = false;
         const redirectToCart = function () {
           if (redirected) {
@@ -2381,34 +2450,73 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
           window.location.href = CART_URL;
         };
 
-        const redirectDelay = cartState.personalizationWanted ? 520 : 140;
-        window.setTimeout(function () {
-          setStoredCartState(buildCartState({
-            personalizationWanted: cartState.personalizationWanted
-          }));
-          redirectToCart();
-        }, redirectDelay);
+        const finalizeBaseRedirect = function (resolvedCartState) {
+          const safeCartState = buildCartState(resolvedCartState);
+          setStoredCartState(safeCartState);
 
-        Promise.resolve(postLeadEvent('nike_add_to_cart', {
-          extra: {
-            size: cartState.size,
-            quantity: cartState.quantity,
-            sku: cartState.sku,
-            destination: CART_URL,
-            personalizationWanted: cartState.personalizationWanted ? 'sim' : 'nao',
-            personalizationMode: cartState.personalizationMode || '',
-            personalizationSummary: cartState.personalizationSummary || '',
-            personalizationExtraValue: cartState.personalizationExtraValue || 0
-          },
-          shipping: cartState.shipping || {}
-        })).finally(function () {
+          const redirectDelay = safeCartState.personalizationWanted ? 520 : 140;
           window.setTimeout(function () {
-            setStoredCartState(buildCartState({
-              personalizationWanted: cartState.personalizationWanted
-            }));
+            setStoredCartState(buildCartState(readStoredCartState()));
             redirectToCart();
-          }, cartState.personalizationWanted ? 180 : 0);
-        });
+          }, redirectDelay);
+
+          Promise.resolve(postLeadEvent('nike_add_to_cart', {
+            extra: {
+              size: safeCartState.size,
+              quantity: safeCartState.quantity,
+              sku: safeCartState.sku,
+              destination: CART_URL,
+              personalizationWanted: safeCartState.personalizationWanted ? 'sim' : 'nao',
+              personalizationMode: safeCartState.personalizationMode || '',
+              personalizationSummary: safeCartState.personalizationSummary || '',
+              personalizationExtraValue: safeCartState.personalizationExtraValue || 0
+            },
+            shipping: safeCartState.shipping || {}
+          })).finally(function () {
+            window.setTimeout(function () {
+              setStoredCartState(buildCartState(readStoredCartState()));
+              redirectToCart();
+            }, safeCartState.personalizationWanted ? 180 : 0);
+          });
+        };
+
+        if (isPersonalizationBridgeActive() && !cartState.personalizationWanted) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof event.stopImmediatePropagation === 'function') {
+            event.stopImmediatePropagation();
+          }
+
+          const waitStartedAt = Date.now();
+          const waitForBridge = function () {
+            const bridgedCartState = buildCartState(readStoredCartState());
+            const hasBridgedPersonalization = Boolean(
+              bridgedCartState.personalizationWanted && (
+                bridgedCartState.personalizationPlayer ||
+                bridgedCartState.personalizationName ||
+                bridgedCartState.personalizationNumber ||
+                Number(bridgedCartState.personalizationExtraValue || 0) > 0
+              )
+            );
+
+            if (hasBridgedPersonalization) {
+              finalizeBaseRedirect(bridgedCartState);
+              return;
+            }
+
+            if (Date.now() - waitStartedAt < 2600) {
+              window.setTimeout(waitForBridge, 120);
+              return;
+            }
+
+            finalizeBaseRedirect(cartState);
+          };
+
+          window.setTimeout(waitForBridge, 120);
+          return;
+        }
+
+        finalizeBaseRedirect(cartState);
       });
     });
   }
