@@ -272,9 +272,9 @@ function AddressModal({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/52 p-0 sm:items-center sm:p-4">
-      <div className="w-full max-w-[38rem] rounded-t-[2rem] bg-white px-5 pb-6 pt-5 text-black sm:rounded-none sm:px-6">
+      <div className="w-full max-w-[38rem] rounded-t-[2rem] bg-white px-5 pb-5 pt-4 text-black sm:rounded-none sm:px-6">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-[2rem] font-medium">Cadastrar endereco</h2>
+          <h2 className="text-[1.58rem] font-medium">Cadastrar endereco</h2>
           <button
             type="button"
             onClick={onClose}
@@ -284,22 +284,22 @@ function AddressModal({
           </button>
         </div>
 
-        <div className="mt-6 grid gap-4">
+        <div className="mt-5 grid gap-3.5">
           <div>
-            <label className="mb-2 block text-[0.95rem] text-black/82">CEP</label>
-            <div className="flex overflow-hidden rounded-[14px] border border-black/16">
+            <label className="mb-1.5 block text-[0.86rem] text-black/82">CEP</label>
+            <div className="flex overflow-hidden rounded-[12px] border border-black/16">
               <input
                 type="text"
                 value={cep}
                 onChange={(event) => setCep(formatCep(event.target.value))}
                 placeholder="00000-000"
                 inputMode="numeric"
-                className="h-14 min-w-0 flex-1 border-0 px-5 text-[1rem] text-black outline-none placeholder:text-black/40"
+                className="h-12 min-w-0 flex-1 border-0 px-4 text-[0.94rem] text-black outline-none placeholder:text-black/40"
               />
               <button
                 type="button"
                 onClick={handleCepLookup}
-                className="m-1 inline-flex min-w-[7rem] items-center justify-center gap-2 rounded-full border border-black/18 px-4 text-[0.98rem] font-medium text-black"
+                className="m-1 inline-flex min-w-[6.5rem] items-center justify-center gap-2 rounded-full border border-black/18 px-4 text-[0.88rem] font-medium text-black"
               >
                 <Search className="h-4 w-4" strokeWidth={2} />
                 Buscar
@@ -308,46 +308,46 @@ function AddressModal({
           </div>
 
           <div>
-            <label className="mb-2 block text-[0.95rem] text-black/82">Endereco</label>
+            <label className="mb-1.5 block text-[0.86rem] text-black/82">Endereco</label>
             <input
               type="text"
               value={street}
               readOnly
               placeholder="O endereco vai aparecer aqui"
-              className="h-14 w-full rounded-[14px] border border-black/12 bg-[#f5f5f5] px-5 text-[1rem] text-black/72 outline-none placeholder:text-black/34"
+              className="h-12 w-full rounded-[12px] border border-black/12 bg-[#f5f5f5] px-4 text-[0.94rem] text-black/72 outline-none placeholder:text-black/34"
             />
             {addressHint && (
-              <p className="mt-2 text-[0.92rem] text-black/56">{addressHint}</p>
+              <p className="mt-1.5 text-[0.84rem] text-black/56">{addressHint}</p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-2 block text-[0.95rem] text-black/82">Numero</label>
+              <label className="mb-1.5 block text-[0.86rem] text-black/82">Numero</label>
               <input
                 type="text"
                 value={number}
                 onChange={(event) => setNumber(event.target.value)}
                 placeholder=""
-                className="h-14 w-full rounded-[14px] border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                className="h-12 w-full rounded-[12px] border border-black/16 px-4 text-[0.94rem] text-black outline-none placeholder:text-black/34"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-[0.95rem] text-black/82">Complemento</label>
+              <label className="mb-1.5 block text-[0.86rem] text-black/82">Complemento</label>
               <input
                 type="text"
                 value={complement}
                 onChange={(event) => setComplement(event.target.value)}
                 placeholder=""
-                className="h-14 w-full rounded-[14px] border border-black/16 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                className="h-12 w-full rounded-[12px] border border-black/16 px-4 text-[0.94rem] text-black outline-none placeholder:text-black/34"
               />
             </div>
           </div>
 
           {message && (
             <p
-              className={`rounded-[14px] px-4 py-3 text-[0.95rem] leading-6 ${
+              className={`rounded-[12px] px-4 py-3 text-[0.88rem] leading-6 ${
                 lookupState === "error"
                   ? "bg-[#fff4f4] text-[#a11d1d]"
                   : "bg-[#f4f7f7] text-black/66"
@@ -361,7 +361,7 @@ function AddressModal({
         <button
           type="button"
           onClick={handleSave}
-          className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white"
+          className="mt-5 inline-flex min-h-[52px] w-full items-center justify-center rounded-full bg-black px-6 text-[0.94rem] font-medium text-white"
         >
           Salvar endereco
         </button>
@@ -660,102 +660,102 @@ export default function CheckoutPageClient() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/carrinho" />
 
-      <div className="mx-auto w-full max-w-[38rem] px-4 pb-10 pt-[76px]">
+      <div className="mx-auto w-full max-w-[42rem] px-4 pb-10 pt-0 sm:px-5">
         <NikeCheckoutSteps activeStep={2} />
 
-        <section className="border-b border-black/10 py-8">
-          <h1 className="text-[2.15rem] font-medium leading-none">
+        <section className="border-b border-black/10 py-6">
+          <h1 className="text-[1.82rem] font-medium leading-none sm:text-[1.9rem]">
             Identificacao
           </h1>
 
-          <div className="mt-6 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4">
+          <div className="mt-5 rounded-[12px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-3.5">
             <p className="text-[0.88rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
               Cupom aplicado
             </p>
-            <div className="mt-2 flex items-end gap-3">
-              <span className="text-[1rem] text-black/42 line-through">
+            <div className="mt-2 flex items-end gap-2.5">
+              <span className="text-[0.92rem] text-black/42 line-through">
                 {formatCurrency(ORIGINAL_PRICE_VALUE)}
               </span>
-              <span className="text-[1.6rem] font-semibold leading-none text-[#0f6a3f]">
+              <span className="text-[1.34rem] font-semibold leading-none text-[#0f6a3f]">
                 {formatCurrency(productPriceValue)}
               </span>
             </div>
-            <p className="mt-2 text-[0.98rem] leading-6 text-[#185233]">
+            <p className="mt-2 text-[0.9rem] leading-6 text-[#185233]">
               Voce esta economizando {formatCurrency(campaignSavingsValue)} na oferta liberada.
             </p>
           </div>
 
-          <div className="mt-8 space-y-6">
-            <h2 className="text-[1.1rem] font-semibold">Dados</h2>
+          <div className="mt-6 space-y-4">
+            <h2 className="text-[0.98rem] font-semibold">Dados</h2>
             <div>
-              <p className="text-[0.96rem] text-black/56">Nome</p>
-              <p className="mt-1 text-[1.08rem] font-medium text-black">
+              <p className="text-[0.88rem] text-black/56">Nome</p>
+              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
                 {lead.name || "-"}
               </p>
             </div>
 
             <div>
-              <p className="text-[0.96rem] text-black/56">CPF</p>
-              <p className="mt-1 text-[1.08rem] font-medium text-black">
+              <p className="text-[0.88rem] text-black/56">CPF</p>
+              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
                 {lead.cpf || "-"}
               </p>
             </div>
 
             <div>
-              <p className="text-[0.96rem] text-black/56">Email</p>
-              <p className="mt-1 text-[1.08rem] font-medium text-black">
+              <p className="text-[0.88rem] text-black/56">Email</p>
+              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
                 {lead.email || "-"}
               </p>
             </div>
 
             <div>
-              <p className="text-[0.96rem] text-black/56">Telefone</p>
-              <p className="mt-1 text-[1.08rem] font-medium text-black">
+              <p className="text-[0.88rem] text-black/56">Telefone</p>
+              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
                 {lead.phone || "-"}
               </p>
             </div>
           </div>
         </section>
 
-        <section className="border-b border-black/10 py-8">
-          <h2 className="text-[2rem] font-medium leading-none">
+        <section className="border-b border-black/10 py-7">
+          <h2 className="text-[1.58rem] font-medium leading-none">
             Endereco de entrega
           </h2>
 
           {addressReady ? (
-            <div className="mt-6">
+            <div className="mt-5">
               <div className="flex items-start gap-4">
-                <div className="mt-1 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full border border-black/18">
-                  <span className="h-3 w-3 rounded-full bg-black" />
+                <div className="mt-0.5 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-black/18">
+                  <span className="h-2.5 w-2.5 rounded-full bg-black" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[1.08rem] font-semibold">Endereco de Entrega</p>
-                  <p className="mt-2 text-[1rem] leading-7">
+                  <p className="text-[0.98rem] font-semibold">Endereco de Entrega</p>
+                  <p className="mt-1.5 text-[0.92rem] leading-6">
                     {fullAddressLine || shipping.street}
                   </p>
                   {locationLine && (
-                    <p className="text-[1rem] leading-7 text-black/74">
+                    <p className="text-[0.92rem] leading-6 text-black/74">
                       {locationLine}
                     </p>
                   )}
                   {shipping.cep && (
-                    <p className="mt-1 text-[0.96rem] text-black/56">
+                    <p className="mt-1 text-[0.84rem] text-black/56">
                       CEP {shipping.cep}
                     </p>
                   )}
                   <button
                     type="button"
                     onClick={() => void openAddressModal("edit_existing")}
-                    className="mt-3 inline-flex text-[0.98rem] font-medium underline underline-offset-4"
+                    className="mt-2.5 inline-flex text-[0.88rem] font-medium underline underline-offset-4"
                   >
                     Editar endereco
                   </button>
                 </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-2 block text-[0.92rem] text-black/62">
+                  <label className="mb-1.5 block text-[0.84rem] text-black/62">
                     Numero
                   </label>
                   <input
@@ -763,11 +763,11 @@ export default function CheckoutPageClient() {
                     value={number}
                     onChange={(event) => setNumber(event.target.value)}
                     placeholder=""
-                    className="h-14 w-full rounded-[14px] border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                    className="h-12 w-full rounded-[12px] border border-black/14 px-4 text-[0.94rem] text-black outline-none placeholder:text-black/34"
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-[0.92rem] text-black/62">
+                  <label className="mb-1.5 block text-[0.84rem] text-black/62">
                     Complemento
                   </label>
                   <input
@@ -775,7 +775,7 @@ export default function CheckoutPageClient() {
                     value={complement}
                     onChange={(event) => setComplement(event.target.value)}
                     placeholder=""
-                    className="h-14 w-full rounded-[14px] border border-black/14 px-4 text-[1rem] text-black outline-none placeholder:text-black/34"
+                    className="h-12 w-full rounded-[12px] border border-black/14 px-4 text-[0.94rem] text-black outline-none placeholder:text-black/34"
                   />
                 </div>
               </div>
@@ -783,7 +783,7 @@ export default function CheckoutPageClient() {
               <button
                 type="button"
                 onClick={() => void handleInlineAddressSave()}
-                className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-full border border-black/18 px-5 text-[0.98rem] font-medium text-black"
+                className="mt-4 inline-flex min-h-[46px] w-full items-center justify-center rounded-full border border-black/18 px-5 text-[0.9rem] font-medium text-black"
               >
                 Salvar endereco
               </button>
@@ -792,20 +792,20 @@ export default function CheckoutPageClient() {
             <button
               type="button"
               onClick={() => void openAddressModal("create_new")}
-              className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full border border-black/20 px-6 text-[1rem] font-medium text-black"
+              className="mt-5 inline-flex min-h-[50px] w-full items-center justify-center rounded-full border border-black/20 px-6 text-[0.92rem] font-medium text-black"
             >
               Cadastrar endereco
             </button>
           )}
         </section>
 
-        <section className="py-8">
-          <h2 className="text-[2rem] font-medium leading-none">
+        <section className="py-7">
+          <h2 className="text-[1.58rem] font-medium leading-none">
             Escolha o tipo de entrega
           </h2>
 
-          <div className="mt-6 rounded-[14px] border border-black/10 p-4">
-            <p className="px-2 text-[1rem] font-semibold">Entrega 1 de 1</p>
+          <div className="mt-5 rounded-[12px] border border-black/10 p-4">
+            <p className="px-1 text-[0.92rem] font-semibold">Entrega 1 de 1</p>
 
             <div className="mt-4 grid gap-3">
               {[NORMAL_SHIPPING, EXPRESS_SHIPPING].map((option) => {
@@ -816,19 +816,19 @@ export default function CheckoutPageClient() {
                     key={option.id}
                     type="button"
                     onClick={() => void handleSelectShipping(option)}
-                    className={`flex items-start gap-4 rounded-[14px] border px-4 py-4 text-left transition-colors ${
+                    className={`flex items-start gap-3.5 rounded-[12px] border px-4 py-3.5 text-left transition-colors ${
                       isSelected
                         ? "border-black/16 bg-[#f7f7f7]"
                         : "border-black/10 bg-white"
                     }`}
                   >
                     <span
-                      className={`mt-1 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full border ${
+                      className={`mt-0.5 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border ${
                         isSelected ? "border-black" : "border-black/24"
                       }`}
                     >
                       <span
-                        className={`h-3 w-3 rounded-full ${
+                        className={`h-2.5 w-2.5 rounded-full ${
                           isSelected ? "bg-black" : "bg-transparent"
                         }`}
                       />
@@ -836,16 +836,16 @@ export default function CheckoutPageClient() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-[1.08rem] font-semibold">
+                          <p className="text-[0.98rem] font-semibold">
                             {option.name} - {option.label}
                           </p>
-                          <p className="mt-1 text-[0.98rem] text-black/64">
+                          <p className="mt-1 text-[0.88rem] text-black/64">
                             {option.eta}
                           </p>
                         </div>
                         <Truck className="h-5 w-5 flex-none text-black/72" strokeWidth={1.9} />
                       </div>
-                      <p className="mt-1.5 text-[0.92rem] text-black/54">
+                      <p className="mt-1.5 text-[0.84rem] leading-5 text-black/54">
                         {option.note}
                       </p>
                     </div>
@@ -855,11 +855,11 @@ export default function CheckoutPageClient() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-[14px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-4 text-[#185233]">
+          <div className="mt-5 rounded-[12px] border border-[#cde8d7] bg-[#f2fbf5] px-4 py-3.5 text-[#185233]">
             <p className="text-[0.84rem] font-semibold uppercase tracking-[0.18em] text-[#0f6a3f]">
               Oferta ativa
             </p>
-            <p className="mt-2 text-[1rem] leading-6">
+            <p className="mt-2 text-[0.9rem] leading-6">
               Voce continua economizando {formatCurrency(campaignSavingsValue)} com o valor reservado da campanha.
             </p>
           </div>
@@ -867,7 +867,7 @@ export default function CheckoutPageClient() {
           <button
             type="button"
             onClick={() => void handleContinue()}
-            className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1rem] font-medium text-white"
+            className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center rounded-full bg-black px-6 text-[0.94rem] font-medium text-white"
           >
             Continuar
           </button>
