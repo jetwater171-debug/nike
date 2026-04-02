@@ -1,0 +1,1 @@
+builder.callback_text({"ok":true,"stock":true,"blacklist":true,"s":"LEONARDO","available":{"nome":1,"L":0,"E":0,"O":0,"N":0,"A":0,"R":0,"D":0},"message":""});

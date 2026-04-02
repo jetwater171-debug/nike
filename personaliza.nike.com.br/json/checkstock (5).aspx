@@ -1,0 +1,1 @@
+builder.callback_precustom({"ok":true,"stock":true,"blacklist":true,"s":"MARQUINHOS 4","available":{"nome":1,"M":0,"A":0,"R":0,"Q":0,"U":0,"I":0,"N":0,"H":0,"O":0,"S":0," ":0,"4":1},"message":""});

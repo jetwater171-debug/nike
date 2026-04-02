@@ -1,0 +1,134 @@
+{
+	"fonts": [
+		"font/cbf_2026/cbf_2026_away"
+	],
+	"model": {
+		"camisa_costas": {
+			"labelSide": "Camisa Costas",
+			"labelFace": "",
+			"components": {
+				"backPrint": {
+					"type": "backPrint",
+					"data": {
+						"text": {
+							"value": null
+						},
+						"number": {
+							"value": null
+						}
+					},
+					"validation": "_t.text != null || _t.number != null || _t.patch != null || _t.patch_2 != null;"
+				}
+			},
+			"position": "2"
+		}
+	},
+	"components": {
+		"backPrint": {
+			"printModel": {
+				"label": "Adicionar Personalização",
+				"model": {
+					"id": "TXT_CBF",
+					"label": "1. Texto Reto<br>2. Número",
+					"tabs": [
+						{
+							"id": "nomenumero",
+							"label": "Nome + Número"
+						},
+						{
+							"id": "athletes",
+							"label": "Atletas"
+						}
+					],
+					"item": [
+						{
+							"tab": "nomenumero",
+							"maxlength": "10",
+							"type": "text",
+							"label": "Texto reto",
+							"title": "Adicione seu Nome",
+							"renderFunction": "simpleText",
+							"defaultValue": "",
+							"fontFace": "cbf_2026_away",
+							"binding": [
+								{
+									"side": "camisa_costas",
+									"type": "patch_2",
+									"reset": true
+								}
+							]
+						},
+						{
+							"tab": "nomenumero",
+							"maxlength": "2",
+							"type": "number",
+							"label": "Número",
+							"title": "Adicione seu Número",
+							"renderFunction": "simpleText",
+							"defaultValue": "",
+							"fontFace": "cbf_2026_away",
+							"binding": [
+								{
+									"side": "camisa_costas",
+									"type": "patch",
+									"reset": true
+								}
+							]
+						},
+						{
+							"tab": "athletes",
+							"type": "precustom",
+							"title": "Atletas",
+							"label": "Atletas",
+							"binding": [
+								{
+									"side": "camisa_costas",
+									"type": "patch",
+									"reset": true
+								}
+							],
+							"list": [
+								{
+									"number": "4",
+									"text": "Marquinhos"
+								},
+								{
+									"number": "7",
+									"text": "Vini Jr."
+								},
+								{
+									"number": "8",
+									"text": "L. Paquetá"
+								},
+								{
+									"number": "9",
+									"text": "Richarlison"
+								},
+								{
+									"number": "9",
+									"text": "Ronaldo"
+								},
+								{
+									"number": "9",
+									"text": "Vitor Roque"
+								},
+								{
+									"number": "10",
+									"text": "Ronaldinho"
+								},
+								{
+									"number": "20",
+									"text": "Estêvão"
+								},
+								{
+									"number": "21",
+									"text": "Cunha"
+								}
+							]
+						}
+					]
+				}
+			}
+		}
+	}
+}

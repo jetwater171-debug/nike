@@ -1,0 +1,1 @@
+{"sku":"IU1074-417","caracteres":["3"],"folhas":[],"simbolos":[]}

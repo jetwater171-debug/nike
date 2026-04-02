@@ -1,0 +1,1 @@
+builder.callback_text({"ok":true,"stock":true,"blacklist":true,"s":"DFGSDF","available":{"nome":1,"D":0,"F":0,"G":0,"S":0},"message":""});

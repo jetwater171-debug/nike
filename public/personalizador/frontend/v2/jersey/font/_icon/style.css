@@ -1,0 +1,88 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?kmx5s8');
+  src:  url('fonts/icomoon.eot?kmx5s8#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?kmx5s8') format('truetype'),
+    url('fonts/icomoon.woff?kmx5s8') format('woff'),
+    url('fonts/icomoon.svg?kmx5s8#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-symbol:before,
+.icon-patch:before {
+  content: "\e90a";
+}
+.icon-symbol:before,
+.icon-patch_2:before {
+  content: "\e90a";
+}
+.icon-symbol:before,
+.icon-patch_3:before {
+  content: "\e90a";
+}
+.icon-symbol:before,
+.icon-patch_4:before {
+  content: "\e90a";
+}
+.icon-symbol:before,
+.icon-patch_5:before {
+  content: "\e90a";
+}
+.icon-symbol:before,
+.icon-patch_6:before {
+  content: "\e90a";
+}
+.icon-athletes:before {
+  content: "\e90b";
+}
+.icon-text:before,
+.icon-number:before,
+.icon-nomenumero:before {
+  content: "\e90c";
+}
+.icon-apagar:before {
+  content: "\e907";
+}
+.icon-check:before {
+  content: "\e908";
+}
+.icon-help:before {
+  content: "\e909";
+}
+.icon-bandeira_de_pais:before {
+  content: "\e904";
+}
+.icon-nome:before {
+  content: "\e905";
+}
+.icon-escudo_de_time:before {
+  content: "\e906";
+}
+.icon-nike:before {
+  content: "\e903";
+}
+.icon-close:before {
+  content: "\e902";
+}
+.icon-next:before {
+  content: "\e900";
+}
+.icon-prev:before {
+  content: "\e901";
+}

@@ -1,0 +1,1 @@
+builder.callback_precustom({"ok":true,"stock":true,"blacklist":true,"s":"RICHARLISON 9","available":{"nome":1,"R":0,"I":0,"C":0,"H":0,"A":0,"L":0,"S":0,"O":0,"N":0," ":0,"9":1},"message":""});

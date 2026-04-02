@@ -1,0 +1,1 @@
+builder.callback_number({"ok":true,"stock":true,"blacklist":true,"s":"14","available":{"1":1,"4":1},"message":""});

@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pt" lang="pt">
+
+<head>
+    <title>Nike</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!--BEGIN BUILDER APP-->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css" />
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/jquery.slick/1.6.0/slick-theme.css" />
+
+    <!-- <link rel="stylesheet" type="text/css" href="css/customizacao.css" media="screen" /> -->
+    <link rel="stylesheet" type="text/css" href="font/_icon/style.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="css/main.min.css?v=1" media="screen" />
+
+    <script src="font/fontsmoothie.min.js"></script>
+
+    <script src="js/jquery-min.js?v=001"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
+        </script>
+    <script src="//cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js?v=001"></script>
+    <script src="js/underscore-min.js?v=001"></script>
+    <script src="js/backbone-min.js?v=001"></script>
+
+    <script src="js/nike-jersey-builder.min.js?v=001"></script>
+
+    <!--END BUILDER APP-->
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-45545514-1']);
+        _gaq.push(['_setDomainName', 'nike.com.br']);
+        _gaq.push(['_trackPageview']);
+
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+
+    <!--TEMPLATES-->
+    <script type="text/html" id="orderConfirmation">
+        <div class="titleBar">
+            <div class="wrapper">
+                <span><%= productName %></span>
+                <span class="tamanho">Tamanho: <%= productSize %></span>
+            </div>
+        </div>
+        <div class="container-table-scroll">
+            <table id="customizationItems">
+                <tbody>
+                    <% if(items.length){ %>
+                    <% for(var i = 0, l = items.length; i < l; i++) { %>
+                    <tr data-index="<%= i %>">
+                        <td>
+                            <div id="backPrevCt_<%= items[i].side + '_' + items[i].type %>">
+                                <!-- preview -->
+                            </div>
+                        </td>
+                        <td>
+                            <span><i class="icon icon-<%= items[i].type %>"></i></span>
+                        </td>
+                        <% if(items[i].component){ %>
+                        <td class="<%= items[i].type %>">
+                            <div class="type_<%= items[i].type %>">
+                                <%= items[i].component %>
+                            </div>
+                        </td>
+                        <td>
+                            <% if(items[i].price > 0){ %>
+                            R$ <span><%= items[i].localePrice[0] %><span><span>,<%= items[i].localePrice[1] %></span>
+                                    <% } %>
+                        </td>
+                        <% } else { %>
+                        <td colspan="2">
+                            <p>Não Personalizado</p>
+                        </td>
+                        <% } %>
+                        <td>
+                            <% if(items[i].editable){ %>
+                            <span class="btToggle glyphicon glyphicon-option-vertical" data-index="<%= i %>" aria-hidden="true"></span>
+                            <div class="buttons" data-index="<%= i %>">
+                                <a class="btEdit" data-index="<%= i %>"><span class="glyphicon glyphicon-edit"></span></a>
+                                <a class="btDel" data-index="<%= i %>"><span class="glyphicon glyphicon-trash"></span></a>
+                            </div>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% } %>
+                    <% } else { %>
+                    <tr>
+                        <td colspan="5">
+                            <center>
+                                <p>Sem personalização</p>
+                            </center>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+                <% if(finalPrice > 0) { %>
+                <tfoot>
+                    <tr>
+                        <td class="finalPrice" colspan="5">
+                            <span>VALOR TOTAL DA PERSONALIZAÇÃO</span> R$ <%= finalPrice.toFixed(2).replace(".", ",") %>
+                        </td>
+                    </tr>
+                    <% if(productPrice > 0) { %>
+                    <tr>
+                        <td class="finalPriceProduct" colspan="6" style="display:none;">
+                            <span>TOTAL (PERSONALIZAÇÃO + PRODUTO)</span>
+                            R$ <%= (productPrice + finalPrice).toFixed(2).replace(".", ",") %>
+                        </td>
+                    </tr>
+                    <% } %>
+                    <tr>
+                        <td class="finalCustom" colspan="5">
+                            <a class="btFinal final-warning">Finalizar Personalização</a>
+                        </td>
+                    </tr>
+                    <% if(disclaimer){ %>
+                    <tr>
+                        <td class="disclaimer" colspan="6">
+                            <span><%= disclaimer %></span>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tfoot>
+                <% } %>
+            </table>
+        </div>
+    </script>
+
+    <script type="text/html" id="topNavBar">
+        <a href="javascript:void(0)" class="btn btn-lg btPrevious inactive"><i class="icon-prev"></i></a>
+        <div id="topNav" class="btn-group" role="group">
+            <% for(var i = 0, l = items.length; i < l; i++) { %>
+            <a href="javascript:void(0)" role="button" class="btn side-button"
+                data-index="<%= i %>"><%= (i + 1) %><span><%= items[i].sideModel.labelSide %>
+                    <%= items[i].sideModel.labelFace %></span> </a>
+            <% } %>
+            <a href="javascript:void(0)" role="button"
+                class="btn cart-button"><%= (items.length + 1) %><span>Finalizar</span></a>
+        </div>
+        <a href="javascript:void(0)" class="btn btn-lg btNext"><i class="icon-next"></i></a>
+    </script>
+    <script type="text/html" id="thumbsNav">
+        <ul class="list">
+            <% for(var i = 0, l = items.length; i < l; i++) { %>
+            <li class="item" data-index="<%= i %>">
+                <img src="<%= items[i].path %>" title="<%= items[i].label %>" height="80" />
+            </li>
+            <% } %>
+        </ul>
+    </script>
+    <script type="text/html" id="preCustomSelection">
+        <div class="blackListContainer">
+            <div class="feedbackContainer">
+                <h3 class="title"><%= title %> <% if(price) { %> (R$ +<%= price %>) <% } %></h3>
+                <div class="blackListFeedback" style="display:none">
+                    <div class="close">x</div>
+                    <span class="arrow"></span>
+                    <span class="text">
+                        <!--message--></span>
+                </div>
+            </div>
+        </div>
+        <div class="imageList textComponent">
+            <div class="list">
+                <% 
+                var i = 0;
+                var cellSize = cols*rows, colCount = Math.ceil(items.length / cellSize);
+                for(var c = 0; c < colCount; c++) { 
+            %>
+                <div class="cell">
+                    <% for(var j = 0; j < cellSize && i < items.length ; j++, i++) { %>
+                    <div class="item" data-index="<%= i %>">
+                        <img src="<%= items[i].url %>" width="100" />
+                        <span><%= items[i].label %></span>
+                    </div>
+                    <% } %>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </script>
+    <script type="text/html" id="textComponent">
+        <div class="textComponent">
+            <h3 class="title"></h3>
+            <p class="subtitle"><span class="textLabel"></span> <span class="textPrice"></span></p>
+            <div class="form-group inputRow">
+                <input type="text" class="form-control input">
+                <span class="blackListFeedbackIcon"></span>
+            </div>
+            <div class="blackListFeedback" style="display:none">
+                <div class="close">x</div>
+                <span class="arrow"></span>
+                <span class="text">
+                    <!--message--></span>
+                <span style="display:none">
+                    <!--temp-->
+                    <div class="aviseMe" style="display:none">
+                        <span>Preencha o campo abaixo com o seu e-mail e seja avisado assim que estiver disponível.</span>
+                        <div class="form">
+                            <input type="email" name="aviseme" placeholder="Seu e-mail" class="aviseMeEmail" />
+                            <input type="button" value="OK" class="btSendAviseMe" />
+                        </div>
+                    </div>
+                </span>
+            </div>
+            <div class="unavailableCharsFixed" style="display:none"></div>
+        </div>
+    </script>
+
+    <script type="text/html" id="colorList">
+        <!--colors-->
+    <div class="colorList textComponent">
+        <h3>
+            <%= title %>
+        </h3>
+        <p class="subtitle">
+            <%= label %>
+        </p>
+        <div class="list">
+            <% var i=0; var cellSize=cols*rows, colCount=Math.ceil(list.length / cellSize); for(var c=0; c < colCount;
+                c++) { %>
+                <div class="cell">
+                    <% for(var j=0; j < cellSize && i < list.length ; j++, i++) { %>
+                        <div class="item" data-index="<%= i %>">
+                            <a href="#" title="<%= list[i].name %>" alt="<%= list[i].name %>"
+                                style="background-color: <%= list[i].hexa %>"></a>
+                        </div>
+                        <% } %>
+                </div>
+                <% } %>
+        </div>
+    </div>
+    </script>
+
+    <script type="text/html" id="fontList">
+        <!--fonts-->
+    <div class="fontList textComponent">
+        <h3>
+            <%= title %>
+        </h3>
+        <p class="subtitle">
+            <%= label %>
+        </p>
+        <div class="list">
+            <% var i=0; var cellSize=cols*rows, colCount=Math.ceil(list.length / cellSize); for(var c=0; c < colCount;
+                c++) { %>
+                <div class="cell">
+                    <% for(var j=0; j < cellSize && i < list.length; j++, i++) { %>
+                        <div class="item" data-index="<%= i %>">
+                            <a href="#" title="<%= list[i].name %>" alt="<%= list[i].name %>">
+                                <img src="<%= list[i]['thumbUrl'] ? list[i]['thumbUrl'] : list[i].url %>"
+                                    alt="<%= list[i].name %>">
+                            </a>
+                        </div>
+                        <% } %>
+                </div>
+                <% } %>
+        </div>
+    </div>
+    </script>
+
+    <script type="text/html" id="symbolList">
+        <!--symbols-->
+    <div class="imageList textComponent">
+        <div class="blackListContainer">
+            <div class="feedbackContainer">
+                <h3 class="title">
+                    <%= title %>
+                        <% if(price) { %> (R$ +<%= price %>) <% } %>
+                </h3>
+                <div class="blackListFeedback" style="display:none">
+                    <div class="close">x</div>
+                    <span class="arrow"></span>
+                    <span class="text">
+                        <!--message--></span>
+                </div>
+            </div>
+        </div>
+        <div class="list">
+            <% var i=0; var cellSize=cols*rows, colCount=Math.ceil(list.length / cellSize); for(var c=0; c < colCount;
+                c++) { %>
+                <div class="cell">
+                    <% for(var j=0; j < cellSize && i < list.length ; j++, i++) { %>
+                        <div class="item" data-index="<%= i %>">
+                            <a href="#" title="<%= list[i].name %>" alt="<%= list[i].name %>"><img
+                                    src="<%= list[i]['thumbUrl'] ? list[i]['thumbUrl'] : list[i].url %>"
+                                    alt="<%= list[i].name %>"></a>
+                        </div>
+                        <% } %>
+                </div>
+                <% } %>
+        </div>
+    </div>
+    </script>
+
+    <script type="text/html" id="checkboxWithImage">
+        <!--checkbox-->
+    <div class="textComponent">
+        <div class="multipleCheckboxWithImage">
+            <div class="blackListContainer">
+                <div class="feedbackContainer">
+                    <h3 class="title">
+                        <%= title %>
+                            <% if(price) { %> (R$ +<%= price %>) <% } %>
+                    </h3>
+                    <div class="blackListFeedback" style="display:none">
+                        <div class="close">x</div>
+                        <span class="arrow"></span>
+                        <span class="text">
+                            <!--message--></span>
+                    </div>
+                </div>
+            </div>
+            <ul class="list">
+                <% for(var i=0, l=list.length; i < l; i++) { %>
+                    <li class="item" data-index="<%= i %>">
+                        <img src="<%= list[i]['thumbUrl'] ? list[i]['thumbUrl'] : list[i].url %>" alt="" />
+                        <span class="label">
+                            <%= list[i].label %>
+                        </span>
+
+                    </li>
+                    <% } %>
+            </ul>
+        </div>
+    </div>
+    </script>
+
+    <script type="text/html" id="toggleButton">
+        <!--checkbox-->
+    <div class="textComponent">
+        <div class="toggleButton">
+            <div class="blackListContainer">
+                <div class="feedbackContainer">
+                    <h3 class="title">
+                        <%= title %>
+                            <% if(price) { %> (R$ +<%= price %>) <% } %>
+                    </h3>
+                </div>
+            </div>
+            <ul class="list">
+                <% for(var i=0, l=list.length; i < l; i++) { %>
+                    <li class="item" data-index="<%= i %>">
+                        <div class="col-2">
+                            <div class="fake-checkbox"></div>
+                        </div>
+                        <div class="col-1">
+                            <span class="label">
+                                <%= list[i].label %>
+                            </span>
+                        </div>
+                    </li>
+                    <% } %>
+            </ul>
+        </div>
+    </div>
+    </script>
+
+    <script type="text/html" id="preCustomList">
+        <div class="preCustomList">
+            <h3><%= title %></h3>
+            <div class="blackListContainer">
+                <div class="feedbackContainer">
+                    <h3 class="title"></h3>
+                    <div class="blackListFeedback" style="display:none">
+                        <div class="close">x</div>
+                        <span class="arrow"></span>
+                        <span class="text">
+                            <!--message--></span>
+                    </div>
+                </div>
+            </div>
+            <ul class="list">
+                <% for(var i = 0, l = list.length; i < l; i++) { %>
+                <li class="item" data-index="<%= i %>">
+                    <span><%= list[i].number %> - <%= list[i].text %></span>
+                </li>
+                <% } %>
+            </ul>
+        </div>
+    </script>
+
+    <script type="text/html" id="tabs">
+        <div class="list btn-group btn-group-justified" role="group">
+            <p>ESCOLHA UMA OU MAIS OPÇÕES</p>
+            <% for(var i = 0, l = list.length; i < l; i++) { %>
+            <a role="button" class="item btn btn-lg btn-black <%= enabled.indexOf(list[i].id) === -1 ? ' disabled' : '' %> "
+                data-index="<%= i %>">
+                <i class="icon icon-<%= (list[i].id == 'precustom' ? 'athletes' : list[i].id) %>"></i>
+                <span><%= list[i].label %></span>
+            </a>
+            <% } %>
+        </div>
+    </script>
+
+    <script type="text/html" id="customPanel">
+        <div>
+            <!-- frontPrint -->
+            <div id="camisa_frente" class="component">
+                <div id="camisa_frente_component">
+                    <div class="box">
+                        <div class="tabsContainer">
+                            <!-- tabs -->
+                        </div>
+                        <div class="componentsContainer">
+                            <!-- components -->
+                        </div>
+
+                    </div>
+                    <a href="javascript:void(0)" class="btClearCurrentSide"><span>
+                            <i class="icon icon-apagar"></i>
+                            Refazer
+                        </span></a>
+                </div>
+            </div>
+
+            <!-- backPrint -->
+            <div id="camisa_costas" class="component">
+                <div id="camisa_costas_component">
+                        <div class="box">
+                        <div class="tabsContainer">
+                            <!-- tabs -->
+                        </div>
+                        <div class="componentsContainer">
+                            <!-- components -->
+                        </div>
+                    </div>
+                    <a href="javascript:void(0)" class="btClearCurrentSide"><span>
+                            <i class="icon icon-apagar"></i>
+                            Refazer
+                        </span></a>
+                </div>
+
+            </div>
+
+            <!--MENU-->
+            <div id="menu">
+                <div class="btn-group nav" role="group">
+                    <a href="#" id="btPrevious" role="button" class="btn btPrevious inactive">
+                        <i class="glyphicon glyphicon-chevron-left"></i>
+                        Anterior
+                    </a>
+                    <a href="#" id="btNext" role="button" class="btn btNext">
+                        <i class="glyphicon glyphicon-menu-right"></i>
+                        Próximo
+                    </a>
+                    <a href="#" id="btFinal" role="button" class="btn btNext">
+                        <i class="icon icon-check"></i>
+                        Finalizar
+                    </a>
+                </div>
+                <div class="value">
+                    <p>
+                        Valor Parcial:
+                        <span id="sidePrice">
+                            <!-- price --></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/html" id="preCustomPanel">
+        <div>
+            <div class="component" style="display:block">
+                <div class="box">
+                    <div class="tabsContainer">
+                        <div>
+                            <div class="list btn-group btn-group-justified" role="group">
+                                <p style="padding-left: 0;">Escolha uma opção</p>
+
+                                <a role="button" class="item btn btn-lg btn-black active">
+                                    <i class="icon icon-nomenumero"></i>
+                                    <span>Estampa</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="componentsContainer">
+                        <div id="preCustomOneItem"></div>
+                        <div id="preCustomSelect" class="textComponent">
+                            <div class="blackListContainer">
+                                <div class="feedbackContainer">
+                                    <h3 class="title"></h3>
+                                    <div class="blackListFeedback" style="display:none">
+                                        <div class="close">x</div>
+                                        <span class="arrow"></span>
+                                        <span class="text">
+                                            <!--message--></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="list">
+                                <!-- append items -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="javascript:void(0)" class="btClearCurrentSide"><span>
+                    <i class="icon icon-apagar"></i>
+                    Refazer
+                </span></a>
+
+            <!--MENU-->
+            <div id="menu">
+                <div class="btn-group nav" role="group">
+                    <a href="#" id="btPrevious" role="button" class="btn btPrevious inactive">
+                        <i class="glyphicon glyphicon-chevron-left"></i>
+                        Anterior
+                    </a>
+                    <a href="#" id="btNext" role="button" class="btn btNext">
+                        <i class="glyphicon glyphicon-menu-right"></i>
+                        Próximo
+                    </a>
+                    <a href="#" id="btFinal" role="button" class="btn btNext">
+                        <i class="icon icon-check"></i>
+                        Finalizar
+                    </a>
+                </div>
+                <div class="value">
+                    <p>
+                        Valor Parcial:
+                        <span id="sidePrice">
+                            <!-- price --></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </script>
+</head>
+
+<body>
+    <div class="containerHolder">
+
+        <!-- BUILDER CONTAINER BEGIN -->
+        <div id="builderContainer">
+            <div id="loader">
+                <div class="icon"></div>
+            </div>
+            <!-- BUILDER BEGIN -->
+            <div id="builderApp" style="display: none">
+
+                <div id="builder">
+                    <div id="navegacaoPassos">
+                        <!-- topNavBar -->
+                    </div>
+
+                    <!-- CUSTOMIZAÇÂO -->
+                    <div id="telaCustomizacao">
+                        <div class="floaterContent">
+                            <div id="thumbs" class="thumbs">
+                                <!-- thumbsNav -->
+                            </div>
+                            <div id="productContainer">
+                                <div id="product"></div>
+                            </div>
+
+                            <a id="btPrevs" class="btn btPrevs"><i class="glyphicon glyphicon-menu-left"></i></a>
+                            <a id="btNexts" class="btn btNexts"><i class="glyphicon glyphicon-menu-right"></i></a>
+                        </div>
+
+                        <!-- PAINEL DE OPÇÔES -->
+                        <div class="painel" id="painel">
+                            <h2 id="painelTitle">Personalize do seu jeito <span class="icon icon-help"
+                                    id="showTips"></span></h2>
+                            <div class="painelBox" id="customContainer">
+                                <!--CUSTOM -->
+                            </div>
+
+                            <!-- TELA DE CONFIRMAÇÂO -->
+                            <div id="telaConfirmacao">
+                                <!-- orderConfirmation -->
+                            </div>
+                            <p class="disclaimer-policy desktop-only">Não realizamos customizações que contenham termos
+                                que se enquadrem em violação de marcas, conteúdo discriminatório, que incitem a
+                                violência ou desrespeitem a religião do outro. Conheça nossa <a
+                                    href="https://atendimento.nike.com.br/hc/pt-br/articles/5336946455059-Posso-personalizar-os-produtos-Nike"
+                                    target="_blank">política de personalização</a>.
+                                <br>
+                                Quer sugerir a inclusão ou exclusão de alguma palavra?
+                                <a href="https://nike-brasil.typeform.com/customize-nike" target="_blank">Envie
+                                    aqui.</a>
+                                <br>
+                                <button type="button" class="linkTrocaDevolucao">Regras para troca e devolução</button>
+                            </p>
+                            <p class="disclaimer-policy mobile-only">Não realizamos customizações que contenham termos
+                                que se enquadrem em violação de marcas, conteúdo discriminatório, que incitem a
+                                violência ou desrespeitem a religião do outro. Conheça nossa <a
+                                    href="https://atendimento.nike.com.br/hc/pt-br/articles/5336946455059-Posso-personalizar-os-produtos-Nike"
+                                    target="_blank">política de personalização</a>.
+                                <br>
+                                Quer sugerir a inclusão ou exclusão de alguma palavra?
+                                <a href="https://nike-brasil.typeform.com/customize-nike" target="_blank">Envie
+                                    aqui.</a>
+                                <br>
+                                <button type="button" class="linkTrocaDevolucao">Regras para troca e devolução</button>
+                            </p>
+                        </div>
+
+                    </div> <!-- FIM CUSTOMIZAÇÂO -->
+
+                    <div id="tipsContainer" class="popups">
+                        <div id="pop-1" class="pop">
+                            <a class="btClose btTipClose" title="Fechar"><i class="icon-close"></i></a>
+                            <p>
+                                <strong>Selecione uma posição</strong>
+                                Clique para ver os lados disponíveis para personalização. Você pode inserir apenas um
+                                item por posição.
+                            </p>
+                            <a class="link-1 btTipClose">Ocultar dicas</a>
+                            <a class="link-2 btTipNext">Próxima Dica</a>
+                        </div>
+
+                        <div id="pop-2" class="pop">
+                            <a class="btClose btTipClose" title="Fechar"><i class="icon-close"></i></a>
+                            <p>
+                                <strong>Errou?</strong>
+                                Não se preocupe, é só clicar aqui para apagar o item que você adicionou e que gostaria
+                                de apagar.
+                            </p>
+                            <a class="link-1 btTipPrevious">Dica Anterior</a>
+                            <a class="link-2 btTipNext">Próxima Dica</a>
+                        </div>
+
+                        <div id="pop-3" class="pop">
+                            <a class="btClose btTipClose" title="Fechar"><i class="icon-close"></i></a>
+                            <p>
+                                <strong>Quanto custa?</strong>
+                                Os valores de cada personalização aparecerão aqui, junto com o ícone de adicionar ou
+                                remover os itens.
+                            </p>
+                            <a class="link-1 btTipPrevious">Dica Anterior</a>
+                            <a class="link-2 btTipNext">Próxima Dica</a>
+                        </div>
+
+                        <div id="pop-4" class="pop">
+                            <a class="btClose btTipClose" title="Fechar"><i class="icon-close"></i></a>
+                            <p>
+                                <strong>Próxima posição ou checkout</strong>
+                                Clicando aqui você vai para a próxima posição de personalização, ou caso já esteja na
+                                última, para o
+                                checkout.
+                            </p>
+                            <a class="link-1 btTipRestart">Rever</a>
+                            <a class="link-2 btTipClose">Iniciar Customização</a>
+                        </div>
+
+                        <div id="pop-5" class="pop">
+                            <a class="btClose btTipClose" title="Fechar"><i class="icon-close"></i></a>
+                            <p>
+                                <strong>Personalização concluída</strong>
+                                Revise suas escolhas e clique em "Finalizar Personalização" para concluir seu pedido.
+                            </p>
+                            <a class="link-2 btTipClose">Fechar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script type="text/javascript">
+                /*BEGIN SAFARI BUG*/
+                (function () {
+                    if (window.location !== window.parent.location && window.innerWidth < 1024) {
+
+                        var html = document.querySelector('html');
+                        html.style.width = '100%';
+                        html.style.height = '100%';
+                        html.style.overflow = 'auto';
+
+                        var body = document.querySelector('body');
+                        body.style.width = '100%';
+                        body.style.height = '100%';
+                        body.style.overflow = 'auto';
+                        body.style.display = 'none';
+
+                        setTimeout(function () {
+                            body.style.display = 'block';
+                        }, 300);
+                    }
+                })();
+                /*END SAFARI BUG*/
+
+                try {
+                    document.domain = "nike.com.br";
+                }
+                catch (e) { };
+
+                //Google Analytics
+                var trackBuilderGA = function (action, content) {
+                    _gaq.push(['_trackEvent', 'jersey', action, content]);
+                }
+
+                function getParameterByName(name) {
+                    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+                    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                        results = regex.exec(location.search);
+                    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+                }
+
+                function getLocalPersonalizerHost() {
+                    var marker = "/frontend/v2/jersey/";
+                    var pathname = window.location.pathname || "";
+                    var markerIndex = pathname.indexOf(marker);
+
+                    if (markerIndex < 0) {
+                        return "";
+                    }
+
+                    return pathname.slice(0, markerIndex);
+                }
+
+                function buildCompletionPayload(builderInstance, productSku, productPrice) {
+                    if (!builderInstance) {
+                        return null;
+                    }
+
+                    builderInstance.updateOrderConfirmationModel();
+
+                    var model = builderInstance.orderConfirmationModel;
+                    var cartData = Array.isArray(builderInstance.cartData) ? builderInstance.cartData.map(function (entry) {
+                        return {
+                            name: entry && entry.name != null ? String(entry.name) : "",
+                            value: entry && entry.value != null ? entry.value : ""
+                        };
+                    }) : [];
+
+                    return {
+                        operation: "codexLocalPersonalizationComplete",
+                        parameters: {
+                            idSku: productSku,
+                            sku: builderInstance.SKU || productSku,
+                            size: builderInstance.PRODUCT_SIZE || "",
+                            productPrice: Number(builderInstance.PRODUCT_PRICE || productPrice || 0),
+                            finalPrice: Number(model && model.get ? model.get("finalPrice") || 0 : 0),
+                            items: model && model.get ? model.get("items") || [] : [],
+                            cartData: cartData
+                        }
+                    };
+                }
+
+                function bindLocalCartBridge(productSku, productPrice, targetOrigin) {
+                    if (!window.builder) {
+                        return;
+                    }
+
+                    window.builder.sendDataToCart = function () {
+                        var builderInstance = window.builder;
+
+                        if (!builderInstance || builderInstance.sendingDataToCart || !builderInstance.progressCompleted()) {
+                            return;
+                        }
+
+                        builderInstance.updateOrderConfirmationModel();
+                        if (!builderInstance.orderConfirmationModel || !builderInstance.orderConfirmationModel.get("hasCustomization")) {
+                            builderInstance.errorHandling("Escolha pelo menos uma personalizacao para continuar.");
+                            return;
+                        }
+
+                        builderInstance.setPreloadVisible(true);
+                        builderInstance.sendingDataToCart = true;
+
+                        try {
+                            var payload = buildCompletionPayload(builderInstance, productSku, productPrice);
+                            if (!payload) {
+                                throw new Error("Nao foi possivel concluir a personalizacao.");
+                            }
+
+                            builderInstance.trackGA("SentToCart");
+                            window.parent.postMessage(payload, targetOrigin || "*");
+                        }
+                        catch (error) {
+                            builderInstance.errorHandling(error && error.message ? error.message : "Ocorreu um erro inesperado.");
+                        }
+                        finally {
+                            builderInstance.setPreloadVisible(false);
+                            builderInstance.sendingDataToCart = false;
+                        }
+                    };
+                }
+
+                function normalizeLocalControlValue(control, value) {
+                    var rawValue = value == null ? "" : String(value);
+                    var maxLength = Number(control && control.options && control.options.maxlength || 0);
+                    var controlType = control && control.options && control.options.type ? String(control.options.type) : "";
+                    var normalized = rawValue.replace(/\s+/g, " ").trim();
+
+                    if (controlType === "number" || controlType === "number_leading_zero") {
+                        normalized = normalized.replace(/\D/g, "");
+                    }
+
+                    if (maxLength > 0) {
+                        normalized = normalized.slice(0, maxLength);
+                    }
+
+                    return normalized.toUpperCase();
+                }
+
+                function resetLocalControlUi(control) {
+                    if (!control || !control.$el) {
+                        return;
+                    }
+
+                    control.$el.removeClass("disabled out-of-stock");
+                    control.$el.find(".disabled, .out-of-stock").removeClass("disabled out-of-stock");
+                    control.$el.find(".stock-unavailable-badge").remove();
+                    control.$el.find(".unavailableCharsFixed").html("").hide();
+
+                    if (control.input) {
+                        control.input.prop("disabled", false);
+                    }
+
+                    if (control.blackList) {
+                        if (control.blackList.feedbackContainer) {
+                            control.blackList.feedbackContainer.hide();
+                        }
+
+                        if (control.blackList.feedbackIcon && control.blackList.feedbackIconClass) {
+                            control.blackList.feedbackIcon.attr("class", control.blackList.feedbackIconClass);
+                        }
+                    }
+                }
+
+                function buildLocalBlackListResult(control, payload) {
+                    var sourceText = "";
+                    if (payload && typeof payload === "object") {
+                        if (payload.text != null && String(payload.text).trim()) {
+                            sourceText = String(payload.text);
+                        } else if (payload.number != null && String(payload.number).trim()) {
+                            sourceText = String(payload.number);
+                        } else if (payload.s != null) {
+                            sourceText = String(payload.s);
+                        } else if (payload.value != null) {
+                            sourceText = String(payload.value);
+                        } else if (payload.name != null) {
+                            sourceText = String(payload.name);
+                        }
+                    }
+
+                    return {
+                        ok: true,
+                        stock: true,
+                        blacklist: true,
+                        s: normalizeLocalControlValue(control, sourceText),
+                        message: ""
+                    };
+                }
+
+                function patchLocalBlackListInstance(control) {
+                    var blackList = control && control.blackList;
+                    if (!blackList || blackList.__codexLocalPatched) {
+                        return;
+                    }
+
+                    blackList.__codexLocalPatched = true;
+                    blackList.clearBlackListInterval = function () {
+                        if (this.blackListTimeout) {
+                            window.clearInterval(this.blackListTimeout);
+                            window.clearTimeout(this.blackListTimeout);
+                            this.blackListTimeout = null;
+                        }
+                    };
+                    blackList.resetFeedback = function () {
+                        if (this.feedbackIcon && this.feedbackIconClass) {
+                            this.feedbackIcon.attr("class", this.feedbackIconClass);
+                        }
+                        if (this.feedbackContainer) {
+                            this.feedbackContainer.hide();
+                        }
+                    };
+                    blackList.clearBlackList = function () {
+                        this.resetFeedback();
+                    };
+                    blackList.loadUnavailableItems = function () {
+                        return Promise.resolve(null);
+                    };
+                    blackList.applyUnavailableItems = function () { };
+                    blackList.applyUnavailableByListIndex = function () { };
+                    blackList.markUnavailableSymbols = function () { };
+                    blackList.markUnavailablePatches = function () { };
+                    blackList.markUnavailableAthletes = function () { };
+                    blackList.showCharsUnavailableWarning = function () { };
+                    blackList.disableTextComponent = function () { };
+                    blackList.disableKeyboardKey = function () { };
+                    blackList.setPatchTabDisabled = function () { };
+                    blackList.setAthleteTabDisabled = function () { };
+                    blackList.setSymbolTabDisabled = function () { };
+
+                    var emitLocalSuccess = function (payload) {
+                        var result = buildLocalBlackListResult(control, payload);
+                        blackList.resetFeedback();
+                        resetLocalControlUi(control);
+
+                        if (blackList.feedbackIcon && blackList.feedbackIconClass) {
+                            blackList.feedbackIcon.attr("class", blackList.feedbackIconClass).addClass("allowed");
+                        }
+
+                        blackList.trigger("onresult", result);
+                        return result;
+                    };
+
+                    blackList.delayCheckBlackList = function (_type, payload) {
+                        this.clearBlackListInterval();
+                        emitLocalSuccess(payload);
+                    };
+                    blackList.checkBlackList = function (_type, payload) {
+                        return emitLocalSuccess(payload);
+                    };
+                }
+
+                function patchLocalTextControl(control) {
+                    if (!control || control.__codexLocalTextPatched) {
+                        return;
+                    }
+
+                    control.__codexLocalTextPatched = true;
+                    patchLocalBlackListInstance(control);
+
+                    control.onBlackListResult = function (result) {
+                        var normalized = normalizeLocalControlValue(this, result && result.s != null ? result.s : (this.input ? this.input.val() : this.oldValue));
+                        this.oldValue = normalized;
+
+                        if (this.input) {
+                            this.input.val(normalized);
+                        }
+
+                        this.internalSetValue(normalized || null);
+                        resetLocalControlUi(this);
+
+                        if (this.aviseMe) {
+                            this.aviseMe.hide();
+                        }
+                    };
+
+                    if (control.blackList) {
+                        control.blackList.off("onresult", null, control);
+                        control.blackList.on("onresult", control.onBlackListResult, control);
+                    }
+
+                    control.checkBlackList = function () {
+                        var normalized = normalizeLocalControlValue(this, this.input ? this.input.val() : this.oldValue);
+                        this.oldValue = normalized;
+
+                        if (this.input) {
+                            this.input.val(normalized);
+                        }
+
+                        if (this.blackList) {
+                            this.blackList.delayCheckBlackList(this.options.type, {
+                                text: normalized,
+                                number: normalized,
+                                color: this.options.color || null
+                            });
+                            return;
+                        }
+
+                        this.internalSetValue(normalized || null);
+                    };
+
+                    control.onInput = function (event) {
+                        var input = event.currentTarget;
+                        var normalized = normalizeLocalControlValue(this, input && input.value);
+                        this.cursorIndex = input && typeof input.selectionStart === "number" ? input.selectionStart : 0;
+                        this.oldValue = normalized;
+
+                        if (input) {
+                            input.value = normalized;
+                        }
+
+                        if (normalized) {
+                            this.checkBlackList();
+                        } else {
+                            if (this.blackList) {
+                                this.blackList.clearBlackListInterval();
+                                this.blackList.resetFeedback();
+                            }
+                            this.internalSetValue(null);
+                        }
+
+                        event.preventDefault();
+                        return false;
+                    };
+
+                    control.undelegateEvents();
+                    control.delegateEvents();
+                    resetLocalControlUi(control);
+                }
+
+                function patchLocalPreCustomControl(control) {
+                    if (!control || control.__codexLocalPreCustomPatched) {
+                        return;
+                    }
+
+                    control.__codexLocalPreCustomPatched = true;
+                    patchLocalBlackListInstance(control);
+
+                    control.onBlackListResult = function (result) {
+                        if (result && result.ok && this.currentSelection) {
+                            var selected = this.options.component.list[this.currentSelection.data("index")];
+                            if (selected) {
+                                this.model.set({ value: selected, fromBinding: false });
+                            }
+                        }
+
+                        resetLocalControlUi(this);
+                    };
+
+                    if (control.blackList) {
+                        control.blackList.off("onresult", null, control);
+                        control.blackList.on("onresult", control.onBlackListResult, control);
+                    }
+
+                    control.onItemClick = function () {
+                        if (!this.currentSelection) {
+                            return;
+                        }
+
+                        var selected = this.options.component.list[this.currentSelection.data("index")];
+                        if (selected) {
+                            this.model.set({ value: selected, fromBinding: false });
+                        }
+
+                        resetLocalControlUi(this);
+                    };
+
+                    resetLocalControlUi(control);
+                }
+
+                function patchLocalBuilderControls(builderInstance) {
+                    if (!builderInstance || !builderInstance.customizationComponents) {
+                        return false;
+                    }
+
+                    var patchedAny = false;
+
+                    _.each(builderInstance.customizationComponents, function (views) {
+                        _.each(views || [], function (view) {
+                            if (!view) {
+                                return;
+                            }
+
+                            resetLocalControlUi(view);
+
+                            if (view.preCustomComponent) {
+                                patchLocalPreCustomControl(view.preCustomComponent);
+                                patchedAny = true;
+                            }
+
+                            if (view.controls) {
+                                _.each(view.controls, function (control) {
+                                    if (!control) {
+                                        return;
+                                    }
+
+                                    resetLocalControlUi(control);
+
+                                    if (control.input && typeof control.internalSetValue === "function") {
+                                        patchLocalTextControl(control);
+                                        patchedAny = true;
+                                        return;
+                                    }
+
+                                    if (control.options && control.options.component && control.options.component.type === "precustom") {
+                                        patchLocalPreCustomControl(control);
+                                        patchedAny = true;
+                                        return;
+                                    }
+
+                                    if (control.blackList) {
+                                        patchLocalBlackListInstance(control);
+                                        patchedAny = true;
+                                    }
+                                });
+                            }
+                        });
+                    });
+
+                    $("#builderApp .disabled, #builderApp .out-of-stock").removeClass("disabled out-of-stock");
+                    $("#builderApp .stock-unavailable-badge").remove();
+                    $("#builderApp .unavailableCharsFixed").html("").hide();
+                    $("#builderApp .input").prop("disabled", false);
+
+                    return patchedAny;
+                }
+
+                function bindLocalInteractiveBuilder() {
+                    var attempts = 0;
+
+                    function patch() {
+                        attempts += 1;
+
+                        if (!window.builder) {
+                            if (attempts < 120) {
+                                window.setTimeout(patch, 100);
+                            }
+                            return;
+                        }
+
+                        var builderInstance = window.builder;
+                        var patched = patchLocalBuilderControls(builderInstance);
+
+                        if (!builderInstance.__codexLocalWatcherBound) {
+                            builderInstance.__codexLocalWatcherBound = true;
+                            if (builderInstance.sideModel && typeof builderInstance.sideModel.on === "function") {
+                                builderInstance.sideModel.on("change", function () {
+                                    window.setTimeout(function () {
+                                        patchLocalBuilderControls(builderInstance);
+                                    }, 0);
+                                });
+                            }
+                        }
+
+                        if (!patched && attempts < 120) {
+                            window.setTimeout(patch, 100);
+                        }
+                    }
+
+                    patch();
+                }
+
+                $(document).ready(function () {
+                    var winWidth = $(window).width();
+
+                    if (winWidth < 1000) {
+                        window.isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+                    }
+
+                    $("body").addClass(window.isMobile ? "mobile" : "desktop");
+
+                    const URL_PARENT_ORIGIN = "*";
+                    const URL_HOST = getLocalPersonalizerHost();
+                    //const URL_HOST = "//personaliza.nike.com.br";// CENTAURO
+                    // const URL_HOST = "//personalizacao.nike.local.t4.srv.br";// LOCAL
+
+                    // Checa o canal pela Query String, se não houver o default será fisia
+                    var CHANNEL = getParameterByName("channel")?.replace(/[^a-zA-Z0-9-_]/g, '') || 'fisia'
+
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const FLAGS = {
+                        channel: CHANNEL,
+                        disablePatchBack: urlParams.get('disablePatchBack') === 'true',
+                        disablePatchFront: urlParams.get('disablePatchFront') === 'true',
+                        disableFront: urlParams.get('disableFront') === 'true'
+                    };
+
+                    $("#builderContainer").addClass(`${CHANNEL}Theme`)
+
+                    var URL_BUILDER = `${URL_HOST}/frontend/v2/jersey/`;
+                    var URL_SEND_XML = `${URL_HOST}/json/jersey_order_v2.aspx?channel=${CHANNEL}`;
+                    var URL_PERSONALIZATION = `${URL_HOST}/json/personalization.aspx`;
+                    var URL_BLACKLIST = `${URL_HOST}/json/checkstock.aspx`;
+
+                    var URL_POSITIONS = URL_BUILDER + "data/positions/";
+                    var URL_PRODUCT_IMAGE = URL_BUILDER + "data/positions/";
+
+                    var PRODUCT_SKU = (getParameterByName("idSku") + "").replace(/[^\w]+/g, "");
+                    var ORDER_ID = (getParameterByName("customid") + "").replace(/[^0-9]/g, "");
+                    var PRODUCT_PRICE = getParameterByName("productPrice");
+
+                    var SETTING_CART = {
+                        url: "https://qasapigateway.centauro.com.br/ecommerce/qas6/v5.1/carrinhos",
+                        header: {
+                            "authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcGlnYXRld2F5LmRjLnNibmV0Iiwic3ViIjoid3d3LmNlbnRhdXJvLmNvbS5iciIsImlhdCI6MTUxNjIzOTAyMiwiY2xpZW50X2lkIjoiZTU3Nzk3ZDYtN2Y3Mi00MzMwLWJjOTItOTM3MWRiNjI0YjQ5In0.Mc2PpOJwltFymE3He95TpGTBPDAbhmxNw-cJEsYTghnGefWwhyiD--EopZquF2uH0bdF7K95SkK5RNaZ05Mh3ShuTbqPtD8D7kSr_zQO80nAyIHleLwQzrqrn5GF9piwVSt7YfVDWxj8rNA5HlXQpdTuu0vEUjHQk4hpapB8MtmE1qg9-bymyhD4Hm7x2XHMa-4AtPxhBotPBUwQKWNTbh3OUbCAETknA2tnwfFCSSS3nXot6Icuwx3hvtnkFTk3XitjPwLZ8xTlIJ5Uyk8MjjdG-poMFHKLrdvF7YzhAHUoNn-9Y91jIaYrSA_hDjgb-1y25Jw7UR_lO5F3ceSimg",
+                            "x-client-token": "677a0758-e275-41df-bd3d-50d7ebcb6fe7",
+                            "x-cv-id": "1",
+                            "Content-Type": "application/json"
+                        }
+                    };
+
+                    window.builderApp(
+                        URL_PARENT_ORIGIN, SETTING_CART, URL_BUILDER, PRODUCT_SKU,
+                        ORDER_ID, URL_BLACKLIST, URL_PERSONALIZATION, URL_SEND_XML,
+                        URL_POSITIONS, URL_PRODUCT_IMAGE, PRODUCT_PRICE, CHANNEL, FLAGS
+                    );
+
+                    bindLocalInteractiveBuilder();
+                    bindLocalCartBridge(PRODUCT_SKU, PRODUCT_PRICE, URL_PARENT_ORIGIN);
+                });
+            </script>
+            <!-- BUILDER END -->
+        </div>
+        <!-- BUILDER CONTAINER END -->
+    </div><!-- containerHolder -->
+    <span class="mask"></span>
+
+    <!-- Modal estático Troca e Devolução (independente do Backbone) -->
+    <div id="modalTrocaDevolucao" style="display:none;">
+        <div class="modalTrocaOverlay">
+            <div id="modalTrocaBox">
+                <a class="modalTrocaClose" title="Fechar"><i class="icon-close"></i></a>
+                <h2>TROCA E DEVOLUÇÃO</h2>
+                <p>Devido à natureza exclusiva da customização, as devoluções de produtos personalizados só serão aceitas em casos de defeito de fabricação preexistente ou problemas de qualidade na aplicação da personalização.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -818,6 +818,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   const PRODUCT_IMAGE = '/assets/nike-brazil-jordan-ii-a3.jpg';
   const CART_STORAGE_KEY = 'nikepromo.cartState';
   const CART_URL = '/carrinho';
+  const LOCAL_PERSONALIZATION_PATH = '/personalizador/frontend/v2/jersey/index.html';
+  const LOCAL_PERSONALIZATION_OVERLAY_ID = 'codex-local-personalization-overlay';
+  const LOCAL_PERSONALIZATION_COMPLETE_OPERATION = 'codexLocalPersonalizationComplete';
   const hiddenSelectors = [
     '[data-testid*="favorite-button"]',
     '[data-testid="non-pix-eligible-label"]',
@@ -1236,12 +1239,13 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
   function syncStoredPersonalizationState(fromNode, overrides) {
     const liveState = readVisiblePersonalizationState(fromNode);
-    const baseState = liveState || normalizePersonalizationState(readStoredCartState());
+    const baseState = readPersonalizationBridgeState(liveState || {});
     const mergedState = normalizePersonalizationState({
       ...baseState,
       ...(overrides && typeof overrides === 'object' ? overrides : {})
     });
 
+    window.__codexLastPersonalizationState = mergedState;
     setStoredCartState(mergedState);
     return mergedState;
   }
@@ -1301,6 +1305,107 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     });
   }
 
+  function buildLocalPersonalizationUrl() {
+    const url = new URL(LOCAL_PERSONALIZATION_PATH, window.location.origin);
+    url.searchParams.set('idSku', PRODUCT_SKU);
+    url.searchParams.set('productPrice', OFFER_PRICE_VALUE.toFixed(2));
+    url.searchParams.set('channel', 'fisia');
+    return url.toString();
+  }
+
+  function ensureLocalPersonalizationModal() {
+    let overlay = document.getElementById(LOCAL_PERSONALIZATION_OVERLAY_ID);
+    if (overlay) {
+      return overlay;
+    }
+
+    overlay = document.createElement('div');
+    overlay.id = LOCAL_PERSONALIZATION_OVERLAY_ID;
+    overlay.setAttribute('hidden', 'hidden');
+    overlay.innerHTML =
+      '<div class="codex-local-personalization__dialog" role="dialog" aria-modal="true" aria-label="Personalizacao da camiseta">' +
+        '<div class="codex-local-personalization__header">' +
+          '<strong class="codex-local-personalization__title">Personalize sua camisa</strong>' +
+          '<button type="button" class="codex-local-personalization__close" aria-label="Fechar personalizacao">Fechar</button>' +
+        '</div>' +
+        '<iframe class="codex-local-personalization__frame" title="Personalizacao da camiseta" loading="eager" data-codex-local-personalization-frame="1"></iframe>' +
+      '</div>';
+
+    overlay.addEventListener('click', function (event) {
+      if (event.target === overlay) {
+        closeLocalPersonalizationModal();
+      }
+    });
+
+    overlay.querySelector('.codex-local-personalization__close').addEventListener('click', function () {
+      closeLocalPersonalizationModal();
+    });
+
+    if (!document.documentElement.dataset.codexLocalPersonalizationEscapeBound) {
+      document.documentElement.dataset.codexLocalPersonalizationEscapeBound = '1';
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && document.body.classList.contains('codex-local-personalization-open')) {
+          closeLocalPersonalizationModal();
+        }
+      }, true);
+    }
+
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function closeLocalPersonalizationModal() {
+    const overlay = document.getElementById(LOCAL_PERSONALIZATION_OVERLAY_ID);
+    if (!overlay) {
+      return;
+    }
+
+    const frame = overlay.querySelector('iframe');
+    if (frame) {
+      frame.removeAttribute('src');
+    }
+
+    overlay.setAttribute('hidden', 'hidden');
+    document.body.classList.remove('codex-local-personalization-open');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    clearPersonalizationBridgeActive();
+  }
+
+  function openLocalPersonalizationModal(sourceTarget) {
+    const cartState = buildCartState(syncStoredPersonalizationState(sourceTarget));
+    if (!String(cartState.size || '').trim()) {
+      window.alert('Escolha o tamanho da camiseta para continuar.');
+      return false;
+    }
+
+    window.__codexPersonalizationRedirecting = false;
+    markPersonalizationBridgeActive();
+
+    const overlay = ensureLocalPersonalizationModal();
+    const frame = overlay.querySelector('iframe');
+    if (frame) {
+      frame.setAttribute('src', buildLocalPersonalizationUrl());
+    }
+
+    overlay.removeAttribute('hidden');
+    document.body.classList.add('codex-local-personalization-open');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return true;
+  }
+
+  function extractLocalPersonalizationCompletionState(payload) {
+    const source = payload && typeof payload === 'object' ? payload : {};
+    const parsedFinalPrice = parseCurrencyValue(source.finalPrice || source.personalizationExtraValue);
+
+    return normalizePersonalizationState({
+      ...extractPersonalizationFromMessagePayload(source),
+      personalizationExtraValue: Number.isFinite(parsedFinalPrice) ? parsedFinalPrice : 0,
+      personalizationPosition: source.personalizationPosition || source.personalizationSide || source.customSide || 'Costas'
+    });
+  }
+
   function markPersonalizationBridgeActive() {
     window.__codexPersonalizationBridgeActiveAt = Date.now();
     if (window.__codexPersonalizationBridgeTimer) {
@@ -1318,7 +1423,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   }
 
   function isPersonalizationIframeVisible() {
-    const frames = document.querySelectorAll('iframe[src*="personaliza.nike.com.br"]');
+    const frames = document.querySelectorAll('iframe[src*="personaliza.nike.com.br"],iframe[data-codex-local-personalization-frame="1"]');
     for (let index = 0; index < frames.length; index += 1) {
       if (isVisibleElement(frames[index])) {
         return true;
@@ -1332,9 +1437,67 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return isPersonalizationIframeVisible() || (startedAt > 0 && Date.now() - startedAt < 30 * 60 * 1000);
   }
 
+  function readPersonalizationBridgeState(extraState) {
+    return normalizePersonalizationState({
+      ...readStoredCartState(),
+      ...(window.__codexLastPersonalizationState && typeof window.__codexLastPersonalizationState === 'object'
+        ? window.__codexLastPersonalizationState
+        : {}),
+      ...(extraState && typeof extraState === 'object' ? extraState : {})
+    });
+  }
+
+  function hasCartUrlMarkers(url) {
+    const href = String(url || '').toLowerCase();
+    return (
+      href.indexOf('shopping-cart') >= 0 ||
+      href.indexOf('shoppingcart') >= 0 ||
+      href.indexOf('/carrinho') >= 0 ||
+      href.indexOf('/cart') >= 0 ||
+      href.indexOf('/bag') >= 0 ||
+      href.indexOf('/basket') >= 0 ||
+      href.indexOf('/sacola') >= 0
+    );
+  }
+
+  function hasPersonalizationUrlMarkers(url) {
+    const href = String(url || '').toLowerCase();
+    return (
+      href.indexOf('personaliz') >= 0 ||
+      href.indexOf('custom-products') >= 0 ||
+      href.indexOf('customized') >= 0 ||
+      href.indexOf('customproduct') >= 0 ||
+      href.indexOf('addcustomizedproduct') >= 0
+    );
+  }
+
+  function isPersonalizationBridgeCompletionSignal(value) {
+    const text = normalizeWhitespace(value).toLowerCase();
+    if (!text) {
+      return false;
+    }
+
+    return (
+      text.indexOf('addcustomizedproduct') >= 0 ||
+      text.indexOf('addtocart') >= 0 ||
+      text.indexOf('add_to_cart') >= 0 ||
+      text.indexOf('shopping-cart') >= 0 ||
+      text.indexOf('shoppingcart') >= 0 ||
+      text.indexOf('finaliz') >= 0 ||
+      text.indexOf('finish') >= 0 ||
+      text.indexOf('submit') >= 0 ||
+      text.indexOf('redirect') >= 0 ||
+      text.indexOf('success') >= 0
+    );
+  }
+
   function isPersonalizationCartRequest(url) {
     const href = String(url || '');
-    return /apigateway\.nike\.com\.br/i.test(href) && /shopping-cart/i.test(href);
+    if (!/nike\.com\.br|gruposbf\.com\.br/i.test(href)) {
+      return false;
+    }
+
+    return hasCartUrlMarkers(href) || hasPersonalizationUrlMarkers(href);
   }
 
   function hasPersonalizationBodyMarkers(body) {
@@ -1366,17 +1529,15 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       ...extractPersonalizationFromPayload(body),
       ...extractPersonalizationFromMessagePayload(body)
     });
-    const cachedBridgeState = normalizePersonalizationState({
-      ...readStoredCartState(),
-      ...(window.__codexLastPersonalizationState && typeof window.__codexLastPersonalizationState === 'object'
-        ? window.__codexLastPersonalizationState
-        : {})
-    });
+    const cachedBridgeState = readPersonalizationBridgeState();
 
     return (
       hasPersonalizationBodyMarkers(body) ||
       hasMeaningfulPersonalizationState(extractedState) ||
-      hasMeaningfulPersonalizationState(cachedBridgeState)
+      (
+        hasMeaningfulPersonalizationState(cachedBridgeState) &&
+        hasCartUrlMarkers(url)
+      )
     );
   }
 
@@ -1842,24 +2003,15 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       return;
     }
 
-    const normalizedState = normalizePersonalizationState({
-      ...(window.__codexLastPersonalizationState && typeof window.__codexLastPersonalizationState === 'object'
-        ? window.__codexLastPersonalizationState
-        : {}),
-      ...(extractedState && typeof extractedState === 'object' ? extractedState : {})
-    });
-
-    window.__codexLastPersonalizationState = normalizedState;
+    const normalizedState = syncStoredPersonalizationState(null, extractedState);
 
     if (!hasMeaningfulPersonalizationState(normalizedState)) {
-      syncStoredPersonalizationState(null, normalizedState);
       schedulePendingPersonalizationBridge(normalizedState);
       return;
     }
 
     window.__codexPersonalizationRedirecting = true;
-    const mergedState = syncStoredPersonalizationState(null, normalizedState);
-    const cartState = buildCartState(mergedState);
+    const cartState = buildCartState(normalizedState);
 
     setStoredCartState(cartState);
     clearPersonalizationBridgeActive();
@@ -1907,39 +2059,126 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       const payload = rawData && typeof rawData === 'object'
         ? rawData
         : (typeof rawData === 'string' ? tryParseBodyObject(rawData) : null);
-      const payloadText = typeof rawData === 'string'
-        ? rawData
-        : normalizeWhitespace(
-            payload ? JSON.stringify(payload) : ''
-          ).toLowerCase();
+      const payloadText = normalizeWhitespace(
+        typeof rawData === 'string'
+          ? rawData
+          : (payload ? JSON.stringify(payload) : '')
+      ).toLowerCase();
+      const operation = normalizeWhitespace(
+        payload && (payload.operation || payload.type || payload.event || payload.action || payload.name || payload.status)
+      ).toLowerCase();
+      const extractedState = normalizePersonalizationState({
+        ...(payload ? extractPersonalizationFromMessagePayload(payload.parameters || payload) : {}),
+        ...(rawData ? extractPersonalizationFromMessagePayload(rawData) : {})
+      });
+      const cachedBridgeState = readPersonalizationBridgeState();
+      const hasPayloadMarkers = (
+        payloadText.indexOf('addcustomizedproduct') >= 0 ||
+        payloadText.indexOf('customtype') >= 0 ||
+        payloadText.indexOf('customvalue') >= 0 ||
+        payloadText.indexOf('personaliz') >= 0
+      );
+      const hasCompletionSignal = (
+        isPersonalizationBridgeCompletionSignal(operation) ||
+        isPersonalizationBridgeCompletionSignal(payloadText) ||
+        hasCartUrlMarkers(payloadText)
+      );
+      const shouldFinalize = (
+        hasCompletionSignal && (
+          hasMeaningfulPersonalizationState(extractedState) ||
+          hasMeaningfulPersonalizationState(cachedBridgeState) ||
+          hasPayloadMarkers
+        )
+      );
 
-      if (
-        origin.indexOf('personaliza.nike.com.br') < 0 &&
-        payloadText.indexOf('addcustomizedproduct') < 0 &&
-        payloadText.indexOf('customtype') < 0 &&
-        payloadText.indexOf('customvalue') < 0
-      ) {
+      if (operation === LOCAL_PERSONALIZATION_COMPLETE_OPERATION.toLowerCase()) {
+        const mergedState = syncStoredPersonalizationState(
+          null,
+          extractLocalPersonalizationCompletionState(payload ? (payload.parameters || payload) : null)
+        );
+        closeLocalPersonalizationModal();
+        completePersonalizationCartBridgeFromState(mergedState);
         return;
       }
 
-      const operation = normalizeWhitespace(payload && (payload.operation || payload.type || payload.event)).toLowerCase();
       if (
-        operation !== 'addcustomizedproduct' &&
-        payloadText.indexOf('addcustomizedproduct') < 0 &&
-        payloadText.indexOf('customtype') < 0 &&
-        payloadText.indexOf('customvalue') < 0
+        !/personaliza\.nike\.com\.br|nike\.com\.br|gruposbf\.com\.br/i.test(origin) ||
+        (
+          !hasPayloadMarkers &&
+          !hasMeaningfulPersonalizationState(extractedState) &&
+          !hasMeaningfulPersonalizationState(cachedBridgeState) &&
+          !shouldFinalize
+        )
       ) {
         return;
       }
 
       markPersonalizationBridgeActive();
-      completePersonalizationCartBridgeFromState(
-        normalizePersonalizationState({
-          ...(payload ? extractPersonalizationFromMessagePayload(payload.parameters || payload) : {}),
-          ...(rawData ? extractPersonalizationFromMessagePayload(rawData) : {})
-        })
-      );
+      const mergedState = syncStoredPersonalizationState(null, extractedState);
+      if (shouldFinalize || (hasCompletionSignal && hasMeaningfulPersonalizationState(mergedState))) {
+        completePersonalizationCartBridgeFromState(mergedState);
+      }
     }, true);
+  }
+
+  function tryCompletePersonalizationFromFallback() {
+    if (!isPersonalizationBridgeActive() || window.__codexPersonalizationRedirecting) {
+      return false;
+    }
+
+    const cachedState = readPersonalizationBridgeState();
+    if (!hasMeaningfulPersonalizationState(cachedState)) {
+      return false;
+    }
+
+    completePersonalizationCartBridgeFromState(cachedState);
+    return true;
+  }
+
+  function bindPersonalizationFallbackSignals() {
+    if (document.documentElement.dataset.codexPersonalizationFallbackBound) {
+      return;
+    }
+
+    document.documentElement.dataset.codexPersonalizationFallbackBound = '1';
+
+    const inspectSignals = function () {
+      if (!isPersonalizationBridgeActive() || window.__codexPersonalizationRedirecting) {
+        return;
+      }
+
+      const toastNodes = document.querySelectorAll('[role="alert"],[data-testid*="toast"],.Toastify__toast,.Toastify__toast-body');
+      for (let index = 0; index < toastNodes.length; index += 1) {
+        const text = normalizeWhitespace(toastNodes[index].innerText || toastNodes[index].textContent || '').toLowerCase();
+        if (!text) {
+          continue;
+        }
+
+        if (
+          text.indexOf('ocorreu um erro ao adicionar a personalizacao ao carrinho') >= 0 ||
+          text.indexOf('algo inesperado aconteceu') >= 0 ||
+          (text.indexOf('personaliz') >= 0 && text.indexOf('erro') >= 0)
+        ) {
+          if (tryCompletePersonalizationFromFallback()) {
+            return;
+          }
+        }
+      }
+
+      const drawer = document.querySelector('[data-testid="add-to-cart-drawer"]');
+      if (
+        drawer &&
+        isVisibleElement(drawer) &&
+        /adicionado ao carrinho/i.test(normalizeWhitespace(drawer.textContent || ''))
+      ) {
+        tryCompletePersonalizationFromFallback();
+      }
+    };
+
+    inspectSignals();
+    const observer = new MutationObserver(inspectSignals);
+    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+    window.__codexPersonalizationFallbackObserver = observer;
   }
 
   function bindPersonalizationCartBridge() {
@@ -2327,7 +2566,15 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       '.codex-main-price{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}' +
       '.codex-main-price__old{font-size:18px;line-height:1.2;color:#777;text-decoration:line-through;font-weight:400;}' +
       '.codex-main-price__new{font-size:32px;line-height:1;color:#0f6a3f;font-weight:700;}' +
-      '[data-testid="zipcode-button"][aria-busy="true"]{opacity:.72;pointer-events:none;}';
+      '[data-testid="zipcode-button"][aria-busy="true"]{opacity:.72;pointer-events:none;}' +
+      '#' + LOCAL_PERSONALIZATION_OVERLAY_ID + '{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:rgba(17,17,17,.72);}' +
+      '#' + LOCAL_PERSONALIZATION_OVERLAY_ID + '[hidden]{display:none !important;}' +
+      '.codex-local-personalization__dialog{width:min(1180px,100%);height:min(860px,100%);display:grid;grid-template-rows:auto 1fr;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 32px 90px rgba(0,0,0,.28);}' +
+      '.codex-local-personalization__header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border-bottom:1px solid #e5e5e5;background:#fff;}' +
+      '.codex-local-personalization__title{font-size:18px;line-height:1.2;color:#111;font-weight:700;}' +
+      '.codex-local-personalization__close{border:0;border-radius:999px;background:#111;color:#fff;padding:10px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;}' +
+      '.codex-local-personalization__frame{width:100%;height:100%;border:0;background:#fff;}' +
+      '@media (max-width: 900px){#' + LOCAL_PERSONALIZATION_OVERLAY_ID + '{padding:0;}.codex-local-personalization__dialog{width:100%;height:100%;border-radius:0;}.codex-local-personalization__header{padding:14px 16px;}}';
     document.head.appendChild(style);
   }
 
@@ -2422,6 +2669,21 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       wrapper.style.visibility = 'visible';
       wrapper.style.opacity = '1';
     }
+
+    const label = input.closest('label');
+    if (label && !label.dataset.codexForceSelectable) {
+      label.dataset.codexForceSelectable = '1';
+      label.addEventListener('click', function () {
+        if (input.disabled) {
+          input.removeAttribute('disabled');
+        }
+
+        if (!input.checked) {
+          input.checked = true;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    }
   }
 
   function formatCep(value) {
@@ -2506,18 +2768,24 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       }
 
       button.dataset.codexPersonalizeBound = '1';
-      button.addEventListener('click', function () {
-        markPersonalizationBridgeActive();
-        window.setTimeout(function () {
-          syncStoredPersonalizationState(button);
-        }, 120);
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === 'function') {
+          event.stopImmediatePropagation();
+        }
+
+        if (!openLocalPersonalizationModal(button)) {
+          return;
+        }
+
         postLeadEvent('nike_personalization_opened', {
           extra: {
             size: readSelectedSize(),
             personalizationWanted: 'sim'
           }
         });
-      });
+      }, true);
     });
 
     if (document.documentElement.dataset.codexPersonalizationLiveBound) {
@@ -2589,6 +2857,12 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
       button.dataset.codexCartBound = '1';
       button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof event.stopImmediatePropagation === 'function') {
+          event.stopImmediatePropagation();
+        }
+
         const personalizationState = syncStoredPersonalizationState(event.target);
         const cartState = buildCartState(personalizationState);
         if (!String(cartState.size || '').trim()) {
@@ -2636,12 +2910,6 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         };
 
         if (isPersonalizationBridgeActive() && !cartState.personalizationWanted) {
-          event.preventDefault();
-          event.stopPropagation();
-          if (typeof event.stopImmediatePropagation === 'function') {
-            event.stopImmediatePropagation();
-          }
-
           const waitStartedAt = Date.now();
           const waitForBridge = function () {
             const bridgedCartState = buildCartState(readStoredCartState());
@@ -2810,6 +3078,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     bindPersonalizationTracking();
     bindPersonalizationMessageBridge();
     bindPersonalizationCartBridge();
+    bindPersonalizationFallbackSignals();
     bindCartRedirect();
   }
 

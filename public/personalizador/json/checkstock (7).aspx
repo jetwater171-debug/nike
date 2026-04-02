@@ -1,0 +1,1 @@
+builder.callback_precustom({"ok":true,"stock":true,"blacklist":true,"s":"RONALDO 9","available":{"nome":1,"R":0,"O":0,"N":0,"A":0,"L":0,"D":0," ":0,"9":1},"message":""});
