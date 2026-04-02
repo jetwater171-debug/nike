@@ -24,7 +24,7 @@ export default function NikeCheckoutHeader({
   backHref,
 }: NikeCheckoutHeaderProps) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white">
+    <header className="border-b border-black/10 bg-white">
       <div className="mx-auto flex h-[62px] w-full max-w-[1180px] items-center justify-between px-5 md:px-8">
         <Link
           href={backHref}

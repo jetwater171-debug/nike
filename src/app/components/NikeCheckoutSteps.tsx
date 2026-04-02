@@ -36,7 +36,7 @@ export default function NikeCheckoutSteps({
           return (
             <div
               key={step.label}
-              className={`relative flex flex-1 items-center justify-center gap-2 text-[0.98rem] font-medium ${
+              className={`relative flex flex-1 items-center justify-center gap-2 text-[0.88rem] font-medium ${
                 index > 0 ? "-ml-[18px] pl-[18px]" : ""
               } ${isActive ? "text-black" : "text-[#727272]"}`}
               style={{ zIndex: STEPS.length - index }}
@@ -50,7 +50,7 @@ export default function NikeCheckoutSteps({
                 }}
               />
               <span
-                className={`relative z-10 inline-flex h-6 w-6 items-center justify-center rounded-full text-[0.74rem] font-semibold ${
+                className={`relative z-10 inline-flex h-5 w-5 items-center justify-center rounded-full text-[0.68rem] font-semibold ${
                   isActive ? "bg-black text-white" : "bg-[#808080] text-white"
                 }`}
               >

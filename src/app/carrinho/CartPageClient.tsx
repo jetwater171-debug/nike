@@ -503,13 +503,13 @@ export default function CartPageClient() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/nike" />
 
-      <div className="mx-auto w-full max-w-[1180px] pb-10 pt-[76px]">
+      <div className="mx-auto w-full max-w-[1180px] pb-10">
         <NikeCheckoutSteps activeStep={1} />
 
         <div className="px-[22px]">
           {noticeVisible && (
             <div className="mt-7 flex items-start justify-between gap-4 rounded-[16px] bg-[#f7f7f7] px-[14px] py-[13px]">
-              <p className="text-[1rem] font-medium leading-[1.55] text-black">
+              <p className="text-[0.9rem] font-medium leading-[1.45] text-black">
                 Os produtos no carrinho nao estao reservados. Finalize seu pedido
                 antes que o estoque acabe.
               </p>
@@ -534,10 +534,10 @@ export default function CartPageClient() {
           <section className="mt-7 border-b border-black/10 pb-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="max-w-[19rem] text-[1.14rem] font-semibold leading-[1.45]">
+                <h1 className="max-w-[19rem] text-[0.98rem] font-semibold leading-[1.35]">
                   {cart.title}
                 </h1>
-                <div className="mt-3 space-y-0 text-[1rem] leading-[1.6] text-black">
+                <div className="mt-3 space-y-0 text-[0.9rem] leading-[1.45] text-black">
                   <p>Quantidade: {cart.quantity}</p>
                   <p>Cor: {cart.color}</p>
                   <p>Tamanho: {cart.size}</p>
@@ -567,11 +567,6 @@ export default function CartPageClient() {
                       )}
                     </>
                   )}
-                </div>
-
-                <div className="mt-4 text-[0.98rem] leading-[1.55] text-[#de1b1b]">
-                  <p>Este produto nao e elegivel para o desconto no Pix.</p>
-                  <p className="underline underline-offset-2">Ver regras.</p>
                 </div>
               </div>
 
@@ -609,7 +604,7 @@ export default function CartPageClient() {
               >
                 <Minus className="h-4 w-4" strokeWidth={2.2} />
               </button>
-              <div className="inline-flex h-12 min-w-12 items-center justify-center border-x border-black/12 px-4 text-[1rem] font-medium">
+              <div className="inline-flex h-12 min-w-12 items-center justify-center border-x border-black/12 px-4 text-[0.92rem] font-medium">
                 {cart.quantity}
               </div>
               <button
@@ -622,16 +617,16 @@ export default function CartPageClient() {
             </div>
 
             <div className="text-right">
-              <p className="text-[2rem] font-semibold leading-none">
+              <p className="text-[1.45rem] font-semibold leading-none">
                 {totalLabel}
               </p>
-              <p className="mt-2 text-[0.98rem] font-medium text-[#1b6d38]">
+              <p className="mt-2 text-[0.84rem] font-medium text-[#1b6d38]">
                 {shippingState.status === "success" &&
                 shippingOption.id === EXPRESS_SHIPPING.id
                   ? "Nike Expresso selecionado"
                   : "Frete gratis da campanha"}
               </p>
-              <p className="mt-1 text-[0.92rem] text-[#1b6d38]">
+              <p className="mt-1 text-[0.8rem] text-[#1b6d38]">
                 Voce economiza {formatCurrency(campaignSavingsValue)}
               </p>
             </div>
@@ -639,7 +634,7 @@ export default function CartPageClient() {
         </section>
 
           <section className="border-b border-black/10 py-7">
-          <h2 className="text-[1.95rem] font-semibold leading-none">Prazo de entrega</h2>
+          <h2 className="text-[1.18rem] font-semibold leading-none">Prazo de entrega</h2>
 
           <div className="mt-5 flex overflow-hidden rounded-[14px] border border-black/16">
             <input
@@ -648,29 +643,29 @@ export default function CartPageClient() {
               onChange={(event) => setCep(formatCep(event.target.value))}
               inputMode="numeric"
               placeholder="00000-000"
-              className="h-14 min-w-0 flex-1 border-0 px-5 text-[1rem] text-black outline-none placeholder:text-black/40"
+              className="h-14 min-w-0 flex-1 border-0 px-5 text-[0.92rem] text-black outline-none placeholder:text-black/40"
             />
             <button
               type="button"
               onClick={handleShippingLookup}
               disabled={shippingState.status === "loading"}
-              className="m-1 inline-flex min-w-[8.75rem] items-center justify-center rounded-full border border-black/20 px-5 text-[1rem] font-medium text-black transition-colors hover:bg-black/[0.04] disabled:opacity-60"
+              className="m-1 inline-flex min-w-[8.75rem] items-center justify-center rounded-full border border-black/20 px-5 text-[0.92rem] font-medium text-black transition-colors hover:bg-black/[0.04] disabled:opacity-60"
             >
               {shippingState.status === "loading" ? "Calculando" : "Calcular"}
             </button>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-3 text-[0.95rem] text-black/55">
+          <div className="mt-3 flex items-center justify-between gap-3 text-[0.84rem] text-black/55">
             <span>Confira a nossa Politica de Frete e Entregas.</span>
             <span>Nao sei o CEP</span>
           </div>
 
           {shippingState.status === "success" && (
             <div className="mt-4 space-y-3">
-              <p className="text-[1rem] font-medium leading-6 text-black">
+              <p className="text-[0.9rem] font-medium leading-6 text-black">
                 {shippingState.address}
               </p>
-              <div className="rounded-[14px] bg-[#eef8f1] px-4 py-3 text-[0.95rem] leading-6 text-[#0f6a3f]">
+              <div className="rounded-[14px] bg-[#eef8f1] px-4 py-3 text-[0.84rem] leading-6 text-[#0f6a3f]">
                 Seu cupom de frete gratis ja esta aplicado nesta entrega.
               </div>
 
@@ -688,25 +683,25 @@ export default function CartPageClient() {
                         : "border-black/10 bg-white hover:bg-[#f8f8f8]"
                     }`}
                   >
-                    <div className="flex items-center gap-2 text-[1.15rem] font-medium text-black">
+                    <div className="flex items-center gap-2 text-[0.98rem] font-medium text-black">
                       <Truck className="h-5 w-5" strokeWidth={1.9} />
                       <span>{option.name}</span>
                     </div>
                     <p
-                      className={`text-[1.2rem] font-semibold ${
+                      className={`text-[1rem] font-semibold ${
                         option.price === 0 ? "text-[#0f6a3f]" : "text-black"
                       }`}
                     >
                       {option.label}
                     </p>
                     <div className="pl-7">
-                      <p className="text-[0.98rem] text-black/62">{option.eta}</p>
-                      <p className="mt-0.5 text-[0.88rem] text-black/52">
+                      <p className="text-[0.86rem] text-black/62">{option.eta}</p>
+                      <p className="mt-0.5 text-[0.78rem] text-black/52">
                         {option.note}
                       </p>
                     </div>
                     {selected && (
-                      <span className="inline-flex items-center justify-end text-[0.82rem] font-medium text-black/62">
+                      <span className="inline-flex items-center justify-end text-[0.74rem] font-medium text-black/62">
                         Selecionado
                       </span>
                     )}
@@ -717,14 +712,14 @@ export default function CartPageClient() {
           )}
 
           {shippingState.status === "error" && (
-            <p className="mt-4 rounded-[14px] border border-[#f0d1d1] bg-[#fff6f6] px-4 py-3 text-[0.95rem] text-[#9a1d1d]">
+            <p className="mt-4 rounded-[14px] border border-[#f0d1d1] bg-[#fff6f6] px-4 py-3 text-[0.84rem] text-[#9a1d1d]">
               {shippingState.message}
             </p>
           )}
           </section>
 
           <section className="border-b border-black/10 py-7">
-          <h2 className="text-[1.95rem] font-semibold leading-none">
+          <h2 className="text-[1.18rem] font-semibold leading-none">
             Cupom de desconto
           </h2>
 
@@ -734,18 +729,18 @@ export default function CartPageClient() {
               value={coupon}
               onChange={(event) => setCoupon(event.target.value)}
               placeholder="Digite seu cupom"
-              className="h-14 min-w-0 flex-1 border-0 px-5 text-[1rem] text-black outline-none placeholder:text-black/40"
+              className="h-14 min-w-0 flex-1 border-0 px-5 text-[0.92rem] text-black outline-none placeholder:text-black/40"
             />
             <button
               type="button"
               onClick={handleApplyCoupon}
-              className="m-1 inline-flex min-w-[8.75rem] items-center justify-center rounded-full border border-black/20 px-5 text-[1rem] font-medium text-black transition-colors hover:bg-black/[0.04]"
+              className="m-1 inline-flex min-w-[8.75rem] items-center justify-center rounded-full border border-black/20 px-5 text-[0.92rem] font-medium text-black transition-colors hover:bg-black/[0.04]"
             >
               Aplicar
             </button>
           </div>
 
-          <div className="mt-4 flex items-start gap-3 text-[1rem] leading-6 text-black/72">
+          <div className="mt-4 flex items-start gap-3 text-[0.88rem] leading-6 text-black/72">
             <div className="mt-0.5 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full border border-black/15">
               <Tag className="h-3.5 w-3.5" strokeWidth={2} />
             </div>
@@ -756,16 +751,16 @@ export default function CartPageClient() {
           </div>
 
           {couponMessage && (
-            <p className="mt-4 rounded-[14px] bg-[#f5f5f5] px-4 py-3 text-[0.95rem] leading-6 text-black/78">
+            <p className="mt-4 rounded-[14px] bg-[#f5f5f5] px-4 py-3 text-[0.84rem] leading-6 text-black/78">
               {couponMessage}
             </p>
           )}
           </section>
 
           <section className="py-7">
-          <h2 className="text-[1.95rem] font-semibold leading-none">Resumo</h2>
+          <h2 className="text-[1.18rem] font-semibold leading-none">Resumo</h2>
 
-          <div className="mt-6 space-y-3 text-[1.1rem]">
+          <div className="mt-6 space-y-3 text-[0.92rem]">
             <div className="flex items-center justify-between gap-4">
               <span className="text-black/74">Valor dos produtos</span>
               <span>{formatCurrency(subtotal)}</span>
@@ -783,20 +778,20 @@ export default function CartPageClient() {
           </div>
 
           <div className="mt-6 flex items-start justify-between gap-4">
-            <span className="text-[1.6rem] font-semibold leading-none">
+            <span className="text-[1.08rem] font-semibold leading-none">
               Total da compra
             </span>
             <div className="text-right">
-              <p className="text-[1.85rem] font-semibold leading-none">
+              <p className="text-[1.2rem] font-semibold leading-none">
                 {totalLabel} no Pix
               </p>
-              <p className="mt-2 text-[1rem] text-black/46">
+              <p className="mt-2 text-[0.84rem] text-black/46">
                 {totalLabel} no cartao
               </p>
             </div>
           </div>
 
-          <div className="mt-7 rounded-[14px] bg-[#f6f6f6] px-4 py-3 text-[0.94rem] leading-6 text-black/68">
+          <div className="mt-7 rounded-[14px] bg-[#f6f6f6] px-4 py-3 text-[0.82rem] leading-6 text-black/68">
             <div className="flex items-start gap-3">
               <Info className="mt-0.5 h-4 w-4 flex-none" strokeWidth={2.1} />
               <p>
@@ -809,7 +804,7 @@ export default function CartPageClient() {
           <button
             type="button"
             onClick={handleContinue}
-            className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[1.02rem] font-medium text-white"
+            className="mt-7 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-black px-6 text-[0.92rem] font-medium text-white"
           >
             Continuar
           </button>
