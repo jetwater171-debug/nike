@@ -685,32 +685,32 @@ export default function CheckoutPageClient() {
             </p>
           </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-5 space-y-2.5">
             <h2 className="text-[0.98rem] font-semibold">Dados</h2>
             <div>
               <p className="text-[0.88rem] text-black/56">Nome</p>
-              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
+              <p className="mt-0 text-[0.98rem] font-medium leading-5 text-black">
                 {lead.name || "-"}
               </p>
             </div>
 
             <div>
               <p className="text-[0.88rem] text-black/56">CPF</p>
-              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
+              <p className="mt-0 text-[0.98rem] font-medium leading-5 text-black">
                 {lead.cpf || "-"}
               </p>
             </div>
 
             <div>
               <p className="text-[0.88rem] text-black/56">Email</p>
-              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
+              <p className="mt-0 text-[0.98rem] font-medium leading-5 text-black">
                 {lead.email || "-"}
               </p>
             </div>
 
             <div>
               <p className="text-[0.88rem] text-black/56">Telefone</p>
-              <p className="mt-0.5 text-[0.98rem] font-medium leading-6 text-black">
+              <p className="mt-0 text-[0.98rem] font-medium leading-5 text-black">
                 {lead.phone || "-"}
               </p>
             </div>
