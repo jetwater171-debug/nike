@@ -1,6 +1,7 @@
 const { upsertLead } = require('../../../server/lead-store');
 const { insertLeadEvent } = require('../../../server/lead-events-store');
 const { ensureAllowedRequest } = require('../../../server/request-guard');
+const { sendMetaCapi } = require('../../../server/meta-capi');
 
 export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -42,11 +43,17 @@ export default async function handler(req, res) {
             bump: body.bump || {},
             pix: body.pix || {},
             amount: body.amount,
+            eventId: body.eventId || '',
+            fbp: body.fbp || '',
+            fbc: body.fbc || '',
+            fbclid: body.fbclid || '',
             metadata: {
                 received_at: new Date().toISOString(),
                 user_agent: req.headers['user-agent'] || '',
                 referrer: req.headers['referer'] || '',
-                client_ip: clientIp
+                client_ip: clientIp,
+                fbp: body.fbp || '',
+                fbc: body.fbc || ''
             },
             raw: body
         };
@@ -68,6 +75,8 @@ export default async function handler(req, res) {
             res.status(207).json({ ok: true, warning: 'lead_event_log_failed', detail: eventResult.detail || '' });
             return;
         }
+
+        await sendMetaCapi(fullPayload.event, fullPayload, req).catch(() => null);
 
         res.status(200).json({ ok: true });
     } catch (error) {

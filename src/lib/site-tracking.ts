@@ -27,6 +27,9 @@ type LeadDraft = {
   cpf?: string;
   email?: string;
   phone?: string;
+  city?: string;
+  state?: string;
+  cep?: string;
 };
 
 type LeadTrackPayload = {
@@ -116,6 +119,76 @@ function generateSessionId() {
 
 function sanitizeDigits(value: unknown) {
   return String(value || "").replace(/\D/g, "");
+}
+
+function normalizeText(value: unknown) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function splitName(value: unknown) {
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] || "",
+    lastName: parts.slice(1).join(" ") || parts[0] || "",
+  };
+}
+
+function buildMetaAdvancedMatching(personalInput?: Record<string, unknown>) {
+  const draft = readLeadDraft();
+  const personal = { ...draft, ...(personalInput || {}) };
+  const { firstName, lastName } = splitName(personal.name);
+  const email = String(personal.email || "").trim().toLowerCase();
+  const phoneDigits = sanitizeDigits(personal.phone);
+  const cpfDigits = sanitizeDigits(personal.cpf);
+  const externalId = cpfDigits || email || phoneDigits || getLeadSessionId();
+
+  return Object.fromEntries(
+    Object.entries({
+      em: email || undefined,
+      ph: phoneDigits ? `55${phoneDigits.replace(/^55/, "")}` : undefined,
+      fn: normalizeText(firstName) || undefined,
+      ln: normalizeText(lastName) || undefined,
+      external_id: externalId || undefined,
+      ct: normalizeText(personal.city) || undefined,
+      st: normalizeText(personal.state) || undefined,
+      zp: sanitizeDigits(personal.cep) || undefined,
+      country: "br",
+    }).filter(([, value]) => value !== undefined && value !== "")
+  );
+}
+
+function readCookie(name: string) {
+  if (!isBrowser()) return "";
+
+  try {
+    const cookies = document.cookie ? document.cookie.split("; ") : [];
+    const prefix = `${name}=`;
+    const found = cookies.find((cookie) => cookie.startsWith(prefix));
+    if (!found) return "";
+    return decodeURIComponent(found.slice(prefix.length));
+  } catch {
+    return "";
+  }
+}
+
+function getFacebookBrowserContext() {
+  const utm = readUtmParams();
+  const fbclid = String(utm.fbclid || "").trim();
+  const fbp = readCookie("_fbp");
+  const existingFbc = readCookie("_fbc");
+  const fbc =
+    existingFbc ||
+    (fbclid ? `fb.1.${Date.now()}.${fbclid}` : "");
+
+  return {
+    fbclid,
+    fbp,
+    fbc,
+  };
 }
 
 function buildEventId(prefix: string, sessionId: string) {
@@ -258,7 +331,7 @@ function wasPixelEventSent(key: string) {
   return Boolean(getPixelEventCache()[key]);
 }
 
-function loadFacebookPixel(pixelId: string) {
+function loadFacebookPixel(pixelId: string, personalInput?: Record<string, unknown>) {
   if (!isBrowser()) return;
   const id = String(pixelId || "").trim();
   if (!id) return;
@@ -266,13 +339,14 @@ function loadFacebookPixel(pixelId: string) {
   const win = window as typeof window & {
     fbq?: (...args: unknown[]) => void;
     _fbq?: unknown;
-    __nikeFbPixelInits?: Record<string, true>;
+    __nikeFbPixelInits?: Record<string, string>;
   };
 
+  const matchingSignature = JSON.stringify(buildMetaAdvancedMatching(personalInput));
   if (!win.__nikeFbPixelInits) {
     win.__nikeFbPixelInits = {};
   }
-  if (win.__nikeFbPixelInits[id]) return;
+  if (win.__nikeFbPixelInits[id] === matchingSignature) return;
 
   if (!win.fbq) {
     // Based on the standard Meta browser pixel loader.
@@ -312,8 +386,8 @@ function loadFacebookPixel(pixelId: string) {
 
   try {
     win.fbq?.("set", "autoConfig", false, id);
-    win.fbq?.("init", id);
-    win.__nikeFbPixelInits[id] = true;
+    win.fbq?.("init", id, buildMetaAdvancedMatching(personalInput));
+    win.__nikeFbPixelInits[id] = matchingSignature;
   } catch {
     // Ignore transient browser pixel errors.
   }
@@ -324,9 +398,10 @@ function trackFacebookEvent(
   eventName: string,
   payload?: Record<string, unknown>,
   eventId?: string,
+  personalInput?: Record<string, unknown>,
 ) {
   if (!isBrowser()) return;
-  loadFacebookPixel(pixelId);
+  loadFacebookPixel(pixelId, personalInput);
 
   const win = window as typeof window & {
     fbq?: (...args: unknown[]) => void;
@@ -475,7 +550,7 @@ async function firePagePixels(page: string) {
 
   const meta = siteConfig?.pixel;
   if (meta?.enabled && meta.id && meta.events?.page_view !== false) {
-    trackFacebookEvent(meta.id, "PageView", pagePayload, pageEventId);
+    trackFacebookEvent(meta.id, "PageView", pagePayload, pageEventId, readLeadDraft());
   }
 
   const tiktok = siteConfig?.tiktokPixel;
@@ -489,6 +564,8 @@ async function firePagePixels(page: string) {
 function fireLeadPixels(eventName: string, payload: LeadTrackPayload, siteConfig: SiteConfig | null) {
   const sessionId = getLeadSessionId();
   const sourcePlatform = getSourcePlatform();
+  const personal = { ...readLeadDraft(), ...(payload.personal || {}) };
+  const matchingContext = { ...personal, ...(payload.address || {}) };
   const eventId =
     String(payload.eventId || "").trim() ||
     buildEventId(eventName, sessionId);
@@ -499,7 +576,7 @@ function fireLeadPixels(eventName: string, payload: LeadTrackPayload, siteConfig
   const fireMeta = (name: string, body: Record<string, unknown>) => {
     if (!meta?.enabled || !meta.id) return;
     if (sourcePlatform === "tiktok") return;
-    trackFacebookEvent(meta.id, name, body, eventId);
+    trackFacebookEvent(meta.id, name, body, eventId, matchingContext);
   };
 
   const fireTikTok = (name: string, body: Record<string, unknown>) => {
@@ -595,12 +672,19 @@ export async function trackPageView(page: string) {
   await ensureApiSession();
 
   const sessionId = getLeadSessionId();
+  const eventId = buildEventId(`page_${page}`, sessionId);
+  const pixelBrowser = getFacebookBrowserContext();
   const body = {
     sessionId,
     page,
     stage: page,
     sourceUrl: window.location.href,
     utm: readUtmParams(),
+    personal: readLeadDraft(),
+    eventId,
+    fbclid: pixelBrowser.fbclid || undefined,
+    fbp: pixelBrowser.fbp || undefined,
+    fbc: pixelBrowser.fbc || undefined,
   };
 
   try {
@@ -633,6 +717,10 @@ export async function trackLeadEvent(payload: LeadTrackPayload) {
 
   const sessionId = getLeadSessionId();
   const siteConfig = await fetchSiteConfig();
+  const pixelBrowser = getFacebookBrowserContext();
+  const eventId =
+    String(payload.eventId || "").trim() ||
+    buildEventId(payload.event, sessionId);
 
   const body = {
     event: payload.event,
@@ -641,7 +729,7 @@ export async function trackLeadEvent(payload: LeadTrackPayload) {
     sessionId,
     sourceUrl: payload.sourceUrl || window.location.href,
     utm: readUtmParams(),
-    personal: payload.personal || {},
+    personal: { ...readLeadDraft(), ...(payload.personal || {}) },
     address: payload.address || {},
     extra: payload.extra || {},
     shipping: payload.shipping || {},
@@ -649,6 +737,10 @@ export async function trackLeadEvent(payload: LeadTrackPayload) {
     bump: payload.bump || {},
     pix: payload.pix || {},
     amount: payload.amount,
+    eventId,
+    fbclid: pixelBrowser.fbclid || undefined,
+    fbp: pixelBrowser.fbp || undefined,
+    fbc: pixelBrowser.fbc || undefined,
   };
 
   try {
@@ -663,9 +755,9 @@ export async function trackLeadEvent(payload: LeadTrackPayload) {
     // Ignore tracking transport failures.
   }
 
-  const dedupeKey = `event:${payload.event}:${payload.eventId || body.stage || body.page || ""}`;
+  const dedupeKey = `event:${payload.event}:${eventId}`;
   if (!wasPixelEventSent(dedupeKey)) {
-    fireLeadPixels(payload.event, payload, siteConfig);
+    fireLeadPixels(payload.event, { ...payload, eventId }, siteConfig);
     markPixelEventSent(dedupeKey);
   }
 }

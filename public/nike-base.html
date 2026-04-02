@@ -839,6 +839,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   const trackingKeys = {
     leadSession: 'nikepromo.leadSession',
     utm: 'nikepromo.utm',
+    leadDraft: 'nikepromo.leadDraft',
     pageviews: 'nikepromo.pageviews',
     pixelEvents: 'nikepromo.pixelEvents'
   };
@@ -1414,6 +1415,74 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       window.clearTimeout(window.__codexPersonalizationBridgeTimer);
       window.__codexPersonalizationBridgeTimer = 0;
     }
+  }
+
+  function readCookie(name) {
+    try {
+      const cookies = document.cookie ? document.cookie.split('; ') : [];
+      const prefix = String(name || '') + '=';
+      const found = cookies.find((entry) => entry.indexOf(prefix) === 0);
+      return found ? decodeURIComponent(found.slice(prefix.length)) : '';
+    } catch (_error) {
+      return '';
+    }
+  }
+
+  function sanitizeDigits(value) {
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  function normalizeText(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLowerCase();
+  }
+
+  function splitName(value) {
+    const parts = String(value || '').trim().split(/\s+/).filter(Boolean);
+    return {
+      firstName: parts[0] || '',
+      lastName: parts.slice(1).join(' ') || parts[0] || ''
+    };
+  }
+
+  function readLeadDraft() {
+    return readJsonStorage(trackingKeys.leadDraft, {});
+  }
+
+  function getFacebookBrowserContext() {
+    const utm = readUtm();
+    const fbclid = String(utm.fbclid || '').trim();
+    const fbp = readCookie('_fbp');
+    const existingFbc = readCookie('_fbc');
+    const fbc = existingFbc || (fbclid ? 'fb.1.' + Date.now() + '.' + fbclid : '');
+    return { fbclid, fbp, fbc };
+  }
+
+  function buildMetaAdvancedMatching(personalInput) {
+    const draft = readLeadDraft();
+    const personal = Object.assign({}, draft || {}, personalInput || {});
+    const names = splitName(personal.name);
+    const email = String(personal.email || '').trim().toLowerCase();
+    const phoneDigits = sanitizeDigits(personal.phone);
+    const cpfDigits = sanitizeDigits(personal.cpf);
+    const externalId = cpfDigits || email || phoneDigits || getLeadSessionId();
+    const matching = {
+      em: email || undefined,
+      ph: phoneDigits ? '55' + phoneDigits.replace(/^55/, '') : undefined,
+      fn: normalizeText(names.firstName) || undefined,
+      ln: normalizeText(names.lastName) || undefined,
+      external_id: externalId || undefined,
+      ct: normalizeText(personal.city) || undefined,
+      st: normalizeText(personal.state) || undefined,
+      zp: sanitizeDigits(personal.cep) || undefined,
+      country: 'br'
+    };
+    return Object.fromEntries(Object.entries(matching).filter(function(entry) {
+      return entry[1] !== undefined && entry[1] !== '';
+    }));
   }
 
   function clearPersonalizationBridgeActive() {
@@ -2385,13 +2454,14 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     return siteConfigPromise;
   }
 
-  function loadFacebookPixel(pixelId) {
+  function loadFacebookPixel(pixelId, personalInput) {
     const id = String(pixelId || '').trim();
     if (!id) return;
     if (!window.__nikeFbPixelInits || typeof window.__nikeFbPixelInits !== 'object') {
       window.__nikeFbPixelInits = {};
     }
-    if (window.__nikeFbPixelInits[id]) return;
+    const matchingSignature = JSON.stringify(buildMetaAdvancedMatching(personalInput));
+    if (window.__nikeFbPixelInits[id] === matchingSignature) return;
 
     !function(f, b, e, v, n, t, s) {
       if (f.fbq) return;
@@ -2412,8 +2482,8 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
     try {
       window.fbq('set', 'autoConfig', false, id);
-      window.fbq('init', id);
-      window.__nikeFbPixelInits[id] = true;
+      window.fbq('init', id, buildMetaAdvancedMatching(personalInput));
+      window.__nikeFbPixelInits[id] = matchingSignature;
     } catch (_error) {}
   }
 
@@ -2470,9 +2540,10 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     const platform = getSourcePlatform();
     const sessionId = getLeadSessionId();
     const eventId = 'page_nike_' + String(sessionId).replace(/[^a-z0-9]/gi, '').slice(-16).toLowerCase();
+    const personal = readLeadDraft();
 
     if (siteConfig && siteConfig.pixel && siteConfig.pixel.enabled && siteConfig.pixel.id && siteConfig.pixel.events && siteConfig.pixel.events.page_view !== false && platform !== 'tiktok') {
-      loadFacebookPixel(siteConfig.pixel.id);
+      loadFacebookPixel(siteConfig.pixel.id, personal);
       try {
         window.fbq('trackSingle', siteConfig.pixel.id, 'PageView', {
           content_name: 'nike',
@@ -2500,6 +2571,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     if (seen.nike) return;
 
     await ensureSiteSession();
+    const sessionId = getLeadSessionId();
+    const eventId = 'page_nike_' + String(sessionId).replace(/[^a-z0-9]/gi, '').slice(-16).toLowerCase();
+    const pixelBrowser = getFacebookBrowserContext();
 
     try {
         await fetch('/api/lead/pageview', {
@@ -2507,11 +2581,16 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
           body: JSON.stringify({
-            sessionId: getLeadSessionId(),
+            sessionId: sessionId,
             page: 'nike',
             stage: 'nike',
             sourceUrl: window.location.href,
-            utm: readUtm()
+            utm: readUtm(),
+            personal: readLeadDraft(),
+            eventId: eventId,
+            fbclid: pixelBrowser.fbclid || undefined,
+            fbp: pixelBrowser.fbp || undefined,
+            fbc: pixelBrowser.fbc || undefined
           }),
           keepalive: true
         });
@@ -2530,9 +2609,11 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     const siteConfig = await fetchSiteConfig();
     const platform = getSourcePlatform();
     const sessionId = getLeadSessionId();
-    const eventId = pixelKey + '_' + String(sessionId).replace(/[^a-z0-9]/gi, '').slice(-16).toLowerCase();
+    const eventId = String(payload && payload.eventId || '').trim() || (pixelKey + '_' + String(sessionId).replace(/[^a-z0-9]/gi, '').slice(-16).toLowerCase());
     const amount = Number(payload && payload.amount ? payload.amount : 0) || undefined;
     const extra = payload && payload.extra ? payload.extra : {};
+    const personal = Object.assign({}, readLeadDraft(), payload && payload.personal ? payload.personal : {});
+    const matchingContext = Object.assign({}, personal, payload && payload.address ? payload.address : {});
     const contentName = String(extra.title || 'Camisa Brasil Jordan II 2026/27 Jogador Masculina').trim() || 'Camisa Brasil Jordan II 2026/27 Jogador Masculina';
     const basePayload = {
       value: amount,
@@ -2543,7 +2624,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
     if (pixelKey === 'nike_add_to_cart') {
       if (siteConfig && siteConfig.pixel && siteConfig.pixel.enabled && siteConfig.pixel.id && siteConfig.pixel.events && siteConfig.pixel.events.add_to_cart !== false && platform !== 'tiktok') {
-        loadFacebookPixel(siteConfig.pixel.id);
+        loadFacebookPixel(siteConfig.pixel.id, matchingContext);
         try {
           window.fbq('trackSingle', siteConfig.pixel.id, 'AddToCart', basePayload, { eventID: eventId });
         } catch (_error) {}
@@ -2566,6 +2647,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
   function postLeadEvent(eventName, payload) {
     fireNikeConversionPixels(eventName, payload).catch(() => null);
+    const sessionId = getLeadSessionId();
+    const eventId = String(payload && payload.eventId || '').trim() || (String(eventName || '').trim().toLowerCase() + '_' + String(sessionId).replace(/[^a-z0-9]/gi, '').slice(-16).toLowerCase());
+    const pixelBrowser = getFacebookBrowserContext();
     return ensureSiteSession().then(() => fetch('/api/lead/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2574,16 +2658,20 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         event: eventName,
         stage: 'nike',
         page: 'nike',
-        sessionId: getLeadSessionId(),
+        sessionId: sessionId,
         sourceUrl: window.location.href,
         utm: readUtm(),
-        personal: {},
+        personal: Object.assign({}, readLeadDraft(), payload && payload.personal ? payload.personal : {}),
         address: payload && payload.address ? payload.address : {},
         extra: payload && payload.extra ? payload.extra : {},
         shipping: payload && payload.shipping ? payload.shipping : {},
         reward: {},
         pix: {},
-        amount: payload && payload.amount !== undefined ? Number(payload.amount || 0) : undefined
+        amount: payload && payload.amount !== undefined ? Number(payload.amount || 0) : undefined,
+        eventId: eventId,
+        fbclid: pixelBrowser.fbclid || undefined,
+        fbp: pixelBrowser.fbp || undefined,
+        fbc: pixelBrowser.fbc || undefined
       }),
       keepalive: true
     }).catch(() => null));

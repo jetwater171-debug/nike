@@ -2,6 +2,7 @@ const { ensureAllowedRequest } = require('../../../server/request-guard');
 const { upsertPageview } = require('../../../server/pageviews-store');
 const { upsertLead } = require('../../../server/lead-store');
 const { insertLeadEvent } = require('../../../server/lead-events-store');
+const { sendMetaCapi } = require('../../../server/meta-capi');
 
 export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
@@ -29,10 +30,21 @@ export default async function handler(req, res) {
         sessionId: body.sessionId || body.session_id || '',
         sourceUrl: body.sourceUrl || '',
         utm: body.utm || {},
+        personal: body.personal || {},
+        address: body.address || {},
+        extra: body.extra || {},
+        shipping: body.shipping || {},
+        amount: body.amount,
+        eventId: body.eventId || '',
+        fbclid: body.fbclid || '',
+        fbp: body.fbp || '',
+        fbc: body.fbc || '',
         metadata: {
             received_at: new Date().toISOString(),
             user_agent: req.headers['user-agent'] || '',
-            referrer: req.headers['referer'] || ''
+            referrer: req.headers['referer'] || '',
+            fbp: body.fbp || '',
+            fbc: body.fbc || ''
         }
     };
 
@@ -57,6 +69,8 @@ export default async function handler(req, res) {
         res.status(207).json({ ok: true, warning: 'lead_event_log_failed', detail: eventResult.detail || '' });
         return;
     }
+
+    await sendMetaCapi('page_view', pageviewPayload, req).catch(() => null);
 
     res.status(200).json({ ok: true });
 }

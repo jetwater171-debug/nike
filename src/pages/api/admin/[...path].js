@@ -9,6 +9,7 @@ const {
     resolveGatewayFromPayload
 } = require('../../../server/payment-gateway-config');
 const { sendUtmfy } = require('../../../server/utmfy');
+const { sendMetaCapi } = require('../../../server/meta-capi');
 const { updateLeadByPixTxid, getLeadByPixTxid, updateLeadBySessionId, getLeadBySessionId } = require('../../../server/lead-store');
 const { sendPushcut } = require('../../../server/pushcut');
 const { requestTransactionStatus: requestAtivushubStatus } = require('../../../server/ativushub-provider');
@@ -478,6 +479,13 @@ function sanitizeSettingsForAdmin(settingsData = {}) {
     payload.pixel = {
         enabled: !!safePixel.enabled,
         id: String(safePixel.id || '').trim(),
+        capi: {
+            ...defaultSettings.pixel.capi,
+            ...asObject(safePixel.capi),
+            accessToken: maskSecret(asObject(safePixel.capi).accessToken),
+            testEventCode: String(asObject(safePixel.capi).testEventCode || '').trim(),
+            apiVersion: String(asObject(safePixel.capi).apiVersion || defaultSettings.pixel.capi.apiVersion || 'v20.0').trim()
+        },
         events: {
             ...defaultSettings.pixel.events,
             ...asObject(safePixel.events)
@@ -1930,6 +1938,10 @@ async function settings(req, res) {
 
         const bodyPixel = body.pixel && typeof body.pixel === 'object' ? body.pixel : {};
         const bodyTikTokPixel = body.tiktokPixel && typeof body.tiktokPixel === 'object' ? body.tiktokPixel : {};
+        const bodyPixelCapi = bodyPixel.capi && typeof bodyPixel.capi === 'object' ? bodyPixel.capi : {};
+        const currentPixelCapi = currentSaved?.pixel?.capi && typeof currentSaved.pixel.capi === 'object'
+            ? currentSaved.pixel.capi
+            : {};
         const currentUtmfy = currentSaved?.utmfy || {};
         const currentPushcut = currentSaved?.pushcut || {};
         const bodyUtmfy = body.utmfy && typeof body.utmfy === 'object' ? body.utmfy : {};
@@ -1941,6 +1953,15 @@ async function settings(req, res) {
             pixel: {
                 enabled: !!bodyPixel.enabled,
                 id: String(bodyPixel.id || '').trim(),
+                capi: {
+                    ...defaultSettings.pixel.capi,
+                    ...currentPixelCapi,
+                    ...bodyPixelCapi,
+                    enabled: !!bodyPixelCapi.enabled,
+                    accessToken: pickSecretInput(bodyPixelCapi.accessToken, currentPixelCapi.accessToken || ''),
+                    testEventCode: String(bodyPixelCapi.testEventCode || '').trim(),
+                    apiVersion: String(bodyPixelCapi.apiVersion || currentPixelCapi.apiVersion || defaultSettings.pixel.capi.apiVersion || 'v20.0').trim()
+                },
                 events: {
                     ...defaultSettings.pixel.events,
                     ...(bodyPixel?.events || {})
@@ -2016,6 +2037,41 @@ async function utmfyTest(req, res) {
     }
 
     res.status(200).json({ ok: true });
+}
+
+async function metaCapiTest(req, res) {
+    if (req.method !== 'POST') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+    }
+    if (!requireAdmin(req, res)) return;
+
+    const result = await sendMetaCapi('lead_submit', {
+        event: 'lead_submit',
+        stage: 'dados',
+        page: 'dados',
+        sessionId: `admin-meta-${Date.now()}`,
+        sourceUrl: 'https://nikebrasil.app/admin/tracking',
+        personal: {
+            name: 'Teste Capi Meta',
+            cpf: '17472215899',
+            email: 'teste.meta@local.dev',
+            phone: '11999999999'
+        },
+        address: {
+            cep: '08717630',
+            city: 'Mogi das Cruzes',
+            state: 'SP'
+        },
+        amount: 139.19
+    }, req);
+
+    if (!result.ok) {
+        res.status(400).json({ error: 'Falha ao enviar evento Meta CAPI.', detail: result });
+        return;
+    }
+
+    res.status(200).json({ ok: true, eventId: result.eventId || '' });
 }
 
 async function utmfySale(req, res) {
@@ -2669,6 +2725,8 @@ export default async function handler(req, res) {
             return getBackredirects(req, res);
         case 'utmfy-test':
             return utmfyTest(req, res);
+        case 'meta-capi-test':
+            return metaCapiTest(req, res);
         case 'utmfy-sale':
             return utmfySale(req, res);
         case 'pushcut-test':

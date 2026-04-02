@@ -3564,6 +3564,10 @@ function initAdmin() {
 
     const pixelEnabled = document.getElementById('pixel-enabled');
     const pixelId = document.getElementById('pixel-id');
+    const pixelCapiEnabled = document.getElementById('pixel-capi-enabled');
+    const pixelCapiToken = document.getElementById('pixel-capi-token');
+    const pixelCapiTestCode = document.getElementById('pixel-capi-test-code');
+    const pixelCapiVersion = document.getElementById('pixel-capi-version');
     const pixelEventPage = document.getElementById('pixel-event-page');
     const pixelEventQuiz = document.getElementById('pixel-event-quiz');
     const pixelEventLead = document.getElementById('pixel-event-lead');
@@ -3668,6 +3672,8 @@ function initAdmin() {
     const adminPage = document.body.getAttribute('data-admin') || '';
     const testPixelBtn = document.getElementById('admin-test-pixel');
     const testPixelStatus = document.getElementById('admin-test-pixel-status');
+    const testPixelCapiBtn = document.getElementById('admin-test-pixel-capi');
+    const testPixelCapiStatus = document.getElementById('admin-test-pixel-capi-status');
     const testTikTokPixelBtn = document.getElementById('admin-test-tiktok-pixel');
     const testTikTokPixelStatus = document.getElementById('admin-test-tiktok-pixel-status');
     const testUtmfyBtn = document.getElementById('admin-test-utmfy');
@@ -3809,6 +3815,10 @@ function initAdmin() {
     const hasPixelForm = !!(
         pixelEnabled ||
         pixelId ||
+        pixelCapiEnabled ||
+        pixelCapiToken ||
+        pixelCapiTestCode ||
+        pixelCapiVersion ||
         pixelEventPage ||
         pixelEventQuiz ||
         pixelEventLead ||
@@ -3977,6 +3987,10 @@ function initAdmin() {
         if (hasPixelForm) {
             if (pixelEnabled) pixelEnabled.checked = !!data.pixel?.enabled;
             if (pixelId) pixelId.value = data.pixel?.id || '';
+            if (pixelCapiEnabled) pixelCapiEnabled.checked = !!data.pixel?.capi?.enabled;
+            if (pixelCapiToken) pixelCapiToken.value = data.pixel?.capi?.accessToken || '';
+            if (pixelCapiTestCode) pixelCapiTestCode.value = data.pixel?.capi?.testEventCode || '';
+            if (pixelCapiVersion) pixelCapiVersion.value = data.pixel?.capi?.apiVersion || 'v20.0';
             if (pixelEventPage) pixelEventPage.checked = data.pixel?.events?.page_view !== false;
             if (pixelEventQuiz) pixelEventQuiz.checked = data.pixel?.events?.quiz_view !== false;
             if (pixelEventLead) pixelEventLead.checked = data.pixel?.events?.lead !== false;
@@ -4078,6 +4092,12 @@ function initAdmin() {
             payload.pixel = {
                 enabled: !!pixelEnabled?.checked,
                 id: pixelId?.value?.trim() || '',
+                capi: {
+                    enabled: !!pixelCapiEnabled?.checked,
+                    accessToken: pixelCapiToken?.value?.trim() || '',
+                    testEventCode: pixelCapiTestCode?.value?.trim() || '',
+                    apiVersion: pixelCapiVersion?.value?.trim() || 'v20.0'
+                },
                 events: {
                     page_view: pixelEventPage?.checked !== false,
                     quiz_view: pixelEventQuiz?.checked !== false,
@@ -4212,6 +4232,30 @@ function initAdmin() {
         firePixelEvent('Lead', { source: 'admin_test' });
         if (testPixelStatus) testPixelStatus.textContent = 'Evento Lead enviado.';
         showToast('Evento teste enviado ao Pixel.', 'success');
+    };
+
+    const runMetaCapiTest = async () => {
+        if (testPixelCapiStatus) testPixelCapiStatus.textContent = 'Enviando evento...';
+        const res = await adminFetch('/api/admin/meta-capi-test', { method: 'POST' });
+        if (!res.ok) {
+            const detail = await res.json().catch(() => ({}));
+            const reason =
+                detail?.detail?.reason ||
+                detail?.detail?.detail?.error_user_msg ||
+                detail?.detail?.detail?.error?.message ||
+                detail?.detail?.detail?.error ||
+                detail?.detail?.error ||
+                detail?.error ||
+                'Falha ao enviar.';
+            if (testPixelCapiStatus) testPixelCapiStatus.textContent = reason;
+            showToast('Falha ao enviar evento Meta CAPI.', 'error');
+            return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (testPixelCapiStatus) {
+            testPixelCapiStatus.textContent = data?.eventId ? `Evento enviado (${data.eventId}).` : 'Evento enviado.';
+        }
+        showToast('Evento teste enviado ao Meta CAPI.', 'success');
     };
 
     const runTikTokPixelTest = async () => {
@@ -5047,6 +5091,7 @@ function initAdmin() {
     });
     leadsReconcile?.addEventListener('click', reconcilePix);
     testPixelBtn?.addEventListener('click', runPixelTest);
+    testPixelCapiBtn?.addEventListener('click', runMetaCapiTest);
     testTikTokPixelBtn?.addEventListener('click', runTikTokPixelTest);
     testUtmfyBtn?.addEventListener('click', runUtmfyTest);
     saleUtmfyBtn?.addEventListener('click', runUtmfySale);

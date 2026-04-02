@@ -68,7 +68,7 @@
             <h2>Pixel do Meta</h2>
             <span class="admin-chip">Facebook Ads</span>
           </div>
-          <p class="admin-hint">Tracking 100% browser-side. Informe apenas o Pixel ID e escolha os eventos.</p>
+          <p class="admin-hint">Use Pixel + CAPI com deduplicacao por <code>event_id</code>. O Pixel envia no navegador e o CAPI reforca no servidor com os dados do lead.</p>
           <div class="admin-grid">
             <label class="admin-switch">
               <input type="checkbox" id="pixel-enabled" />
@@ -77,6 +77,22 @@
             <div class="input-group">
               <input type="text" id="pixel-id" class="floating-input" placeholder=" " />
               <label for="pixel-id" class="floating-label">Pixel ID</label>
+            </div>
+            <label class="admin-switch">
+              <input type="checkbox" id="pixel-capi-enabled" />
+              <span>CAPI ativo</span>
+            </label>
+            <div class="input-group">
+              <input type="text" id="pixel-capi-token" class="floating-input" placeholder=" " />
+              <label for="pixel-capi-token" class="floating-label">Access Token do CAPI</label>
+            </div>
+            <div class="input-group">
+              <input type="text" id="pixel-capi-test-code" class="floating-input" placeholder=" " />
+              <label for="pixel-capi-test-code" class="floating-label">Test Event Code</label>
+            </div>
+            <div class="input-group">
+              <input type="text" id="pixel-capi-version" class="floating-input" placeholder=" " />
+              <label for="pixel-capi-version" class="floating-label">API Version</label>
             </div>
             <div class="admin-checkboxes">
               <label><input type="checkbox" id="pixel-event-page" /> PageView</label>
@@ -122,6 +138,10 @@
           <div class="admin-inline-actions">
             <button id="admin-test-pixel" class="btn-secondary" type="button">Testar Meta</button>
             <span id="admin-test-pixel-status" class="admin-muted"></span>
+          </div>
+          <div class="admin-inline-actions">
+            <button id="admin-test-pixel-capi" class="btn-secondary" type="button">Testar Meta CAPI</button>
+            <span id="admin-test-pixel-capi-status" class="admin-muted"></span>
           </div>
           <div class="admin-inline-actions">
             <button id="admin-test-tiktok-pixel" class="btn-secondary" type="button">Testar TikTok</button>

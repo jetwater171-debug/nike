@@ -17,6 +17,12 @@ function buildDefaultBrowserPixelSettings() {
     return {
         enabled: false,
         id: '',
+        capi: {
+            enabled: false,
+            accessToken: '',
+            testEventCode: '',
+            apiVersion: 'v20.0'
+        },
         events: {
             page_view: true,
             quiz_view: true,
@@ -113,6 +119,10 @@ async function getSettings() {
             pixel: {
                 enabled: !!valuePixel.enabled,
                 id: String(valuePixel.id || '').trim(),
+                capi: {
+                    ...defaultSettings.pixel.capi,
+                    ...((valuePixel.capi && typeof valuePixel.capi === 'object') ? valuePixel.capi : {})
+                },
                 events: {
                     ...defaultSettings.pixel.events,
                     ...(valuePixel.events || {})

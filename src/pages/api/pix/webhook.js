@@ -6,6 +6,7 @@ const {
     findLeadByIdentity
 } = require('../../../server/lead-store');
 const { enqueueDispatch, processDispatchQueue } = require('../../../server/dispatch-queue');
+const { sendMetaCapi } = require('../../../server/meta-capi');
 const {
     normalizeGatewayId
 } = require('../../../server/payment-gateway-config');
@@ -900,6 +901,20 @@ export default async function handler(req, res) {
     }
 
     if (shouldTriggerPaidSideEffects) {
+        await sendMetaCapi('pix_confirmed', {
+            event: 'pix_confirmed',
+            stage: 'pix',
+            page: 'pix',
+            sessionId: leadData?.session_id || sessionOrderId || '',
+            pixTxid: effectiveTxid,
+            amount: eventAmount,
+            sourceUrl:
+                leadData?.source_url ||
+                leadPayload?.sourceUrl ||
+                leadPayload?.pixSourceUrl ||
+                ''
+        }, req).catch(() => null);
+
         const orderIdForPush = String(
             leadData?.session_id ||
             sessionOrderId ||
