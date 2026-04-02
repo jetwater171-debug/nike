@@ -1265,6 +1265,350 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     });
   }
 
+  function markPersonalizationBridgeActive() {
+    window.__codexPersonalizationBridgeActiveAt = Date.now();
+  }
+
+  function clearPersonalizationBridgeActive() {
+    window.__codexPersonalizationBridgeActiveAt = 0;
+  }
+
+  function isPersonalizationIframeVisible() {
+    const frames = document.querySelectorAll('iframe[src*="personaliza.nike.com.br"]');
+    for (let index = 0; index < frames.length; index += 1) {
+      if (isVisibleElement(frames[index])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isPersonalizationBridgeActive() {
+    const startedAt = Number(window.__codexPersonalizationBridgeActiveAt || 0);
+    return isPersonalizationIframeVisible() || (startedAt > 0 && Date.now() - startedAt < 30 * 60 * 1000);
+  }
+
+  function isPersonalizationCartRequest(url) {
+    const href = String(url || '');
+    return /apigateway\.nike\.com\.br/i.test(href) && /shopping-cart/i.test(href);
+  }
+
+  function tryParseBodyObject(body) {
+    if (!body) {
+      return null;
+    }
+
+    if (typeof body === 'string') {
+      try {
+        return JSON.parse(body);
+      } catch (_error) {
+        try {
+          const params = new URLSearchParams(body);
+          const parsed = {};
+          params.forEach(function (value, key) {
+            parsed[key] = value;
+          });
+          return Object.keys(parsed).length ? parsed : null;
+        } catch (_innerError) {
+          return null;
+        }
+      }
+    }
+
+    if (typeof FormData !== 'undefined' && body instanceof FormData) {
+      const parsed = {};
+      body.forEach(function (value, key) {
+        parsed[key] = typeof value === 'string' ? value : '';
+      });
+      return parsed;
+    }
+
+    if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) {
+      const parsed = {};
+      body.forEach(function (value, key) {
+        parsed[key] = value;
+      });
+      return parsed;
+    }
+
+    if (typeof body === 'object') {
+      return body;
+    }
+
+    return null;
+  }
+
+  function readBodyText(body) {
+    if (!body) {
+      return '';
+    }
+
+    if (typeof body === 'string') {
+      return body;
+    }
+
+    if (typeof FormData !== 'undefined' && body instanceof FormData) {
+      const parts = [];
+      body.forEach(function (value, key) {
+        parts.push(key + '=' + String(value));
+      });
+      return parts.join('&');
+    }
+
+    if (typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams) {
+      return body.toString();
+    }
+
+    if (typeof body === 'object') {
+      try {
+        return JSON.stringify(body);
+      } catch (_error) {
+        return '';
+      }
+    }
+
+    return String(body);
+  }
+
+  function walkPayloadValues(value, path, collector) {
+    if (value == null) {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach(function (item, index) {
+        walkPayloadValues(item, path.concat(String(index)), collector);
+      });
+      return;
+    }
+
+    if (typeof value === 'object') {
+      Object.keys(value).forEach(function (key) {
+        walkPayloadValues(value[key], path.concat(String(key)), collector);
+      });
+      return;
+    }
+
+    collector(path.join('.').toLowerCase(), value);
+  }
+
+  function extractPersonalizationFromPayload(body) {
+    const payloadObject = tryParseBodyObject(body);
+    const rawText = readBodyText(body);
+    let personalizationName = '';
+    let personalizationNumber = '';
+    let personalizationPlayer = '';
+    let personalizationExtraValue = 0;
+
+    if (payloadObject) {
+      walkPayloadValues(payloadObject, [], function (path, value) {
+        const stringValue = normalizeWhitespace(value);
+        if (!stringValue) {
+          return;
+        }
+
+        if (!personalizationNumber && /(?:number|numero)/i.test(path)) {
+          const digits = normalizePersonalizationNumber(stringValue);
+          if (digits) {
+            personalizationNumber = digits;
+            return;
+          }
+        }
+
+        if (!personalizationPlayer && /(?:athlete|atleta|player|jogador)/i.test(path) && /[a-z]/i.test(stringValue)) {
+          personalizationPlayer = stringValue.slice(0, 40);
+          return;
+        }
+
+        if (!personalizationName && /(?:text|name|nome)/i.test(path) && /[a-z]/i.test(stringValue) && !/nome \+ numero/i.test(stringValue)) {
+          personalizationName = normalizePersonalizationName(stringValue);
+          return;
+        }
+
+        if (!personalizationExtraValue && /(?:price|value|valor|partial|parcial|amount)/i.test(path)) {
+          const parsedValue = parseCurrencyValue(stringValue) || Number(stringValue);
+          if (Math.abs(parsedValue - PERSONALIZATION_FULL_PRICE_VALUE) < 0.02) {
+            personalizationExtraValue = PERSONALIZATION_FULL_PRICE_VALUE;
+          } else if (Math.abs(parsedValue - PERSONALIZATION_SINGLE_PRICE_VALUE) < 0.02) {
+            personalizationExtraValue = PERSONALIZATION_SINGLE_PRICE_VALUE;
+          }
+        }
+      });
+    }
+
+    if (!personalizationName) {
+      const nameMatch = rawText.match(/"(?:text|name|nome)"\s*:\s*"([^"]{1,20})"/i);
+      if (nameMatch && /[a-z]/i.test(nameMatch[1])) {
+        personalizationName = normalizePersonalizationName(nameMatch[1]);
+      }
+    }
+
+    if (!personalizationNumber) {
+      const numberMatch = rawText.match(/"(?:number|numero)"\s*:\s*"?(\\d{1,2})"?/i);
+      if (numberMatch) {
+        personalizationNumber = normalizePersonalizationNumber(numberMatch[1]);
+      }
+    }
+
+    if (!personalizationPlayer) {
+      const playerMatch = rawText.match(/"(?:athlete|atleta|player|jogador)[^"]*"\s*:\s*"([^"]{1,40})"/i);
+      if (playerMatch && /[a-z]/i.test(playerMatch[1])) {
+        personalizationPlayer = normalizeWhitespace(playerMatch[1]).slice(0, 40);
+      }
+    }
+
+    if (!personalizationExtraValue) {
+      const fullMatch = rawText.match(/99[,.]98/);
+      const singleMatch = rawText.match(/49[,.]99/);
+      if (fullMatch) {
+        personalizationExtraValue = PERSONALIZATION_FULL_PRICE_VALUE;
+      } else if (singleMatch) {
+        personalizationExtraValue = PERSONALIZATION_SINGLE_PRICE_VALUE;
+      }
+    }
+
+    return normalizePersonalizationState({
+      personalizationName,
+      personalizationNumber,
+      personalizationPlayer,
+      personalizationExtraValue
+    });
+  }
+
+  function buildFakeCartSuccessResponse(cartState) {
+    return {
+      ok: true,
+      success: true,
+      cart: {
+        items: [
+          {
+            sku: cartState.sku || PRODUCT_SKU,
+            size: cartState.size || '',
+            quantity: cartState.quantity || 1,
+            personalization: cartState.personalizationSummary || ''
+          }
+        ]
+      }
+    };
+  }
+
+  function completePersonalizationCartBridge(body) {
+    if (window.__codexPersonalizationRedirecting) {
+      return;
+    }
+
+    window.__codexPersonalizationRedirecting = true;
+    const extractedState = extractPersonalizationFromPayload(body);
+    const mergedState = syncStoredPersonalizationState(null, extractedState);
+    const cartState = buildCartState(mergedState);
+
+    setStoredCartState(cartState);
+    clearPersonalizationBridgeActive();
+
+    Promise.resolve(postLeadEvent('nike_personalization_completed', {
+      extra: {
+        size: cartState.size,
+        quantity: cartState.quantity,
+        sku: cartState.sku,
+        destination: CART_URL,
+        personalizationWanted: cartState.personalizationWanted ? 'sim' : 'nao',
+        personalizationMode: cartState.personalizationMode || '',
+        personalizationSummary: cartState.personalizationSummary || '',
+        personalizationExtraValue: cartState.personalizationExtraValue || 0
+      },
+      shipping: cartState.shipping || {}
+    })).finally(function () {
+      window.setTimeout(function () {
+        window.location.href = CART_URL;
+      }, 40);
+    });
+  }
+
+  function bindPersonalizationCartBridge() {
+    if (window.__codexPersonalizationCartBridgeBound) {
+      return;
+    }
+
+    window.__codexPersonalizationCartBridgeBound = true;
+
+    const nativeFetch = window.fetch ? window.fetch.bind(window) : null;
+    if (nativeFetch) {
+      window.fetch = function (input, init) {
+        const requestUrl = typeof input === 'string' ? input : input && input.url;
+        const requestBody = init && typeof init === 'object' ? init.body : undefined;
+
+        if (typeof Request !== 'undefined' && input instanceof Request && isPersonalizationBridgeActive() && isPersonalizationCartRequest(input.url)) {
+          return input.clone().text().catch(function () {
+            return '';
+          }).then(function (bodyText) {
+            completePersonalizationCartBridge(bodyText);
+            return new Response(JSON.stringify(buildFakeCartSuccessResponse(buildCartState())), {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+          });
+        }
+
+        if (isPersonalizationBridgeActive() && isPersonalizationCartRequest(requestUrl)) {
+          completePersonalizationCartBridge(requestBody);
+          const payload = JSON.stringify(buildFakeCartSuccessResponse(buildCartState()));
+          return Promise.resolve(new Response(payload, {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }));
+        }
+
+        return nativeFetch(input, init);
+      };
+    }
+
+    const nativeOpen = XMLHttpRequest.prototype.open;
+    const nativeSend = XMLHttpRequest.prototype.send;
+
+    XMLHttpRequest.prototype.open = function (method, url) {
+      this.__codexRequestUrl = url;
+      return nativeOpen.apply(this, arguments);
+    };
+
+    XMLHttpRequest.prototype.send = function (body) {
+      if (isPersonalizationBridgeActive() && isPersonalizationCartRequest(this.__codexRequestUrl)) {
+        completePersonalizationCartBridge(body);
+        const fakeText = JSON.stringify(buildFakeCartSuccessResponse(buildCartState()));
+        try {
+          Object.defineProperty(this, 'readyState', { configurable: true, value: 4 });
+          Object.defineProperty(this, 'status', { configurable: true, value: 200 });
+          Object.defineProperty(this, 'statusText', { configurable: true, value: 'OK' });
+          Object.defineProperty(this, 'responseText', { configurable: true, value: fakeText });
+          Object.defineProperty(this, 'response', { configurable: true, value: fakeText });
+        } catch (_error) {
+          // Ignore readonly properties.
+        }
+
+        const xhr = this;
+        window.setTimeout(function () {
+          if (typeof xhr.onreadystatechange === 'function') {
+            xhr.onreadystatechange();
+          }
+          if (typeof xhr.onload === 'function') {
+            xhr.onload();
+          }
+          if (typeof xhr.dispatchEvent === 'function') {
+            try { xhr.dispatchEvent(new Event('readystatechange')); } catch (_error) {}
+            try { xhr.dispatchEvent(new Event('load')); } catch (_error) {}
+            try { xhr.dispatchEvent(new Event('loadend')); } catch (_error) {}
+          }
+        }, 0);
+        return;
+      }
+
+      return nativeSend.call(this, body);
+    };
+  }
+
   function readCurrentPriceState(existingState, personalizationState) {
     const existing = existingState && typeof existingState === 'object' ? existingState : {};
     const personalization = normalizePersonalizationState({
@@ -1741,6 +2085,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
 
       button.dataset.codexPersonalizeBound = '1';
       button.addEventListener('click', function () {
+        markPersonalizationBridgeActive();
         window.setTimeout(function () {
           syncStoredPersonalizationState(button);
         }, 120);
@@ -2004,6 +2349,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     bindCepLookup();
     bindSizeTracking();
     bindPersonalizationTracking();
+    bindPersonalizationCartBridge();
     bindCartRedirect();
   }
 
