@@ -1366,8 +1366,18 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
       ...extractPersonalizationFromPayload(body),
       ...extractPersonalizationFromMessagePayload(body)
     });
+    const cachedBridgeState = normalizePersonalizationState({
+      ...readStoredCartState(),
+      ...(window.__codexLastPersonalizationState && typeof window.__codexLastPersonalizationState === 'object'
+        ? window.__codexLastPersonalizationState
+        : {})
+    });
 
-    return hasPersonalizationBodyMarkers(body) || hasMeaningfulPersonalizationState(extractedState);
+    return (
+      hasPersonalizationBodyMarkers(body) ||
+      hasMeaningfulPersonalizationState(extractedState) ||
+      hasMeaningfulPersonalizationState(cachedBridgeState)
+    );
   }
 
   function tryParseBodyObject(body) {
