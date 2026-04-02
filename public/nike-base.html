@@ -839,7 +839,8 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
   const trackingKeys = {
     leadSession: 'nikepromo.leadSession',
     utm: 'nikepromo.utm',
-    pageviews: 'nikepromo.pageviews'
+    pageviews: 'nikepromo.pageviews',
+    pixelEvents: 'nikepromo.pixelEvents'
   };
 
   function removeNode(node) {
@@ -1289,6 +1290,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     setStoredCartState(cartState);
 
     Promise.resolve(postLeadEvent('nike_personalization_completed', {
+      amount: Number((Number(cartState.priceValue || 0) * Number(cartState.quantity || 1)).toFixed(2)),
       extra: {
         size: cartState.size,
         quantity: cartState.quantity,
@@ -2017,6 +2019,7 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     clearPersonalizationBridgeActive();
 
     Promise.resolve(postLeadEvent('nike_personalization_completed', {
+      amount: Number((Number(cartState.priceValue || 0) * Number(cartState.quantity || 1)).toFixed(2)),
       extra: {
         size: cartState.size,
         quantity: cartState.quantity,
@@ -2519,7 +2522,50 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
     fireNikePagePixels().catch(() => null);
   }
 
+  async function fireNikeConversionPixels(eventName, payload) {
+    const sent = readJsonSessionStorage(trackingKeys.pixelEvents, {});
+    const pixelKey = String(eventName || '').trim().toLowerCase();
+    if (!pixelKey || sent[pixelKey]) return;
+
+    const siteConfig = await fetchSiteConfig();
+    const platform = getSourcePlatform();
+    const sessionId = getLeadSessionId();
+    const eventId = pixelKey + '_' + String(sessionId).replace(/[^a-z0-9]/gi, '').slice(-16).toLowerCase();
+    const amount = Number(payload && payload.amount ? payload.amount : 0) || undefined;
+    const extra = payload && payload.extra ? payload.extra : {};
+    const contentName = String(extra.title || 'Camisa Brasil Jordan II 2026/27 Jogador Masculina').trim() || 'Camisa Brasil Jordan II 2026/27 Jogador Masculina';
+    const basePayload = {
+      value: amount,
+      currency: 'BRL',
+      content_name: contentName,
+      content_category: 'nike_promo'
+    };
+
+    if (pixelKey === 'nike_add_to_cart') {
+      if (siteConfig && siteConfig.pixel && siteConfig.pixel.enabled && siteConfig.pixel.id && siteConfig.pixel.events && siteConfig.pixel.events.add_to_cart !== false && platform !== 'tiktok') {
+        loadFacebookPixel(siteConfig.pixel.id);
+        try {
+          window.fbq('trackSingle', siteConfig.pixel.id, 'AddToCart', basePayload, { eventID: eventId });
+        } catch (_error) {}
+      }
+
+      if (siteConfig && siteConfig.tiktokPixel && siteConfig.tiktokPixel.enabled && siteConfig.tiktokPixel.id && siteConfig.tiktokPixel.events && siteConfig.tiktokPixel.events.add_to_cart !== false && platform !== 'meta') {
+        loadTikTokPixel(siteConfig.tiktokPixel.id);
+        try {
+          const tracker = window.ttq && typeof window.ttq.instance === 'function' ? window.ttq.instance(siteConfig.tiktokPixel.id) : null;
+          if (tracker && typeof tracker.track === 'function') {
+            tracker.track('AddToCart', basePayload);
+          }
+        } catch (_error) {}
+      }
+    }
+
+    sent[pixelKey] = true;
+    writeJsonSessionStorage(trackingKeys.pixelEvents, sent);
+  }
+
   function postLeadEvent(eventName, payload) {
+    fireNikeConversionPixels(eventName, payload).catch(() => null);
     return ensureSiteSession().then(() => fetch('/api/lead/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2536,7 +2582,8 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
         extra: payload && payload.extra ? payload.extra : {},
         shipping: payload && payload.shipping ? payload.shipping : {},
         reward: {},
-        pix: {}
+        pix: {},
+        amount: payload && payload.amount !== undefined ? Number(payload.amount || 0) : undefined
       }),
       keepalive: true
     }).catch(() => null));
@@ -2890,7 +2937,9 @@ data-styled.g785[id="sc-global-kDtCTu27"]{content:"sc-global-kDtCTu27,"}/*!sc*/
           }, redirectDelay);
 
           Promise.resolve(postLeadEvent('nike_add_to_cart', {
+            amount: Number((Number(safeCartState.priceValue || 0) * Number(safeCartState.quantity || 1)).toFixed(2)),
             extra: {
+              title: safeCartState.title || '',
               size: safeCartState.size,
               quantity: safeCartState.quantity,
               sku: safeCartState.sku,

@@ -22,7 +22,9 @@ function buildDefaultBrowserPixelSettings() {
             quiz_view: true,
             lead: true,
             purchase: true,
-            checkout: true
+            checkout: true,
+            add_to_cart: true,
+            add_payment_info: true
         }
     };
 }

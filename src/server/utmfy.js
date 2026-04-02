@@ -120,6 +120,7 @@ function buildUtmfyOrder(eventName, payload = {}, cfg = {}) {
     const address = payload.address || {};
     const shipping = payload.shipping || {};
     const bump = payload.bump || {};
+    const extra = payload.extra || {};
     const utm = payload.utm || {};
     const tracking = payload.trackingParameters || {};
 
@@ -135,19 +136,45 @@ function buildUtmfyOrder(eventName, payload = {}, cfg = {}) {
     const approvedDate = status === 'paid' ? toIsoUtc(payload.approvedDate || payload.approvedAt || Date.now()) : null;
     const refundedAt = status === 'refunded' ? toIsoUtc(payload.refundedAt || payload.refunded_at || payload.data_estorno || Date.now()) : null;
 
-    const shippingPrice = normalizeAmount(shipping.price || 0);
+    const hasExplicitShippingSubtotal =
+        extra &&
+        Object.prototype.hasOwnProperty.call(extra, 'shippingSubtotal');
+    const hasExplicitProductSubtotal =
+        extra &&
+        Object.prototype.hasOwnProperty.call(extra, 'productSubtotal');
+    const shippingPrice = normalizeAmount(
+        hasExplicitShippingSubtotal ? extra.shippingSubtotal : (shipping.price || 0)
+    );
     const bumpPrice = normalizeAmount(bump.price || 0);
     const upsellEnabled = Boolean(payload?.upsell?.enabled);
     const upsellPrice = normalizeAmount(payload?.upsell?.price || 0);
     const upsellTitle = pickText(payload?.upsell?.title) || 'Prioridade de envio';
     const hasUpsellProduct = upsellEnabled && upsellPrice > 0;
+    let productSubtotal = normalizeAmount(
+        hasExplicitProductSubtotal ? extra.productSubtotal : 0
+    );
     const totalAmount = normalizeAmount(
         payload.amount ||
         payload.pixAmount ||
-        (hasUpsellProduct ? (upsellPrice + bumpPrice) : (shippingPrice + bumpPrice)) ||
+        (hasUpsellProduct ? (upsellPrice + bumpPrice) : (productSubtotal + shippingPrice + bumpPrice)) ||
         0
     );
+    if (productSubtotal <= 0 && !hasUpsellProduct) {
+        productSubtotal = Number(
+            Math.max(0, totalAmount - shippingPrice - bumpPrice).toFixed(2)
+        );
+    }
     const totalPriceInCents = toIntCents(totalAmount);
+    const productQuantity = Math.max(
+        1,
+        Number(extra.productQuantity || extra.quantity || 1) || 1
+    );
+    const productTitle =
+        pickText(extra.productTitle || payload.productTitle) ||
+        'Camisa Brasil Jordan II 2026/27 Jogador Masculina';
+    const productId =
+        pickText(extra.sku || payload.sku) ||
+        'IU1074-417';
 
     const customerName = splitName(personal.name || payload.client_name || payload.customer?.name || '').name;
     const customerEmail = pickText(personal.email || payload.client_email || payload.customer?.email);
@@ -168,10 +195,20 @@ function buildUtmfyOrder(eventName, payload = {}, cfg = {}) {
             priceInCents: toIntCents(upsellPrice)
         });
     }
+    if (productSubtotal > 0 && !hasUpsellProduct) {
+        products.push({
+            id: productId,
+            name: productTitle,
+            planId: null,
+            planName: null,
+            quantity: productQuantity,
+            priceInCents: toIntCents(productSubtotal / productQuantity)
+        });
+    }
     if (shippingPrice > 0 && !hasUpsellProduct) {
         products.push({
             id: shipping.id || 'frete',
-            name: shipping.name || 'Frete Bag iFood',
+            name: shipping.name || 'Frete',
             planId: null,
             planName: null,
             quantity: 1,
@@ -190,8 +227,8 @@ function buildUtmfyOrder(eventName, payload = {}, cfg = {}) {
     }
     if (products.length === 0) {
         products.push({
-            id: 'frete',
-            name: upsellEnabled ? upsellTitle : 'Frete Bag iFood',
+            id: productId || 'produto',
+            name: upsellEnabled ? upsellTitle : productTitle,
             planId: null,
             planName: null,
             quantity: 1,

@@ -6,6 +6,8 @@ type PixelEvents = {
   lead?: boolean;
   purchase?: boolean;
   checkout?: boolean;
+  add_to_cart?: boolean;
+  add_payment_info?: boolean;
 };
 
 type BrowserPixelConfig = {
@@ -535,6 +537,32 @@ function fireLeadPixels(eventName: string, payload: LeadTrackPayload, siteConfig
         currency: "BRL",
         content_name: payload.page || "checkout",
       });
+    }
+  }
+
+  if (eventName === "payment_view") {
+    const paymentPayload = {
+      value: Number(payload.amount || 0) || undefined,
+      currency: "BRL",
+      content_name: payload.page || "pagamento",
+    };
+
+    if (
+      meta?.enabled &&
+      meta.id &&
+      meta.events?.add_payment_info !== false &&
+      meta.events?.checkout !== false
+    ) {
+      fireMeta("AddPaymentInfo", paymentPayload);
+    }
+
+    if (
+      tiktok?.enabled &&
+      tiktok.id &&
+      tiktok.events?.add_payment_info !== false &&
+      tiktok.events?.checkout !== false
+    ) {
+      fireTikTok("AddPaymentInfo", paymentPayload);
     }
   }
 

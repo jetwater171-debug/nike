@@ -841,23 +841,36 @@ export default async function handler(req, res) {
         const streetNumber = extra?.noNumber ? 'S/N' : String(extra?.number || '').trim() || 'S/N';
         const complement = extra?.noComplement ? 'Sem complemento' : String(extra?.complement || '').trim() || 'Sem complemento';
 
-        let shippingPrice = toBrlAmount(shipping?.price || 0);
+        const hasExplicitProductSubtotal =
+            extra && Object.prototype.hasOwnProperty.call(extra, 'productSubtotal');
+        const hasExplicitShippingSubtotal =
+            extra && Object.prototype.hasOwnProperty.call(extra, 'shippingSubtotal');
+        const quantityValue = Math.max(1, Number(extra?.productQuantity || extra?.quantity || 1) || 1);
+        const productTitle = String(extra?.productTitle || rawBody?.productTitle || 'Camisa Brasil Jordan II 2026/27 Jogador Masculina').trim()
+            || 'Camisa Brasil Jordan II 2026/27 Jogador Masculina';
+        let productSubtotal = toBrlAmount(hasExplicitProductSubtotal ? extra?.productSubtotal : 0);
+        let shippingPrice = toBrlAmount(
+            hasExplicitShippingSubtotal ? extra?.shippingSubtotal : (shipping?.price || 0)
+        );
         let bumpPrice = bump?.price ? toBrlAmount(bump.price) : 0;
         if (bump?.selected === false) bumpPrice = 0;
-        let totalAmount = Number((shippingPrice + rewardExtraPrice + bumpPrice).toFixed(2));
-        if (totalAmount <= 0 && value > 0) {
+        let totalAmount = Number((productSubtotal + shippingPrice + rewardExtraPrice + bumpPrice).toFixed(2));
+        if (value > 0) {
             totalAmount = Number(value.toFixed(2));
-            if (shippingPrice <= 0) {
-                shippingPrice = Number(Math.max(0, totalAmount - rewardExtraPrice - bumpPrice).toFixed(2));
-            }
+        }
+        if (productSubtotal <= 0 && totalAmount > 0) {
+            productSubtotal = Number(Math.max(0, totalAmount - shippingPrice - rewardExtraPrice - bumpPrice).toFixed(2));
+        }
+        if (!hasExplicitShippingSubtotal && shippingPrice <= 0 && totalAmount > 0 && productSubtotal > 0) {
+            shippingPrice = Number(Math.max(0, totalAmount - productSubtotal - rewardExtraPrice - bumpPrice).toFixed(2));
         }
         if (!totalAmount || totalAmount <= 0) {
-            return res.status(400).json({ error: 'Valor do frete invalido.' });
+            return res.status(400).json({ error: 'Valor do pedido invalido.' });
         }
         const normalizedShipping = {
             ...(shipping || {}),
             id: String(shipping?.id || '').trim() || 'frete',
-            name: String(shipping?.name || '').trim() || 'Frete Bag iFood',
+            name: String(shipping?.name || '').trim() || 'Frete',
             price: shippingPrice,
             basePrice: toBrlAmount(shipping?.basePrice || shipping?.originalPrice || shippingPrice),
             originalPrice: toBrlAmount(shipping?.originalPrice || shipping?.basePrice || shippingPrice)
@@ -884,14 +897,25 @@ export default async function handler(req, res) {
             }
         }
 
-        const items = [
-            {
-                title: 'Frete Bag do iFood',
+        const items = [];
+
+        if (productSubtotal > 0) {
+            items.push({
+                title: productTitle,
+                quantity: quantityValue,
+                unitPrice: Number((productSubtotal / quantityValue).toFixed(2)),
+                tangible: true
+            });
+        }
+
+        if (shippingPrice > 0) {
+            items.push({
+                title: normalizedShipping.name || 'Frete',
                 quantity: 1,
                 unitPrice: Number(shippingPrice.toFixed(2)),
                 tangible: false
-            }
-        ];
+            });
+        }
 
         if (rewardExtraPrice > 0) {
             items.push({
@@ -899,6 +923,15 @@ export default async function handler(req, res) {
                 quantity: 1,
                 unitPrice: Number(rewardExtraPrice.toFixed(2)),
                 tangible: false
+            });
+        }
+
+        if (items.length === 0) {
+            items.push({
+                title: productTitle,
+                quantity: 1,
+                unitPrice: Number(totalAmount.toFixed(2)),
+                tangible: true
             });
         }
 
@@ -1518,6 +1551,7 @@ export default async function handler(req, res) {
                     amount: totalAmount,
                     sessionId: sessionId || '',
                     personal,
+                    extra,
                     shipping: normalizedShipping,
                     reward: normalizedReward,
                     bump: normalizedBump.selected ? normalizedBump : null,
