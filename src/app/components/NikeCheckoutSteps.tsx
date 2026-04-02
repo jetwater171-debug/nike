@@ -29,7 +29,9 @@ export default function NikeCheckoutSteps({
         {STEPS.map((step, index) => {
           const isActive = step.number === activeStep;
           const label =
-            step.label === "Identificacao" ? "Identificação" : step.label;
+            step.label === "Identificacao"
+              ? "Identifica\u00e7\u00e3o"
+              : step.label;
 
           return (
             <div

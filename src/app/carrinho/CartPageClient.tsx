@@ -503,100 +503,103 @@ export default function CartPageClient() {
     <main className="min-h-screen bg-white text-black">
       <NikeCheckoutHeader backHref="/nike" />
 
-      <div className="mx-auto w-full max-w-[430px] px-[22px] pb-10 pt-[76px]">
+      <div className="mx-auto w-full max-w-[430px] pb-10 pt-[76px]">
         <NikeCheckoutSteps activeStep={1} />
 
-        {noticeVisible && (
-          <div className="mt-7 flex items-start justify-between gap-4 rounded-[16px] bg-[#f7f7f7] px-[14px] py-[13px]">
-            <p className="text-[1rem] font-medium leading-[1.55] text-black">
-              Os produtos no carrinho nao estao reservados. Finalize seu pedido
-              antes que o estoque acabe.
-            </p>
-            <button
-              type="button"
-              aria-label="Fechar aviso"
-              onClick={() => {
-                setNoticeVisible(false);
-                void trackLeadEvent({
-                  event: "cart_notice_dismissed",
-                  stage: "carrinho",
-                  page: "carrinho",
-                });
-              }}
-              className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-black/[0.05]"
-            >
-              <X className="h-5 w-5" strokeWidth={1.8} />
-            </button>
-          </div>
-        )}
+        <div className="px-[22px]">
+          {noticeVisible && (
+            <div className="mt-7 flex items-start justify-between gap-4 rounded-[16px] bg-[#f7f7f7] px-[14px] py-[13px]">
+              <p className="text-[1rem] font-medium leading-[1.55] text-black">
+                Os produtos no carrinho nao estao reservados. Finalize seu pedido
+                antes que o estoque acabe.
+              </p>
+              <button
+                type="button"
+                aria-label="Fechar aviso"
+                onClick={() => {
+                  setNoticeVisible(false);
+                  void trackLeadEvent({
+                    event: "cart_notice_dismissed",
+                    stage: "carrinho",
+                    page: "carrinho",
+                  });
+                }}
+                className="inline-flex h-10 w-10 flex-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-black/[0.05]"
+              >
+                <X className="h-5 w-5" strokeWidth={1.8} />
+              </button>
+            </div>
+          )}
 
-        <section className="mt-7 border-b border-black/10 pb-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="max-w-[19rem] text-[1.14rem] font-semibold leading-[1.45]">
-                {cart.title}
-              </h1>
-              <div className="mt-3 space-y-0 text-[1rem] leading-[1.6] text-black">
-                <p>Quantidade: {cart.quantity}</p>
-                <p>Cor: {cart.color}</p>
-                <p>Tamanho: {cart.size}</p>
-                <p>Estilo: {cart.sku}</p>
-                {cart.personalizationWanted && (
-                  <>
-                    <p className="pt-1 font-medium">Personalizacao</p>
-                    <p>Posicao: {cart.personalizationPosition || "Costas"}</p>
-                    {cart.personalizationPlayer ? (
-                      <p>Jogador: {cart.personalizationPlayer}</p>
-                    ) : (
-                      <>
-                        {cart.personalizationName ? (
-                          <p>Nome: {cart.personalizationName}</p>
-                        ) : null}
-                        {cart.personalizationNumber ? (
-                          <p>Numero: {cart.personalizationNumber}</p>
-                        ) : null}
-                        {!cart.personalizationName &&
-                        !cart.personalizationNumber ? (
-                          <p>
-                            Personalizacao:{" "}
-                            {personalizationSummary || "selecionada"}
-                          </p>
-                        ) : null}
-                      </>
-                    )}
-                  </>
-                )}
+          <section className="mt-7 border-b border-black/10 pb-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="max-w-[19rem] text-[1.14rem] font-semibold leading-[1.45]">
+                  {cart.title}
+                </h1>
+                <div className="mt-3 space-y-0 text-[1rem] leading-[1.6] text-black">
+                  <p>Quantidade: {cart.quantity}</p>
+                  <p>Cor: {cart.color}</p>
+                  <p>Tamanho: {cart.size}</p>
+                  <p>Estilo: {cart.sku}</p>
+                  {cart.personalizationWanted && (
+                    <>
+                      <p className="pt-1 font-medium">Personalizacao</p>
+                      <p>Posicao: {cart.personalizationPosition || "Costas"}</p>
+                      {cart.personalizationPlayer ? (
+                        <p>Jogador: {cart.personalizationPlayer}</p>
+                      ) : (
+                        <>
+                          {cart.personalizationName ? (
+                            <p>Nome: {cart.personalizationName}</p>
+                          ) : null}
+                          {cart.personalizationNumber ? (
+                            <p>Numero: {cart.personalizationNumber}</p>
+                          ) : null}
+                          {!cart.personalizationName &&
+                          !cart.personalizationNumber ? (
+                            <p>
+                              Personalizacao:{" "}
+                              {personalizationSummary || "selecionada"}
+                            </p>
+                          ) : null}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className="mt-4 text-[0.98rem] leading-[1.55] text-[#de1b1b]">
+                  <p>Este produto nao e elegivel para o desconto no Pix.</p>
+                  <p className="underline underline-offset-2">Ver regras.</p>
+                </div>
               </div>
 
-              <div className="mt-4 text-[0.98rem] leading-[1.55] text-[#de1b1b]">
-                <p>Este produto nao e elegivel para o desconto no Pix.</p>
-                <p className="underline underline-offset-2">Ver regras.</p>
-              </div>
+              <button
+                type="button"
+                aria-label="Remover produto"
+                onClick={handleRemoveProduct}
+                className="mt-1 inline-flex h-10 w-10 flex-none items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
+              >
+                <Trash2 className="h-5 w-5" strokeWidth={1.9} />
+              </button>
             </div>
 
-            <button
-              type="button"
-              aria-label="Remover produto"
-              onClick={handleRemoveProduct}
-              className="mt-1 inline-flex h-10 w-10 flex-none items-center justify-center text-black transition-colors hover:bg-black/[0.04]"
-            >
-              <Trash2 className="h-5 w-5" strokeWidth={1.9} />
-            </button>
-          </div>
+            <div className="mt-8 overflow-hidden bg-[#f1f1f1]">
+              <Image
+                src={cart.image}
+                alt={cart.title}
+                width={780}
+                height={980}
+                priority
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          </section>
+        </div>
 
-          <div className="mt-8 overflow-hidden bg-[#f1f1f1]">
-            <Image
-              src={cart.image}
-              alt={cart.title}
-              width={780}
-              height={980}
-              priority
-              className="h-auto w-full object-cover"
-            />
-          </div>
-        </section>
-
-        <section className="border-b border-black/10 py-6">
+        <div className="px-[22px]">
+          <section className="border-b border-black/10 py-6">
           <div className="flex items-center justify-between gap-4">
             <div className="inline-flex overflow-hidden border border-black/12">
               <button
@@ -635,7 +638,7 @@ export default function CartPageClient() {
           </div>
         </section>
 
-        <section className="border-b border-black/10 py-7">
+          <section className="border-b border-black/10 py-7">
           <h2 className="text-[1.95rem] font-semibold leading-none">Prazo de entrega</h2>
 
           <div className="mt-5 flex overflow-hidden rounded-[14px] border border-black/16">
@@ -718,9 +721,9 @@ export default function CartPageClient() {
               {shippingState.message}
             </p>
           )}
-        </section>
+          </section>
 
-        <section className="border-b border-black/10 py-7">
+          <section className="border-b border-black/10 py-7">
           <h2 className="text-[1.95rem] font-semibold leading-none">
             Cupom de desconto
           </h2>
@@ -757,9 +760,9 @@ export default function CartPageClient() {
               {couponMessage}
             </p>
           )}
-        </section>
+          </section>
 
-        <section className="py-7">
+          <section className="py-7">
           <h2 className="text-[1.95rem] font-semibold leading-none">Resumo</h2>
 
           <div className="mt-6 space-y-3 text-[1.1rem]">
@@ -810,7 +813,8 @@ export default function CartPageClient() {
           >
             Continuar
           </button>
-        </section>
+          </section>
+        </div>
       </div>
     </main>
   );
